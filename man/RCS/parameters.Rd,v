@@ -1,0 +1,118 @@
+head	1.2;
+access;
+symbols;
+locks
+	fraley:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2007.02.07.19.25.37;	author fraley;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2007.02.07.19.10.06;	author fraley;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@\name{parameters}
+\alias{parameters}
+\alias{parameters.ensembleBMAgamma0}
+\alias{parameters.ensembleBMAnormal}
+\alias{parameters.fitBMAgamma0}
+\alias{parameters.fitBMAnormal}
+\title{
+    Extract ensemble BMA parameters
+}
+\description{
+   Extracts parameters from an ensemble BMA fit.
+}
+\usage{
+parameters( object, \dots) 
+}
+\arguments{
+\item{object}{
+     An ensemble BMA model fit.
+  }
+\item{\dots}{
+     For \code{ensembleBMAgamma0} and \code{ensembleBMAnormal} objects, there 
+     is an additional \code{dates} argument, giving a character representation 
+     of the dates for which parameters are desired. 
+    \code{dates} must be chosen from \code{names(object$dateTable)}, and the
+     default is to give the parameters for all of the available dates.
+ }
+}
+\value{
+A list of parameters (including weights) corresponding to the model for
+the specified dates. The list may also include a transformation and its inverse
+if the data was transformed to obtain the parameters.
+}
+\seealso{
+  \code{\link{ensembleBMAgamma0}},
+  \code{\link{ensembleBMAnormal}}, 
+  \code{\link{fitBMAgamma0}},
+  \code{\link{fitBMAnormal}} 
+}
+\examples{
+
+  data(slp)
+
+  slpData <- ensembleData(forecasts = slp[c("AVN", "GEM", "ETA", "NGM", "NOGAPS")],
+                          observations = slp$obs, dates = slp$init_date,
+                          latitude = slp$lat, longitude = slp$lon)
+
+  slpFit1 <- ensembleBMAnormal(slpData)
+
+  slpPars1 <- parameters( slpFit1, date = "2000050500")
+  
+  d <- as.logical(match(as.numeric(dates(slpData)), 68-(1:30)-1, nomatch = 0))
+
+  slpFit2 <- fitBMAnormal(slpData[d, ], )
+  slpPars2 <- parameters( slpFit2)
+
+
+# Note: a reduced data set and training period are used in this
+# and other help file examples for fast execution. A much larger
+# training period (and hence more data) is typically needed for
+# good forecasting results.
+
+  data(precip10)
+
+  precip10data <- ensembleData( forecasts = precip10[ ,1:5],
+                                observations = precip10[ , 6],
+                                dates = precip10[ , 7])
+
+  precip10fit1 <- ensembleBMAgamma0(precip10data,training=list(length=5,lag=2))
+
+  precip10pars1 <- parameters(precip10fit1, date = "8") 
+
+  d <- as.logical(match(as.numeric(dates(precip10data)), 8-(1:5)-1, nomatch=0))
+
+  precip10fit2 <- fitBMAgamma0(precip10data[d, ], )
+  precip10pars2 <- parameters( precip10fit2)
+}
+\keyword{models}
+% docclass is function
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d43 1
+a43 1
+  slpData <- ensembleData(forecasts = slp[forecasts = c("AVN", "GEM", "ETA", "NGM", "NOGAPS")],
+@

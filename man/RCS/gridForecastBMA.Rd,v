@@ -1,0 +1,327 @@
+head	1.7;
+access;
+symbols;
+locks
+	fraley:1.7; strict;
+comment	@# @;
+
+
+1.7
+date	2007.02.24.00.35.17;	author fraley;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2007.02.16.23.17.18;	author fraley;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2007.02.14.23.36.13;	author fraley;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2007.02.07.19.21.44;	author fraley;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2007.02.07.19.04.55;	author fraley;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2007.01.31.19.01.06;	author fraley;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2007.01.31.18.57.22;	author fraley;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@\name{gridForecastBMA}
+\alias{gridForecastBMA}
+\alias{gridForecastBMA.ensembleBMAgamma0}
+\alias{gridForecastBMA.ensembleBMAnormal}
+\alias{gridForecastBMA.fitBMAgamma0}
+\alias{gridForecastBMA.fitBMAnormal}
+\title{
+   BMA forecasts for a grid of ensemble predictions.
+}
+\description{
+   Computes quantiles for the probability distribution function
+   (PDF) of an ensemble BMA mixture model at a grid of 
+   locations. 
+}
+\usage{
+gridForecastBMA( object, gridData, quantiles = 0.5, 
+                 date = NULL, popData = NULL, \dots)
+}
+\arguments{
+  \item{object}{
+     An ensemble BMA model fit.
+  }
+  \item{gridData}{
+     A two- or three dimensional array.
+     If two dimensional, the rows represents spatial locations on a grid
+     the columns represent the ensemble forecasts at each location.
+     If three dimensional, the for two dimension represents spatial locations 
+     on a grid and the thrid dimension represents the ensemble forecasts 
+     at each location.
+  }
+  \item{quantiles}{
+     The vector of desired quantiles for the PDF of the BMA mixture model.
+  }
+ \item{date}{
+     For \code{ensembleBMAgamma0} and \code{ensembleBMAnormal} objects, there 
+     is an additional \code{date} argument, giving a character representation 
+     of the date for which the grid forecast is desired. 
+    \code{date} must be chosen from \code{names(object$dateTable)}.
+ }
+ \item{popData}{
+     For \code{ensembleBMAgamma0} and \code{fitBMAgamma0} objects, there 
+     is an additional \code{popData} argument for providing predictors
+     in the logistic regression for probability of precipitation.
+     The value of \code{popData} (if any) used to create \code{object}
+     should be supplied here.
+ }
+ \item{\dots}{
+     Included for generic function compatibility.
+ }
+}
+\value{
+     A three dimensional grid in which the first two dimensions
+     represent spatial locations as in the input and the third dimension 
+     gives the desired quantile forecasts at each location. 
+}
+\details{
+   This method is generic, and can be applied to any ensemble BMA forecasting
+   model. \cr
+   Note the model may have been applied to a transformation of the data,
+   but that information is included in the input \code{object}, and
+   the output is transformed appropriately. \cr
+   This can be used to compute confidence intervals for the PDF. 
+}
+\seealso{
+  \code{\link{ensembleBMA}}, 
+  \code{\link{fitBMA}},
+  \code{\link{quantileForecastBMA}} 
+}
+\references{
+A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles,
+\emph{Monthly Weather Review 133:1155-1174, 2005}.
+
+V. J. Berrocal, A. E. Raftery and T. Gneiting,
+Combining Spatial and Ensemble Information in Probabilistic Weather Forecasts,
+Technical Report no. 495, Department of Statistics, University of
+Washington, February 2006.
+}
+
+\examples{
+  data(srft)
+  data(srftGrid)
+
+  srftData <- ensembleData(dates = srft$date, observations = srft$observation,
+  forecasts = srft[c("CMCG","ETA","GASP","GFS","JMA","NGPS","TCWB","UKMO")])
+
+  srftFeb14fit1 <- ensembleBMAnormal( srftData, date = "2004021400",
+                                     trainingRule = list(length=25, lag=2))
+
+  gridForecastBMA(srftFeb14fit1, srftGrid[,1:ensembleSize(srftData)], 
+                  date = "2004021400")
+
+  trainingFeb14data <- trainingData( srftData, date = "2004021400",
+                                 trainingRule = list(length=25, lag=2))
+
+  srftFeb14fit2 <- fitBMAnormal( trainingFeb14data)
+
+  gridForecastBMA(srftFeb14fit2, srftGrid[,1:ensembleSize(srftData)], 
+                  date = "2004021400")
+}
+\keyword{models}
+% docclass is function
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d16 1
+a16 1
+gridForecastBMA( object, grid, quantiles = 0.5, 
+d23 7
+a29 4
+  \item{grid}{
+     A three dimensional grid in which the first two dimensions
+     represent spatial locations and the third dimension gives 
+     the ensemble forecasts at each location.
+d73 5
+d81 2
+a82 27
+ 
+  data(slp)
+ 
+  slpData <- ensembleData(forecasts = slp[c("AVN","GEM","ETA","NGM","NOGAPS")],
+                          observations = slp$obs, dates = slp$date,
+                          latitude = slp$lat, longitude = slp$lon)
+
+#  slpFit1 <- ensembleBMAnormal(slpData)
+
+#  slpGrid <- array( NA, c(3, 4, ensembleSize(slpData)))
+#  d <- as.character(ensembleDates(slpData)) == "2000011300"
+#  for (i in 1:ensembleSize(slpData))
+#     slpGrid[,,i] <- forecasts(slpData)[,i][d]
+
+#  slpGridForec1 <- gridForecastBMA( slpFit1, slpGrid, date = "2000050500")
+  
+#  d <- as.logical(match(as.numeric(ensembleDates(slpData)), 68-(1:30)-1, nomatch = 0))
+
+#  slpFit2 <- fitBMAnormal(slpData[d, ], )
+#  slpGridForec2 <- gridForecastBMA( slpFit2, slpGrid, quantiles=c(0.5,0.9))
+
+
+
+# Note: a reduced data set and training period are used in this
+# and other help file examples for fast execution. A much larger
+# training period (and hence more data) is typically needed for
+# good forecasting results.
+d84 2
+a85 1
+  data(precip10)
+d87 2
+a88 3
+  precip10data <- ensembleData( forecasts = precip10[ ,1:5],
+                                observations = precip10[ , 6],
+                                dates = precip10[ , 7])
+d90 2
+a91 1
+  precip10fit1 <- ensembleBMAgamma0(precip10data,training=list(length=5,lag=2))
+d93 2
+a94 4
+  precip10grid <- array( NA, c(8, 10, ensembleSize(precip10data)))
+  d <- as.numeric(ensembleDates(precip10data)) == 8
+  for (i in 1:ensembleSize(precip10data))
+     precip10grid[,,i] <- ensembleForecasts(precip10data)[,i][d]
+d96 1
+a96 5
+  precip10gridForec1 <- gridForecastBMA(precip10fit1, precip10grid, 
+                                         quantiles = c(0.5, 0.9), date = "8")
+  
+  d <- as.logical(match(as.numeric(ensembleDates(precip10data)), 8-(1:5)-1, 
+                       nomatch=0))
+d98 2
+a99 3
+  precip10fit2 <- fitBMAgamma0(precip10data[d, ], )
+  precip10gridForec2 <- gridForecastBMA( precip10fit2, precip10grid)
+                        
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d76 1
+a76 1
+  slpData <- ensembleData(forecasts = slp[c("AVN", "GEM", "ETA", "NGM", "NOGAPS")],
+d80 1
+a80 1
+  slpFit1 <- ensembleBMAnormal(slpData)
+d82 4
+a85 4
+  slpGrid <- array( NA, c(3, 4, ensembleSize(slpData)))
+  d <- as.character(dates(slpData)) == "2000011300"
+  for (i in 1:ensembleSize(slpData))
+     slpGrid[,,i] <- forecasts(slpData)[,i][d]
+d87 1
+a87 1
+  slpGridForec1 <- gridForecastBMA( slpFit1, slpGrid, date = "2000050500")
+d89 5
+a93 1
+  d <- as.logical(match(as.numeric(dates(slpData)), 68-(1:30)-1, nomatch = 0))
+a94 2
+  slpFit2 <- fitBMAnormal(slpData[d, ], )
+  slpGridForec2 <- gridForecastBMA( slpFit2, slpGrid, quantiles=c(0.5,0.9))
+d110 1
+a110 1
+  d <- as.numeric(dates(precip10data)) == 8
+d112 1
+a112 1
+     precip10grid[,,i] <- forecasts(precip10data)[,i][d]
+d117 2
+a118 1
+  d <- as.logical(match(as.numeric(dates(precip10data)), 8-(1:5)-1, nomatch=0))
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d34 1
+a34 1
+     of the date for which parameters are desired. 
+d77 1
+a77 1
+                          observations = slp$obs, dates = slp$init_date,
+d82 2
+a83 2
+  slpGrid <- array( NA, c(2, 3, ensembleSize(slpData)))
+  d <- as.character(dates(slpData)) == "2000050500"
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d76 1
+a76 1
+  slpData <- ensembleData(forecasts = slp[forecasts = c("AVN", "GEM", "ETA", "NGM", "NOGAPS")],
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d73 1
+d75 4
+a78 3
+
+  slpData <- ensembleData(forecasts = slp[,4:8], observations = slp[,9],
+               dates = slp[,1], latitude = slp[,2], longitude = slp[,3])
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d45 1
+a45 4
+     For \code{ensembleBMAgamma0} and \code{ensembleBMAnormal} objects, there 
+     is an additional \code{date} argument, giving a character representation 
+     of the date for which parameters are desired. 
+    \code{date} must be chosen from \code{names(object$dateTable)}.
+@

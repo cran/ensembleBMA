@@ -1,0 +1,125 @@
+head	1.2;
+access;
+symbols;
+locks
+	fraley:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2007.02.24.00.25.27;	author fraley;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2007.02.22.19.41.26;	author fraley;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@\name{controlBMAgamma0}
+\alias{controlBMAgamma0}
+\title{
+  Control parameters for BMA for precipitation.
+}
+\description{
+   Specifies a list of values controling the Bayesian Model Averaging fit 
+   of a mixture gammas with a point mass at 0 to ensemble forecasts for
+   precipitation.
+}
+\usage{
+controlBMAgamma0(maxIter, eps, nEsteps, transformation, inverseTransformation, 
+                start)
+}
+\arguments{
+  \item{maxIter}{
+     An integer specifying an upper limit on the number of iterations
+     for fitting  the BMA mixture via EM. The default is 
+    \code{.Machine$integer.max}, which essentially sets no upper
+     limit on the number of iterations, so that the convergence
+     criterion based on \code{eps} is used.
+  }
+  \item{eps}{
+     A numeric convergence tolerance. The EM fit for the mixture of
+     gammas is terminated when the relative error in successive 
+     objective values in the M-step falls below \code{eps}.
+     The default is \code{sqrt(.Machine$double.eps)}, 
+     which is approximately \code{1.e-8} on IEEE compliant machines.
+  }
+  \item{nEsteps}{
+     The number of E-steps per M-step. The default is 1, but using
+     more E-steps per M-step will cause the convergence criterion
+     to be satisfied in fewer iterations. This is a heuristic for
+     a gain in speed since the results for multiple M-steps
+     often are  not much different from the results with one 
+     E-step per M-step.
+  }
+  \item{transformation}{
+    The function corresponding the transformation of the data used to fit 
+    the models for the  point mass at 0 and mean of nonzero observations. 
+    The untransformed forecast is used to fit the variance model.
+   }
+  \item{inverseTransformation}{
+    The function corresponding to the inverse of \code{transformation}.
+    Used in various diagnostic methods for the BMA output.
+   }
+  \item{start}{
+     An optional list of starting values for variance coefficients
+     and weights. The default is to start with the variance coefficients
+     equal to 1, and with equal weights for each member of the ensemble.
+  }
+}
+\value{
+  A list whose components are the input arguments and their assigned values. 
+}
+\seealso{
+  \code{\link{ensembleBMAgamma0}}, 
+  \code{\link{forecastBMAgamma0}}, 
+  \code{\link{fitBMAgamma0}}
+}
+\references{
+J. M. Sloughter, A. E. Raftery, T Gneiting and C. Fraley, 
+Probabilistic Quantitative Precipitation Forecasting 
+using Bayesian Model Averaging,
+Technical Report No. 496R, Department of Statistics, University of
+Washington, October 2006 (to appear in \emph{Monthly Weather Review}).
+}
+
+\examples{
+  data(prcp)
+
+  prcpData <- ensembleData( dates = prcp$date, observations = prcp$obs,
+                          forecasts = prcp[,c("CENT","AVN","CMCG","ETA",
+                                      "GASP","JMA","NGPS","TCWB","UKMO")])
+
+  prcpFitAlt <- ensembleBMAgamma0(prcpData, trainingRule=list(length=25,lag=2),
+                       control = controlBMAgamma0(maxIter = 100, 
+                              transformation = function(x) x^(1/4),
+                              inverseTransformation = function(x) x^4))
+}
+\keyword{models}
+% docclass is function
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d12 2
+a13 1
+controlBMAgamma0(maxIter, eps, nEsteps, transformation, inverseTransformation, start)
+d76 1
+a76 1
+  prcpFitAlt <- ensembleBMA(prcpData, training = list(length=25, lag=2),
+@

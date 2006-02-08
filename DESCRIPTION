@@ -1,8 +1,11 @@
 Package: ensembleBMA
 Title: Probabilistic forecasting using Bayesian Model Averaging
-Version: 1.0
-Author: Adrian E. Raftery, J. McLean Sloughter, Michael Polakowski, University of Washington
-Description: This package uses Bayesian Model Averaging to create probabilistic forecasts of ensembles using a mixture of normal distributions.
-Maintainer: J. McLean Sloughter <mclean@stat.washington.edu>
-License: What license is it under?
-Packaged: Wed Feb  8 12:58:30 2006; hornik
+Version: 2.0
+Author: Chris Fraley, Adrian E. Raftery, J. McLean Sloughter, 
+        Tilmann Gneiting, Michael Polakowski, University of Washington
+Description: Bayesian Model Averaging to create probabilistic
+             forecasts from ensemble forecasts and weather observations.
+Maintainer: Chris Fraley <fraley@stat.washington.edu>
+License: GPL Version 2 or higher
+
+

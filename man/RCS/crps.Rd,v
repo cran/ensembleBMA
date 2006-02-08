@@ -1,0 +1,97 @@
+head	1.1;
+access;
+symbols;
+locks
+	fraley:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2006.12.29.20.34.08;	author fraley;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@\name{crps}
+\alias{crps}
+\alias{crps.ensembleBMAnormal}
+\title{
+   Continuous  Ranked Probability Score
+}
+\description{
+   Computes the continuous ranked probability score
+   for ensemble BMA forecasting models for which the CDF is
+   avaiable.
+}
+\usage{
+crps( object, ensembleData, ...)
+}
+\arguments{
+  \item{object}{
+     An ensemble BMA model fit for \code{ensembleData}.
+  }
+  \item{ensembleData}{
+     An \code{ensembleData} object giving including ensemble
+     forecasts, observations and dates corresponding to \code{object}.
+  }
+  \item{\dots}{
+      For generic function compatibility.
+  }
+}
+\value{
+ The continuous ranked probability score  
+ for each observation  in \code{ensembleData} 
+ according to the model given in \code{object}.
+}
+\details{
+   This function is generic, but applies only to normal BMA models in
+   the current \code{ensembleBMA} package. \\
+   There will typically  be some leading NAs in the result, corresponding
+   to dates in \code{ensembleData} for which there was insufficient
+   training data when the models in \code{object} were coomputed.
+}
+\seealso{
+  \code{\link{crpsANDmae}}, 
+  \code{\link{ensembleBMAnormal}} 
+}
+\references{
+D. A. Unger, A method  to estimate the continuous ranked probability score,
+\emph{Preprints of the Ninth Conference on Probability and Statistics in
+Atmospheric Sciences}, Virginia Beach, VA USA, 206-213,
+American Meteorological Society.
+
+H. Hersbach, Decomposition of the continuous ranked probability score
+for ensemble prediction systems,
+\emph{Weather and Forecasting 15, 559-570}.
+
+T. Gneiting and A. E. Raftery, 
+Strictly proper scoring rules, prediction and estimation, 
+Technical Report No. 463R, Department of Statistics, University of
+Washington, November 2006.\\
+to appear in \emph{Journal of the American Statistical Association}.
+}
+
+\examples{
+  data(slp)
+
+  slpData <- ensembleData(forecasts = slp[,4:8], observations = slp[,9],
+               dates = slp[,1], latitude = slp[,2], longitude = slp[,3])
+
+  slpFit <- ensembleBMAnormal(slpData)
+
+  slpCRPS <- crps( slpFit, slpData)
+
+  mean(slpCRPS, na.rm = TRUE) 
+}
+\keyword{models}
+% docclass is function
+@
