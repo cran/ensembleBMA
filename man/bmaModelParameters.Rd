@@ -5,23 +5,23 @@
 \alias{bmaModelParameters.fitBMAgamma0}
 \alias{bmaModelParameters.fitBMAnormal}
 \title{
-    Extract ensemble BMA model parameters.
+    Extract BMA model parameters
 }
 \description{
    Extracts model parameters from an ensemble BMA fit.
 }
 \usage{
-bmaModelParameters( object, \dots) 
+bmaModelParameters( fit, \dots) 
 }
 \arguments{
-\item{object}{
+\item{fit}{
      An ensemble BMA model fit.
   }
 \item{\dots}{
-     For \code{ensembleBMAgamma0} and \code{ensembleBMAnormal} objects, there 
+     For \code{ensembleBMAgamma0} and \code{ensembleBMAnormal} fits, there
      is an additional \code{dates} argument, giving a character representation 
      of the dates for which BMA model parameters are desired. 
-    \code{dates} must be chosen from \code{names(object$dateTable)}, and the
+    \code{dates} must be chosen from \code{names(fit$dateTable)}, and the
      default is to give the BMA model parameters for all of the available 
      dates.
  }
@@ -39,21 +39,22 @@ if the data was transformed to obtain the model parameters.
   \code{\link{fitBMAnormal}} 
 }
 \examples{
-  data(slp)
+  data(slpTest)
 
-  slpData <- ensembleData(forecasts = slp[c("AVN","GEM","ETA","NGM","NOGAPS")],
-                          observations = slp$obs, dates = slp$date)
+  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
+  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
+                         observations = slpTest$obs, dates = slpTest$date)
 
-  slpFit1 <- ensembleBMAnormal(slpData, date = "2000063000")
+  slpTestFit1 <- ensembleBMAnormal(slpTestData, date = "2000063000")
 
-  bmaModelParameters( slpFit1, date = "2000063000")
+  bmaModelParameters( slpTestFit1, date = "2000063000")
 
-  trainDat <- trainingData( slpData, date = "2000063000",
-                            trainingRule = slpFit1$training)
+  trainDat <- trainingData( slpTestData, date = "2000063000",
+                            trainingRule = slpTestFit1$training)
  
-  slpFit2 <- fitBMAnormal(trainDat)
+  slpTestFit2 <- fitBMAnormal(trainDat)
  
-  bmaModelParameters( slpFit2)
+  bmaModelParameters( slpTestFit2)
 }
 \keyword{models}
 % docclass is function

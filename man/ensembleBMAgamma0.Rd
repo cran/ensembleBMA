@@ -1,16 +1,18 @@
 \name{ensembleBMAgamma0}
 \alias{ensembleBMAgamma0}
 \title{
-    BMA mixture of gammas ensemble forecasting models with a point mass at 0.
+    BMA precipitation modeling 
 }
 \description{
    Fits a Bayesian Model Averaging mixture of gammas with a point mass at 0 
-   to ensemble forecasting data. Intended for modeling precipitation. 
+   to ensemble forecasts. Intended for predicting precipitation. 
+   Allows specification of a training rule and forecasting dates.
 }
 \usage{
 ensembleBMAgamma0( ensembleData, dates = NULL, 
                    trainingRule = list(length = 30, lag = 2), 
-                   control = controlBMAgamma0(), warmStart = FALSE, popData = NULL)
+                   control = controlBMAgamma0(), warmStart = FALSE, 
+                   exchangeable = NULL, popData = NULL)
 }
 \arguments{
   \item{ensembleData}{
@@ -18,7 +20,8 @@ ensembleBMAgamma0( ensembleData, dates = NULL,
      and dates of precipitation. 
   }
   \item{dates}{
-     The dates for which modeling is desired. By default, this will include all
+     The dates for which forecasts are desired. 
+     By default, this will include all
      dates consistent with the training rule.
   }
   \item{trainingRule}{
@@ -31,15 +34,22 @@ ensembleBMAgamma0( ensembleData, dates = NULL,
      given by the function \code{controlBMAgamma0}.
   }
   \item{warmStart}{
-      A logical variable indicating whether or not estimation of models for a sequence
-      of dates or time steps should be initialized with the weights from the previous
-      date or time step. The default is for the initilaizatiin to be independent of
-      the result at the previous time step.
+      A logical variable indicating whether or not estimation of models 
+      for a sequence of dates or time steps should be initialized with 
+      the weights from the previous date or time step. The default is 
+      for the initialization to be independent of the result at the 
+      previous time step.
+  }
+  \item{exchangeable}{
+     A numeric or character vector or factor indicating groups of
+     ensemble members that are exchangeable (indistinguishable).
+     The models fit will have equal weights and parameters within each group.
+     The default determines exchangeability from \code{ensembleData}.
   }
  \item{popData}{
       Optional predictors for the logistic regression for probability of 
-      precipitation. This option applies to the mixture of gammas model with 
-      a point mass at zero that is used for precipitation.
+      zero precipitation. This option applies to the mixture of gammas model 
+      with a point mass at zero that is used for precipitation.
       In this model, the default predictors are an intercept, the     
       transformed forecast data, and a logical variable indicating
       whether or not the forecast is equal to 0. 
@@ -74,30 +84,31 @@ A list with the following output components:
   }
   \item{prob0coefs}{
     The fitted coefficients in the model for the point mass at 0 
-    for each member of the ensemble at each date.
+    (probability of zero precipitaion) for each member of the ensemble 
+     at each date. 
   }
   \item{biasCoefs}{
-    The fitted coefficients in the model for the mean of nonzero observations
+    The fitted coefficients in the model for the mean of the gamma components
     for each member of the ensemble at each date (bias correction).
   }
   \item{varCoefs}{
-    The fitted coefficients for the model for the variance of nonzero 
-    observations at each date.
+    The fitted coefficients for the model for the variance of gamma
+    components for each date.
     The coefficients are the same for all members of the ensemble.
   }
   \item{weights}{
-    The fitted weights for the mixture of gammas model for the
-    nonzero observations at each date.
+    The fitted BMA weights for the gamma components for each ensemble member at each date.
   }
   \item{transformation}{
-    The function corresponding the transformation of the data used to fit 
-    the models for the  point mass at 0 and mean of nonzero observations. 
+    The function corresponding to the transformation of the data used to fit 
+    the models for the  point mass at 0 and the bias model. 
     The untransformed forecast is used to fit the variance model.
     This is input as part of \code{control}.
    }
   \item{inverseTransformation}{
     The function corresponding to the inverse of \code{transformation}.
-    Used in various diagnostic methods for the output.
+    Used for quantile forecasts and verification.
+    This is input as part of \code{control}.
    }
 }
 \details{
@@ -105,37 +116,46 @@ A list with the following output components:
    will be missing entries denoted by \code{NA} for dates that are too recent 
    to be forecast with  the training rule. \cr
    The following methods are available for \code{ensembleBMAgamma0} objects:
-   \code{gridForecastBMA}, \code{quantileForecastBMA}, 
-   \code{bmaModelParameters}, \code{brierSkillScores}, and \code{crpsANDmae}.
+   \code{cdfBMA}, \code{quantileForecastBMA},   \code{bmaModelParameters}, 
+   \code{brierScore}, \code{crps} and \code{mae}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
-  \code{\link{forecastBMAgamma0}}, 
   \code{\link{controlBMAgamma0}}, 
   \code{\link{fitBMAgamma0}},
-  \code{\link{gridForecastBMA}},
+  \code{\link{cdfBMA}},
   \code{\link{quantileForecastBMA}},
   \code{\link{bmaModelParameters}},
-  \code{\link{brierSkillScores}},
-  \code{\link{crpsANDmae}},
+  \code{\link{brierScore}},
+  \code{\link{crps}},
+  \code{\link{mae}}
 }
 \references{
 J. M. Sloughter, A. E. Raftery, T. Gneiting and C. Fraley, 
-Probabilistic Quantitative Precipitation Forecasting 
-using Bayesian Model Averaging,
-Technical Report No. 496R, Department of Statistics, University of
-Washington, October 2006 (to appear in \emph{Montly Weather Review}).
+Probabilistic quantitative precipitation forecasting 
+using Bayesian model averaging,
+\emph{Monthly Weather Review 135:3209--3220, 2007}.
+
+C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
+\code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
+using Ensembles and Bayesian Model Averaging,
+Technical Report No. 516, Department of Statistics, University of
+Washington, August 2007.
 }
 
 \examples{
 \dontrun{
-  data(prcp)
+  data(prcpTest)
 
-  prcpData <- ensembleData( dates = prcp$date, observations = prcp$obs,
-                          forecasts = prcp[,c("CENT","AVN","CMCG","ETA",
-                                      "GASP","JMA","NGPS","TCWB","UKMO")])
+  labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
 
-  prcpFit <- ensembleBMAgamma0(prcpData)
+  prcpTestData <- ensembleData( forecasts = prcpTest[ ,labels],
+                          dates = prcpTest$date, observations = prcpTest$obs)
+
+\dontrun{
+  prcpTestFit <- ensembleBMA(prcpTestData, model = "gamma0")
+}
+  prcpTestFit <- ensembleBMAgamma0(prcpTestData)
 }
 }
 \keyword{models}

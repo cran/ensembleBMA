@@ -1,12 +1,12 @@
 "bmaModelParameters.fitBMAgamma0" <-
-function(object, ...) 
+function(fit, ...) 
 {
- list(weights = object$weights, 
-      popCoefs = object$popCoefs,
-      biasCoefs = object$biasCoefs, 
-      varCoefs = object$varCoefs,
-      transformation = object$transformation,
-      inverseTransformation = object$inverseTransformation,
+ list(weights = fit$weights, 
+      popCoefs = fit$popCoefs,
+      biasCoefs = fit$biasCoefs, 
+      varCoefs = fit$varCoefs,
+      transformation = fit$transformation,
+      inverseTransformation = fit$inverseTransformation,
       model = "gamma0")
 }
 

@@ -1,7 +1,7 @@
 \name{controlBMAgamma0}
 \alias{controlBMAgamma0}
 \title{
-  Control parameters for BMA for precipitation.
+  Control parameters for BMA precipitation modeling
 }
 \description{
    Specifies a list of values controling the Bayesian Model Averaging fit 
@@ -16,9 +16,8 @@ controlBMAgamma0(maxIter, eps, nEsteps, transformation, inverseTransformation,
   \item{maxIter}{
      An integer specifying an upper limit on the number of iterations
      for fitting  the BMA mixture via EM. The default is 
-    \code{.Machine$integer.max}, which essentially sets no upper
-     limit on the number of iterations, so that the convergence
-     criterion based on \code{eps} is used.
+    \code{Inf}, which sets no upper limit on the number of iterations, 
+     so that the convergence criterion based on \code{eps} is used.
   }
   \item{eps}{
      A numeric convergence tolerance. The EM fit for the mixture of
@@ -36,13 +35,13 @@ controlBMAgamma0(maxIter, eps, nEsteps, transformation, inverseTransformation,
      E-step per M-step.
   }
   \item{transformation}{
-    The function corresponding the transformation of the data used to fit 
+    The function corresponding to the transformation of the data used to fit 
     the models for the  point mass at 0 and mean of nonzero observations. 
     The untransformed forecast is used to fit the variance model.
    }
   \item{inverseTransformation}{
     The function corresponding to the inverse of \code{transformation}.
-    Used in various diagnostic methods for the BMA output.
+    Used for quantile forecasts and verification.
    }
   \item{start}{
      An optional list of starting values for variance coefficients
@@ -50,30 +49,38 @@ controlBMAgamma0(maxIter, eps, nEsteps, transformation, inverseTransformation,
      equal to 1, and with equal weights for each member of the ensemble.
   }
 }
+
 \value{
   A list whose components are the input arguments and their assigned values. 
 }
+
 \seealso{
   \code{\link{ensembleBMAgamma0}}, 
-  \code{\link{forecastBMAgamma0}}, 
   \code{\link{fitBMAgamma0}}
 }
+
 \references{
 J. M. Sloughter, A. E. Raftery, T Gneiting and C. Fraley, 
-Probabilistic Quantitative Precipitation Forecasting 
+Probabilistic quantitative precipitation forecasting 
+using Bayesian model averaging,
+\emph{Monthly Weather Review 135:3209--3220, 2007}.
+
+C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
+\code{ensembleBMA}: An \code{R} Package for Probabilistic Ensemble Forecasting
 using Bayesian Model Averaging,
-Technical Report No. 496R, Department of Statistics, University of
-Washington, October 2006 (to appear in \emph{Monthly Weather Review}).
+Technical Report No. 516, Department of Statistics, University of
+Washington, August 2007.
 }
 
 \examples{
-  data(prcp)
+  data(prcpTest)
 
-  prcpData <- ensembleData( dates = prcp$date, observations = prcp$obs,
-                          forecasts = prcp[,c("CENT","AVN","CMCG","ETA",
-                                      "GASP","JMA","NGPS","TCWB","UKMO")])
+  labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
+  prcpTestData <- ensembleData( forecasts = prcpTest[ , labels],
+                          dates = prcpTest$date, observations = prcpTest$obs)
 
-  prcpFitAlt <- ensembleBMAgamma0(prcpData, trainingRule=list(length=25,lag=2),
+  prcpTestFitAlt <- ensembleBMAgamma0(prcpTestData, 
+                         trainingRule=list(length=25,lag=2),
                        control = controlBMAgamma0(maxIter = 10, 
                               transformation = function(x) x^(1/4),
                               inverseTransformation = function(x) x^4))

@@ -1,27 +1,52 @@
 "fitBMAgamma0" <-
-function(ensembleData, control = controlBMAgamma0(), popData = NULL) 
+function(ensembleData, control = controlBMAgamma0(), 
+         exchangeable = NULL, popData = NULL) 
 {
+  if (is.null(exchangeable)) exchangeable <- ensembleGroups(ensembleData)
+
+  if (length(unique(exchangeable)) == length(exchangeable))
+    exchangeable <- NULL
+
+  if (!(nullX <- is.null(exchangeable))) {
+    namX <- as.character(exchangeable)
+    uniqueX <- unique(namX)
+    nX <- length(uniqueX)
+  }
+
+  if (!(nullPOP <- is.null(popData))) {
+      if (!is.null(dim(popData))) {
+        if (length(dim(popData)) == 2) {
+          popData <- list(popData)
+        }
+       else {
+         popData <- apply(popData, 3, list)
+       }
+      }
+  }
+
   maxIter <- control$maxIter
   tol <- eps <- control$eps
   nEsteps <- control$nEsteps
 
-  ensMemNames <- ensembleMemberNames(ensembleData)
+  ensMemNames <- ensembleMemberLabels(ensembleData)
   nForecasts <- length(ensMemNames)
 
   obs <- ensembleVerifObs(ensembleData)
   nObs <- length(obs)
   Y0 <- obs == 0
+  n0obs <- sum(Y0)
 
 # untransformed weather data for variance model  
 
   ensembleData <- ensembleForecasts(ensembleData)
+
+  Xvar <- ensembleData[!Y0, ]
 
   LM0 <- function(coefs, Xy, XX, R)(crossprod(R %*% coefs) - 2*sum(coefs*Xy))/2
 
   LM1 <- function(coefs, Xy, XX, R) XX %*% coefs - Xy
 
   LM2 <- function(coefs, Xy, XX, R) XX
-
 
  inverseLogit <- function(x) {
 # logit function safeguared against underflow and overflow
@@ -103,119 +128,187 @@ function(ensembleData, control = controlBMAgamma0(), popData = NULL)
              })
     crossprod(sweep(X, MARGIN=1, FUN="*", STATS=sqrt(d)))
   }
-
-    popFit <- apply(ensembleData, 2, function(x, y0) {
-    # x is a transformation of the forecast
-    glm(y0~x+(x==0),family=binomial(logit))}, y0 = Y0)
-
-  if (is.null(popData)) {
-
-    popFit <- lapply( popFit, function(x, components) x[components],
-                        components = c("coefficients","fitted.values","model"))
-
-    prob0check <- unlist(lapply(popFit, function(z) {
-                                coefs <- z$coefficients
-                                coefs[2] <= 0 && coefs[3] >= 0
-                                }))
-  if (any(!prob0check)) {
-    popFit[!prob0check] <- lapply(popFit[!prob0check],
-   function(z)  {
-     coefs <- z$coefficients
-     coefs[2] <- min(coefs[2],0)
-     coefs[3] <- max(coefs[3],0)
-     X <- model.matrix(y0~x+(x==0), data = z$model)
-     opt <- nlminb(coefs, ob=LR0, gr=LR1, he=LR2, 
-                   lower = c(-Inf,-Inf,0), upper =c(Inf,0,Inf),
-                   X = X, y = z$model$y)
-     if (opt$convergence)  print(opt$message)
-     coefs <- z$coefficients <- opt$par
-     z$fitted.values <- sapply(X %*% coefs, inverseLogit)
-     z
-          })
-  }
-
-  }
-  else {
-
-    if (!is.null(dim(popData))) {
-      if (length(dim(popData)) == 2) {
-        popData <- list(popData)
-      }
-     else {
-       popData <- apply(popData, 3, list)
-     }
-    }
-    
-    for (j in 1:nForecasts) {
-       popFit[[j]] <- update(popFit[[j]], . ~ . - (x == 0))
-       popi <- do.call("cbind", lapply( popData, function(x,j) x[,j], j = j))
-       popFit[[j]] <- update(popFit[[j]], . ~ . + popi)
-    }
-
-    popFit <- lapply( popFit, function(x, components) x[components],
-                        components = c("coefficients","fitted.values","model"))
-
-  }
-
-  popCoefs <- lapply(popFit, function(x) x$coefficients)
-  popCoefs <- as.matrix(data.frame(popCoefs))
-  dimnames(popCoefs) <- NULL
-
-  POP <- lapply(popFit, function(x) x$fitted.values)
-  POP <- as.matrix(data.frame(POP))
-  dimnames(POP) <- NULL
-  PROB1 <- (1-POP)[!Y0,]
-  POP <- POP[Y0,]
-
-  Xvar <- ensembleData <- ensembleData[!Y0, ]
-
-  obs <- sapply(obs, function(x) sapply(x,control$transformation))
-  obs <- obs[!Y0]
   
   ensembleData <- apply(ensembleData, 2, 
                        function(x) sapply(x,control$transformation))
 
+  if (nullX) {
+    prob0fit <- apply(ensembleData, 2, function(x, y0) {
+    glm(y0~x+(x==0),family=binomial(logit))}, y0 = Y0)
 
-# means determined as a bias-corrrrection step
-  meanFit <- apply(ensembleData, 2, function(x, y) {
-   components <- c("coefficients","fitted.values","model")
-   lm(y~x)[components]}, y = obs)
+    if (nullPOP) {
 
-  meanCheck1 <- unlist(lapply(meanFit, function(z) {
-                              coefs <- z$coefficients
-                              coefs[1] >= 0 && coefs[2] >= 0 
-                              }))
-  if (any(!meanCheck1)) {
-    meanFit[!meanCheck1] <- lapply(meanFit[!meanCheck1],
-     function(z)  {
-         y <- z$model$y
-# x is the cube root of the forecasts; y is the cube root of the obs
-         X <- model.matrix(y~x, data = z$model)
-         coefs    <- z$coefficients 
-         coefs[1] <- max(coefs[2],0)
-         coefs[2] <- max(coefs[2],0)
-     opt <- nlminb(coefs, ob=LM0, gr=LM1, he=LM2,
-                   lower = c(0,0), upper =c(Inf,Inf),
-                   Xy = crossprod(X,y), XX = crossprod(X), 
-                   R = qr.R(qr(X)))
-     if (opt$convergence)  print(opt$message)
-     coefs <- z$coefficients <- opt$par
-     z$fitted.values <- X %*% coefs
-     z
-          })
+      prob0fit <- lapply( prob0fit, function(x, components) x[components],
+                     components = c("coefficients","fitted.values","model"))
+
+      prob0check <- unlist(lapply(prob0fit, function(z) {
+                                coefs <- z$coefficients
+                                coefs[2] <= 0 && coefs[3] >= 0
+                                }))
+      if (any(!prob0check)) {
+        prob0fit[!prob0check] <- lapply(prob0fit[!prob0check],
+           function(z){
+                       coefs <- z$coefficients
+                       coefs[2] <- min(coefs[2],0)
+                       coefs[3] <- max(coefs[3],0)
+                       X <- model.matrix(y0~x+(x==0), data = z$model)
+                       opt <- nlminb(coefs, ob=LR0, gr=LR1, he=LR2, 
+                                     lower = c(-Inf,-Inf,0), 
+                                     upper =c(Inf,0,Inf),
+                                     X = X, y = z$model$y)
+                       if (opt$convergence)  print(opt$message)
+                       coefs <- z$coefficients <- opt$par
+                       z$fitted.values <- sapply(X %*% coefs, inverseLogit)
+                       z
+                      })
+      }
+
+    }
+    else {
+    
+      for (j in 1:nForecasts) {
+         prob0fit[[j]] <- update(prob0fit[[j]], . ~ . - (x == 0))
+         popi <- do.call("cbind", lapply( popData, function(x,j) x[,j], j = j))
+         prob0fit[[j]] <- update(prob0fit[[j]], . ~ . + popi)
+      }
+
+      prob0fit <- lapply( prob0fit, function(x, components) x[components],
+                        components = c("coefficients","fitted.values","model"))
+
+    }
+
+    prob0coefs <- lapply(prob0fit, function(x) x$coefficients)
+    prob0coefs <- as.matrix(data.frame(prob0coefs))
+    dimnames(prob0coefs) <- NULL
+
+    PROB0 <- lapply(prob0fit, function(x) x$fitted.values)
+    PROB0 <- as.matrix(data.frame(PROB0))
+    dimnames(PROB0) <- NULL
+  }
+  else {
+
+    logisticFunc <- function(x, y, popData = NULL) {
+      x <- as.matrix(x)
+      n <- ncol(x)
+      x <- as.vector(x)
+      y <- rep(y,n)
+      if (is.null(popData)) {
+        glm(y ~ x + (x==0))
+      }
+      else {
+        glm(y ~ x + popData)
+      }
+    }
+
+    logisticOpt <- function(x, y, fit) {
+                            x <- as.matrix(x)
+                            n <- ncol(x)
+                            x <- as.vector(x)
+                            y <- rep(y,n)
+                            coefs <- fit$coefficients
+                            coefs[2] <- min(coefs[2],0)
+                            coefs[3] <- max(coefs[3],0)
+                            X <- model.matrix(y~x+(x==0), data = fit$model)
+                            opt <- nlminb(coefs, ob=LR0, gr=LR1, he=LR2, 
+                                          lower = c(-Inf,-Inf,0), 
+                                          upper =c(Inf,0,Inf),
+                                          X = X, y = y)
+                            if (opt$convergence)  print(opt$message)
+                            coefs <- fit$coefficients <- opt$par
+                        fit$fitted.values <- sapply(X %*% coefs, inverseLogit)
+                            fit[c("coefficients", "fitted.values")]
+    }
+
+    prob0coefs <- matrix(NA, 3, nForecasts)
+    dimnames(prob0coefs) <- NULL
+
+    PROB0 <- matrix(NA, nObs, nForecasts)
+    dimnames(PROB0) <- NULL
+
+    for (labX in uniqueX) {
+       I <- namX == labX
+       fit <- logisticFunc(ensembleData[, I, drop = F], Y0, popData)
+       if (!is.null(popData) &&
+          !(fit$coefficients[2] <= 0 && fit$coefficients[3] >= 0)) {
+          fit <- logisticOpt(ensembleData[, I, drop = F], Y0, fit)
+       }
+      prob0coefs[, I] <- fit$coefficients
+      PROB0[,I] <- fit$fitted.values
+    }
+
   }
 
-# chk <- c(sum(as.numeric(!prob0check)), sum(as.numeric(!meanCheck1)))
+  PROB1 <- (1-PROB0)[!Y0,]
+  PROB0 <- PROB0[Y0,]
 
-# print(chk)
+  obs <- sapply(obs, function(x) sapply(x,control$transformation))
+  obs <- obs[!Y0]
 
-  biasCoefs <- lapply(meanFit, function(x) x$coefficients)
-  biasCoefs <- as.matrix(data.frame(biasCoefs))
-  dimnames(biasCoefs) <- NULL
+  ensembleData <- ensembleData[!Y0,]
 
-  MEAN <- lapply(meanFit, function(x) x$fitted.values)
-  MEAN <- as.matrix(data.frame(MEAN))
-  dimnames(MEAN) <- NULL
+# means determined as a bias-corrrrection step
+
+  if (nullX) {
+    meanFit <- apply(ensembleData, 2, function(x, y) {
+                     components <- c("coefficients","fitted.values","model")
+                     lm(y~x)[components]}, y = obs)
+
+    meanCheck1 <- unlist(lapply(meanFit, function(z) {
+                                coefs <- z$coefficients
+                                coefs[1] >= 0 && coefs[2] >= 0 
+                               }))
+    if (any(!meanCheck1)) {
+      meanFit[!meanCheck1] <- lapply(meanFit[!meanCheck1],
+              function(z) {
+                           y <- z$model$y
+# x is the cube root of the forecasts; y is the cube root of the obs
+                           X <- model.matrix(y~x, data = z$model)
+                           coefs    <- z$coefficients 
+                           coefs[1] <- max(coefs[1],0)
+                           coefs[2] <- max(coefs[2],0)
+                           opt <- nlminb(coefs, ob=LM0, gr=LM1, he=LM2,
+                                         lower = c(0,0), upper =c(Inf,Inf),
+                                       Xy = crossprod(X,y), XX = crossprod(X), 
+                                         R = qr.R(qr(X)))
+                           if (opt$convergence) print(opt$message)
+                           coefs <- z$coefficients <- opt$par
+                           z$fitted.values <- X %*% coefs
+                           z
+                          })
+     }
+
+     biasCoefs <- lapply(meanFit, function(x) x$coefficients)
+     biasCoefs <- as.matrix(data.frame(biasCoefs))
+     dimnames(biasCoefs) <- NULL
+
+     MEAN <- lapply(meanFit, function(x) x$fitted.values)
+     MEAN <- as.matrix(data.frame(MEAN))
+     dimnames(MEAN) <- NULL
+    }
+  else {
+
+    lmFunc <- function(x, y) {
+      x <- as.matrix(x)
+      n <- ncol(x)
+      x <- as.vector(x)
+      y <- rep(y,n)
+      lm(y ~ x)
+    }
+
+    biasCoefs <- matrix( NA, 2, nForecasts)
+    dimnames(biasCoefs) <- NULL
+
+    MEAN <- matrix(NA, length(obs), nForecasts)
+    dimnames(MEAN) <- NULL
+
+    for (labX in uniqueX) {
+       I <- namX == labX
+       fit <- lmFunc(ensembleData[, I, drop = F], obs)
+       biasCoefs[, I] <- fit$coefficients
+       MEAN[,I] <- fit$fitted.values
+    }
+
+  }
 
 #  gammaLoglikEM <- function(par, w, m, p, X, Y)
   gammaLoglikEM <- function(w, m, p1, X, Y)
@@ -256,9 +349,10 @@ function(ensembleData, control = controlBMAgamma0(), popData = NULL)
   }
   gradient
 }
-
   varCoefs <- if(is.null(control$start$varCoefs)) c(1,1) else control$start$varCoefs
   varCoefs <- pmax(varCoefs,1.e-4)
+
+  names(varCoefs) <- names(weights) <- NULL
 
   # set all latent variables equal initially, 
   # and "new weights" (used later to compare changes in weights) to zero
@@ -269,13 +363,18 @@ function(ensembleData, control = controlBMAgamma0(), popData = NULL)
   weights <- weights/sum(weights)
   if (!is.null(names(weights))) weights <- weights[ensMemNames]
 
-  names(varCoefs) <- names(weights) <- NULL
+  if (!nullX) {
+    for (labX in uniqueX) {
+      I <- namX == labX
+      weights[I] <- mean(weights[I])
+    }
+  }
 
   nIter <- 0
   z <- matrix( 1/nForecasts, ncol=nForecasts, nrow=nObs)
   objold <- 0
 
-  # main EM algorithm
+ # main EM algorithm
   while(TRUE)
   {
     VAR= varCoefs[1]+varCoefs[2]*Xvar
@@ -295,13 +394,12 @@ function(ensembleData, control = controlBMAgamma0(), popData = NULL)
  RATE <- MEAN/VAR
  SHAPE <- RATE*MEAN
 
-# nEsteps <- max(nIter + 1, 100)
  for (i in 1:nEsteps) {
 
     z[!Y0,] <- dgamma(obs, shape=SHAPE, rate=RATE, log=TRUE) 
     z[!Y0,] <- sweep(z[!Y0,], MARGIN=1, FUN="-", STATS=apply(z[!Y0,],1,max))  
     z[!Y0,] <- sweep(PROB1, MARGIN=2, FUN="*", STATS=weights)*exp(z[!Y0,])
-    z[Y0,] <- sweep(POP, MARGIN=2, FUN="*", STATS=weights)
+    z[Y0,] <- sweep(PROB0, MARGIN=2, FUN="*", STATS=weights)
  
     # normalize the latent variables
     z <- z/apply(z, 1, sum)
@@ -309,6 +407,16 @@ function(ensembleData, control = controlBMAgamma0(), popData = NULL)
     # calculate new weights based on latent variables
     wold <- weights
     weights <- apply(z, 2, sum)/nObs
+
+    if (!nullX) {
+
+        weights <- sapply(split(weights,namX),mean)[namX]
+##      for (labX in uniqueX) {
+##        I <- namX == labX
+##        weights[I] <- mean(weights[I])
+##      }
+    }
+
     weps <- max(abs(wold - weights)/(1+abs(weights)))
 
 } 
@@ -339,11 +447,11 @@ function(ensembleData, control = controlBMAgamma0(), popData = NULL)
     warning("iteration limit reached")
 
  dimnames(biasCoefs) <- list(NULL, ensMemNames)
- dimnames(popCoefs) <- list(NULL, ensMemNames)
+ dimnames(prob0coefs) <- list(NULL, ensMemNames)
  names(weights) <- ensMemNames
 
  structure(
-  list(popCoefs = popCoefs, biasCoefs = biasCoefs, varCoefs = varCoefs,
+  list(prob0coefs = prob0coefs, biasCoefs = biasCoefs, varCoefs = varCoefs,
        weights = weights, nIter = nIter, 
        transformation = control$transformation,
        inverseTransformation = control$inverseTransformation),

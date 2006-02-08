@@ -1,15 +1,18 @@
 \name{ensembleBMAnormal}
 \alias{ensembleBMAnormal}
+\alias{crpsNormal}
 \title{
-    BMA mixture of normals modeling for ensemble forecasts.  
+    BMA mixture of normals modeling
 }
 \description{
    Fits a Bayesian Model Averaging mixture of normals to ensemble forecasts.
+   Allows specification of a training rule and forecasting dates.
 }
 \usage{
 ensembleBMAnormal(ensembleData, dates = NULL, 
                   trainingRule = list(length=30, lag=2), 
-                  control = controlBMAnormal(), warmStart = FALSE, minCRPS = FALSE)
+                  control = controlBMAnormal(), warmStart = FALSE, 
+                  minCRPS = FALSE, exchangeable = NULL)
 }
 \arguments{
   \item{ensembleData}{
@@ -17,7 +20,8 @@ ensembleBMAnormal(ensembleData, dates = NULL,
      and dates of precipitation. 
   }
   \item{dates}{
-     The dates for which modeling is desired. By default, this will include all
+     The dates for which forecasts are desired. 
+     By default, this will include all
      dates consistent with the training rule.
   }
   \item{trainingRule}{
@@ -30,17 +34,24 @@ ensembleBMAnormal(ensembleData, dates = NULL,
      given by the function \code{controlBMAnormal}.
   }
   \item{warmStart}{
-      A logical variable indicating whether or not estimation of models for a sequence
-      of dates or time steps should be initialized with the weights from the previous
-      date or time step. The default is for the initilaizatiin to be independent of
-      the result at the previous time step.
+      A logical variable indicating whether or not estimation of models 
+      for a sequence of dates or time steps should be initialized with 
+      the weights from the previous date or time step. The default is 
+      for the initialization to be independent of the result at the 
+      previous time step.
   }
   \item{minCRPS}{
      A logical variable indicating whether or not to add a postprocessing
      step after the BMA fit to choose the standard deviation so as to
-     minimize the CRPS. The default is not to do the CRPS minimization,
+     minimize the CRPS for the training data. The default is not to do the CRPS minimization,
      which can add considerable extra cost to the computation, especially
      when unequal variances are specified in \code{control}.
+  }
+ \item{exchangeable}{
+     A numeric or character vector or factor indicating groups of
+     ensemble members that are exchangeable (indistinguishable).
+     The modeling will have equal weights and parameters within each group.
+     The default determines exchangeability from \code{ensembleData}.
   }
 }
 \value{
@@ -53,14 +64,14 @@ A list with the following output components:
     The training rule specified as input.
   }
  \item{biasCoefs}{
-    The fitted bias-correction coefficients at each date.
+    The fitted bias-correction coefficients for each ensemble member at each date.
   }
   \item{sd}{
     The fitted standard deviations for the mixture of normals model
     at each date.
   }
   \item{weights}{
-    The fitted weights for the mixture of normals modelat each date.
+    The fitted BMA weights for the normal components for each ensemble member at each date.
   }
 }
 \details{
@@ -68,34 +79,45 @@ A list with the following output components:
    will be missing entries denoted by \code{NA} for dates that are too recent 
    to be forecast with  the training rule. \cr
    The following methods are available for \code{ensembleBMAnormal} objects:
-   \code{gridForecastBMA}, \code{quantileForecastBMA}, 
-   \code{bmaModelParameters},  \code{brierSkillScores}, and \code{crpsANDmae}.
+   \code{cdfBMA}, \code{quantileForecastBMA}, \code{bmaModelParameters},  
+   \code{brierScore}, \code{crps} and \code{mae}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
-  \code{\link{forecastBMAnormal}}, 
   \code{\link{controlBMAnormal}}, 
   \code{\link{fitBMAnormal}},
-  \code{\link{gridForecastBMA}},
+  \code{\link{cdfBMA}},
   \code{\link{quantileForecastBMA}},
   \code{\link{bmaModelParameters}},
-  \code{\link{brierSkillScores}},
-  \code{\link{crpsANDmae}}
+  \code{\link{brierScore}},
+  \code{\link{crps}},
+  \code{\link{mae}}
 }
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles,
+Using Bayesian model averaging to calibrate forecast ensembles,
 \emph{Monthly Weather Review 133:1155-1174, 2005}.
+
+C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
+\code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
+using Ensembles and Bayesian Model Averaging,
+Technical Report No. 516, Department of Statistics, University of
+Washington, August 2007.
 }
 
 \examples{
 \dontrun{
-  data(slp)
+  data(slpTest)
 
-  slpData <- ensembleData(forecasts = slp[c("AVN","GEM","ETA","NGM","NOGAPS")],
-                          observations = slp$obs, dates = slp$date)
+  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
+  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
+                         observations = slpTest$obs, dates = slpTest$date)
 
-  slpFit <- ensembleBMAnormal( slpData, minCRPS = TRUE)
+\dontrun{
+  slpTestFit <- ensembleBMAnormal( slpTestData, model = "normal")
+}
+
+  slpTestFit <- ensembleBMAnormal( slpTestData)
 }
 }
 \keyword{models}

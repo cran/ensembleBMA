@@ -1,5 +1,6 @@
 "fitBMA" <-
-function(ensembleData, control = NULL, model = NULL, popData = NULL)
+function(ensembleData, control = NULL, model = NULL, 
+         exchangeable = NULL, popData = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
  mc <- match.call()   

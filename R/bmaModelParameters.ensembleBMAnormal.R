@@ -1,16 +1,16 @@
 "bmaModelParameters.ensembleBMAnormal" <-
-function(object, dates = NULL, ...) 
+function(fit, dates = NULL, ...) 
 {
- if (is.null(dates)) dates <- names(object$dateTable)
+ if (is.null(dates)) dates <- names(fit$dateTable)
 
- I <- match(dates, names(object$dateTable), nomatch=0)
+ I <- match(dates, names(fit$dateTable), nomatch=0)
 
  if (any(!I) || !length(I)) 
    stop("parameters not available for specified dates")
 
- list(weights = object$weights[,I], 
-      biasCoefs = object$biasCoefs[,,I], 
-      sd = if (is.null(dim(sd))) object$sd[I] else object$sd[,I],
+ list(weights = fit$weights[,I], 
+      biasCoefs = fit$biasCoefs[,,I], 
+      sd = if (is.null(dim(sd))) fit$sd[I] else fit$sd[,I],
       model = "normal")
 }
 

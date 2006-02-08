@@ -1,6 +1,11 @@
 "quantileForecastBMA.ensembleBMAgamma0" <-
-function(object, ensembleData, quantiles = 0.5, popData = NULL, ...) 
+function(fit, ensembleData, quantiles=0.5, dates=NULL, popData=NULL, ...) 
 {
+
+ M <- matchEnsembleMembers(ensembleData, fit)
+ nForecasts <- ensembleSize(ensembleData)
+ if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+
  inverseLogit <- function(x) {
 # logit function safeguared against underflow and overflow
               if (x >= 0) {
@@ -32,36 +37,55 @@ function(object, ensembleData, quantiles = 0.5, popData = NULL, ...)
    }
  }
 
- ensDates <- ensembleDates(ensembleData)
+ nObs <- ensembleNobs(ensembleData)
 
- Dates <- as.numeric(ensDates)
- DATES <- sort(unique(Dates))
+ if (!is.null(dates)) {
+   K <- match(dates, names(fit$dateTable), nomatch=0)
+   if (any(!K) || !length(K)) 
+     stop("parameters not available for a specified date")
+   dateTable <- fit$dateTable[K]
+ }
+ else {
+   dateTable <- fit$dateTable
+   K <- 1:length(dateTable)
+  }
 
- L <- as.logical(match(as.character(ensDates),
-                 names(object$dateTable), nomatch = 0))
-
- K <- sapply(names(object$dateTable), function(d,D) 
-                        which(d == as.character(D))[1],
-                            D = ensDates)
- dates <- sort(Dates[K])
- nDates <- length(dates)
+ if (is.null(ensDates <- ensembleDates(ensembleData))) {
+   if (length(dateTable) > 1) stop("date ambiguity")
+   Dates <- rep(1,nObs)
+   dates <- DATES <- 1
+   L <- 1:nObs
+ }
+ else {
+   if (!is.null(dates)) {
+     L <- as.logical(match(dates, as.character(ensDates), nomatch=0))
+     if (all(!L) || !length(L)) 
+       stop("specified dates incompatible with ensemble data")
+   }
+   Dates <- as.numeric(ensDates)
+   DATES <- sort(unique(Dates))
+   L <- as.logical(match(as.character(ensDates), names(dateTable), nomatch=0))
+   if (all(!L) || !length(L)) 
+     stop("model fit dates incompatible with ensemble data")
+   dates <- sort(unique(Dates[L]))
+ }
 
  J <- match(dates, DATES, nomatch = 0)
 
  if (any(!J)) stop("specified dates not matched in data")
  
- nObs <- ensembleNobs(ensembleData)
  Q <- matrix(NA, nObs, length(quantiles))
- dimnames(Q) <- list(ensembleObsNames(ensembleData),as.character(quantiles))
+ dimnames(Q) <- list(ensembleObsLabels(ensembleData),as.character(quantiles))
 
  ensembleData <- ensembleForecasts(ensembleData)
 
- k <- 0
+ l <- 0
  for (j in J) {
 
-    k <- k + 1
+    l <- l + 1
+    k <- K[l]
 
-    if (any(is.na(WEIGHTS <- object$weights[,k]))) next
+    if (any(is.na(WEIGHTS <- fit$weights[,k]))) next
 
     I <- which(as.logical(match(Dates, DATES[j], nomatch = 0)))
     
@@ -69,27 +93,27 @@ function(object, ensembleData, quantiles = 0.5, popData = NULL, ...)
     
        f <- ensembleData[i,]
 
-       VAR <- object$varCoefs[1,k] + object$varCoefs[2,k]*f
+       VAR <- fit$varCoefs[1,k] + fit$varCoefs[2,k]*f
 
-       fTrans <- sapply(f, object$transformation)
+       fTrans <- sapply(f, fit$transformation)
 
        if (is.null(popData)) {
-         POP <- sapply(apply(rbind( 1, fTrans, f==0) * object$popCoefs[,,k],
+         PROB0 <- sapply(apply(rbind( 1, fTrans, f==0)*fit$prob0coefs[,,k],
                                   2,sum), inverseLogit)
        }
        else {
          popi <- rbind(lapply( popData, function(x,i) x[i,], i = i))
-         POP <- sapply(apply(rbind( 1, fTrans, popi) * object$popCoefs[,,k],
+         PROB0 <- sapply(apply(rbind( 1, fTrans, popi)*fit$prob0coefs[,,k],
                                 2,sum), inverseLogit)
        }
 
-       MEAN <- apply(rbind(1, fTrans)*object$biasCoefs[,,k], 2, sum)
+       MEAN <- apply(rbind(1, fTrans)*fit$biasCoefs[,,k], 2, sum)
 
-       Q[i,] <- sapply(quantiles,gamma0BMAquant,WEIGHTS=WEIGHTS,
-                       POP=POP,MEAN=MEAN,VAR=VAR)
+       Q[i,] <- sapply(quantiles, gamma0BMAquant, WEIGHTS=WEIGHTS,
+                       PROB0=PROB0, MEAN=MEAN, VAR=VAR)
     }
  }
 
-  apply(Q[L,,drop = FALSE], 2, object$inverseTransformation)
+  apply(Q[ L, , drop = FALSE], 2, fit$inverseTransformation)
 }
 

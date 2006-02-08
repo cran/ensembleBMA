@@ -1,7 +1,7 @@
 \name{trainingData}
 \alias{trainingData}
 \title{
-    Training data for a given date and training rule.
+    Extract Training Data
 }
 \description{
   Extracts the training data corresponding to a given date and training rule.
@@ -12,7 +12,7 @@ trainingData( ensembleData, date, trainingRule = list(length=30, lag=2))
 \arguments{
   \item{ensembleData}{
      An \code{ensembleData} object including ensemble forecasts, observations 
-     and dates of precipitation. 
+     and dates. 
   }
   \item{date}{
      The date for which the training data is desired. 
@@ -38,27 +38,33 @@ the given date relative to \code{ensembleData}.
 
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles,
+Using Bayesian model averaging to calibrate forecast ensembles,
 \emph{Monthly Weather Review 133:1155-1174, 2005}.
 
 J. M. Sloughter, A. E. Raftery, T. Gneiting and C. Fraley, 
-Probabilistic Quantitative Precipitation Forecasting 
-using Bayesian Model Averaging,
-Technical Report No. 496R, Department of Statistics, University of
-Washington, October 2006 (to appear in \emph{Montly Weather Review}).
+Probabilistic quantitative precipitation forecasting 
+using Bayesian model averaging,
+\emph{Monthly Weather Review 135:3309--3320, 2007}.
+
+C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
+\code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
+using Ensembles and Bayesian Model Averaging,
+Technical Report No. 516, Department of Statistics, University of
+Washington, August 2007.
 }
 
 \examples{
 \dontrun{
-  data(slp)
+  data(slpTest)
 
-  slpData <- ensembleData(forecasts = slp[c("AVN","GEM","ETA","NGM","NOGAPS")],
-                          observations = slp$obs, dates = slp$date)
+  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
+  slpTestData <- ensembleData( forecasts = slpTest[ ,memberLabels],
+                         observations = slpTest$obs, dates = slpTest$date)
 
-  trainDat <- trainingData(slpData, date = "2000063000",
+  trainDat <- trainingData(slpTestData, date = "2000063000",
                            trainingRule = list(length=30,lag =2))
  
-  slpFitTD <- fitBMAnormal(trainDat)
+  slpTestFitTD <- fitBMAnormal(trainDat)
 }
 }
 \keyword{models}

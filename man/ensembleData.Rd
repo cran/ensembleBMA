@@ -3,80 +3,89 @@
 \alias{precipitationData}
 \alias{temperatureData}
 \alias{pressureData}
-\alias{ensembleObsNames}
-\alias{ensembleMemberNames}
+\alias{ensembleObsLabels}
+\alias{ensembleMemberLabels}
 \alias{ensembleSize}
 \alias{ensembleNobs}
 \alias{ensembleForecasts}
 \alias{ensembleDates}
 \alias{ensembleVerifObs}
-\alias{ensembleObsNames.ensembleData}
-\alias{ensembleMemberNames.ensembleData}
+\alias{ensembleGroups}
+\alias{ensembleObsLabels.ensembleData}
+\alias{ensembleMemberLabels.ensembleData}
 \alias{ensembleSize.ensembleData}
 \alias{ensembleNobs.ensembleData}
 \alias{ensembleForecasts.ensembleData}
 \alias{ensembleDates.ensembleData}
 \alias{ensembleVerifObs.ensembleData}
+\alias{ensembleGroups.ensembleData}
 \alias{[.ensembleData}
+\alias{matchEnsembleMembers}
 \title{
-  Creates an ensembleData object.
+  Create an ensembleData object
 }
 \description{
-   Creates a \code{ensembleData} object. 
+   Creates an \code{ensembleData} object including ensemble forecasts along
+   with dates and (optionally) observations. Other descriptive information
+   such as latitude, longitude, and station type may be included as well.
 }
 \usage{
-ensembleData( forecasts, observations, dates,  ..., na.action = "remove", 
-              missingValues = NULL,  labels = NULL)
+ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL, 
+              exchangeable = NULL, dates = NULL, observations = NULL, 
+              latitude = NULL, longitude = NULL, ...)
 }
 \arguments{
   \item{forecasts}{
      A matrix with columns corresponding to forecasts from individual members 
      of an ensemble and rows corresponding to forecasts for the same date.
   }
-  \item{observations}{
-    Vector of observed weather conditions corresponding to the forecast
-    values.
+  \item{caseLabels}{
+     An optional set of labels assigned to the forecast instances.
+     The default is to use the row names corresponding to \code{forecasts}.
+  }
+  \item{memberLabels}{
+     An optional set of labels assigned to the ensemble members.
+     The default is to use the column names corresponding to \code{forecasts}.
+     These are important because they are used to match ensemble members
+     with BMA modeling weights and parameters.
+  }
+  \item{exchangeable}{
+     A numeric or character vector or factor indicating groups of 
+     ensemble members that are exchangeable (indistinguishable).
+     The models fit will have equal weights and parameters
+     within each group.
+     The same names/labels should be used as for the forecasts.     
+     The default assumes that none of the ensemble members are
+     exhangeable.
   }
   \item{dates}{
-    Vector of dates corresponding to the forecasts and observations.
+    Optional vector of dates corresponding to the forecasts.
     This must be in integer or ordered factor form. If a factor,
     it must sort in chronological order.
    }
+  \item{observations}{
+    Optional vector of observed weather conditions corresponding 
+    to the forecasts. Must be supplied if the data is to be
+    used for BMA modeling. 
+  }
+  \item{latitude}{
+    Optional vector of latitudes of the forecast locations.
+   }
+  \item{longitude}{
+    Optional vector of longitudes of the forecast locations.
+   }
   \item{...}{
-     A named list of saditional attributes such as latitude,
-    longitude, station name, station type.
-    }
-  \item{na.action}{
-     A character string indicating how missing values handled.
-     The default is \code{"remove"} means that data items with missing values
-     in either forecasts, observations, or dates are removed from the 
-     data. If set to \code{NULL}, no missing values are removed.
-   }
-  \item{missingValues}{
-     One or more numeric codes used to indicate missing values in the data.
-     These will be replaced by \code{NA} in the output if 
-     \code{na.action = NULL}.
-     If not supplied, it is assumed that missing values are designated
-     by \code{NA}.
-   }
-  \item{labels}{
-     A character vector labeling the observations, forecasts, and dates.
-     The default is to take the names from the observations, forecasts,
-     or dates in that order.
+    A named list of additional attributes such as station name and station type.
    }
 }
 \value{
-   An \code{ensembleData} object, incorporating forecasts and observations
-   with the associated integer dates.
+   An \code{ensembleData} object, incorporating forecasts and (optionally) observations
+   with the associated dates.
 }
 \details{
-    Although the input dates may not be consecutive, the dates of an
-    \code{ensembleData} object are consecutive integers giving the 
-    order of the levels of the \code{dates} input if it were represented
-    as a factor.\cr
     Methods for \code{ensembleData} objects include \code{ensembleSize},
     \code{ensembleForecasts}, \code{ensembleVerifObs}, and \code{ensembleDates}. \cr
-    Subsetting is possible, but in the case of columns it applies on to
+    Subsetting is possible, but in the case of columns it applies only to
     the ensemble forecasts.
 }
 
@@ -85,24 +94,40 @@ ensembleData( forecasts, observations, dates,  ..., na.action = "remove",
   \code{\link{ensembleBMAgamma0}}, 
   \code{\link{ensembleBMAnormal}}
 }
+
+\references{
+C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
+\code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
+using Ensembles and Bayesian Model Averaging,
+Technical Report No. 516, Department of Statistics, University of
+Washington, August 2007.
+}
+
 \examples{
 
- data(slp)
+ data(slpTest)
 
- slpData <- ensembleData(forecasts = slp[c("AVN","GEM","ETA","NGM","NOGAPS")],
-                         observations = slp$obs, dates = slp$date)
+ labels <- c("AVN","GEM","ETA","NGM","NOGAPS")
+ slpTestData <- ensembleData(forecasts = slpTest[ ,labels],
+                        observations = slpTest$obs, dates = slpTest$date)
+
+ slpTestDataX <- ensembleData(forecasts = slpTest[ ,labels],
+                        observations = slpTest$obs, dates = slpTest$date,
+         exchangeable = c(AVN=1, GEM=2, ETA=1, NGM=3, NOGAPS=4))
 
 \dontrun{
- slpFit <- ensembleBMAnormal( slpData)
+ slpTestFit <- ensembleBMAnormal( slpTestData)
+ slpTestFitX <- ensembleBMAnormal( slpTestDataX)
 }
-  data(prcp)
+  data(prcpTest)
 
-  prcpData <- ensembleData( dates = prcp$date, observations = prcp$obs,
-                          forecasts = prcp[,c("CENT","AVN","CMCG","ETA",
-                                      "GASP","JMA","NGPS","TCWB","UKMO")])
+  labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
+  prcpTestData <- ensembleData( forecasts = prcpTest[ ,labels],
+                          dates = prcpTest$date, observations = prcpTest$obs)
+                            
 
 \dontrun{
-  prcpFit <- ensembleBMAgamma0(prcpData)
+  prcpTestFit <- ensembleBMAgamma0(prcpTestData)
 }
 
 }

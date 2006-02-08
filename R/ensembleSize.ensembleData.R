@@ -1,6 +1,6 @@
 "ensembleSize.ensembleData" <-
 function(x) 
 { 
- charmatch("obs", dimnames(x)[[2]]) - 1
+ attr(x, "ensembleSize")
 }
 

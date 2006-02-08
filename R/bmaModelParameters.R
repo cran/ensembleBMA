@@ -1,4 +1,4 @@
 "bmaModelParameters" <-
-function(object, ...) 
+function(fit, ...) 
 UseMethod("bmaModelParameters")
 

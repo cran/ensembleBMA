@@ -1,47 +1,72 @@
 "ensembleData" <-
-function(forecasts, observations, dates, ..., na.action = "remove", 
-          missingValues = NULL, labels = NULL) 
+function(forecasts, caseLabels = NULL, memberLabels = NULL, 
+         exchangeable = NULL,
+         dates = NULL, observations = NULL, latitude = NULL,
+         longitude = NULL, ...) 
 {
- auxList <- list(...)
- nObs <- length(observations)
- if (length(dates) != nObs) 
-   stop("number of dates does not equal number of observations")
- dates <- as.factor(dates)
  if (is.null(dim(forecasts))) forecasts <- as.matrix(forecasts)
- if (nrow(forecasts) != nObs) 
-   stop("number of observations does not equal number of forecasts")
- if (is.null(forcNames <- dimnames(forecasts)[[2]])) {
-   forcNames <- paste("forc", 1:ncol(forecasts), sep = "")
- }
- object <- cbind(forecasts,observations,dates)
- NAMES <- c(forcNames, "observations", "dates")
-#ord <- order(as.numeric(dates))
-#object <- as.data.frame(object[ord,])
- namesObs <- names(observations)
+ nObs <- nrow(forecasts)
  namesFor <- dimnames(forecasts)[[1]]
- if (is.null(labels)) {
-    if (!is.null(namesObs <- names(observations))) {
-      labels <- namesObs
-    }
-    else if (!is.null(namesFor <- dimnames(forecasts)[[1]])) {
-      labels <- namesFor
-    }
-    else labels <- names(dates)
+ if (is.null(memberLabels)) {
+   memberLabels <- dimnames(forecasts)[[2]]
  }
- dimnames(object) <- list(labels, NAMES)
- object <- c(object, auxList)
- object <- as.data.frame(object)
- if (!is.null(missingValues)) {
-     apply(object, 2, function(x, values) {
-            x[match(values, x, nomatch=0)] <- NA
-            }, values = as.vector(missingValues))
+ if (is.null(memberLabels)) {
+   if (!is.null(exchangeable) && !is.null(names(exhangeable)))
+     stop("exchangeable labels but no member labels")
+   memberLabels <- as.character(1:ncol(forecasts))
+   dimnames(forecasts) <- list(dimnames(forecasts)[[1]], memberLabels)
  }
- switch(na.action,
- remove= {
-   object <- object[apply(object[,NAMES], 1, function(x) !any(is.na(x))),]
- },
- {})
+ if (length(unique(memberLabels)) < length(memberLabels)) {
+   stop("duplicated member labels")
+ }
+ if (!is.null(exchangeable)){
+   if (length(exchangeable) != ncol(forecasts))
+     stop("exchangeable specification incompatible with forecasts")
+   namX <- names(exchangeable)
+   if (!is.null(namX)) {
+     if (length(unique(namX)) < length(namX)) {
+       stop("duplicated exchangeable labels")
+     }
+     m <- match(namX, memberLabels, nomatch = 0)
+     if (length(unique(m)) != length(m))
+       stop("exchangeable incompatible with forecasts")
+     exchangeable <- exchangeable[m]
+   }
+   else {
+     names(exchangeable) <- memberLabels
+   } 
+ }
+ forecasts <- as.data.frame(forecasts)
+ ensembleSize <- ncol(forecasts)
+ if (!is.null(dates)) dates <- as.factor(dates)
+ object <- c(as.list(forecasts), list(observations = observations,
+             dates = dates, 
+             latitude = latitude, longitude = longitude), 
+             list(...))
+ object <- object[!sapply(object, is.null)]
+ if (length(unique(sapply(object, length))) != 1) 
+   stop("inputs unequal in length")
+ namesObj <- names(object)
+## names may change here e.g. avn/gfs to avn.gfs 
+ object <- data.frame(object)
+ namesObs <- names(observations)
+ namesDates <- names(dates)
+ namesFor <- dimnames(forecasts)[[1]]
+ if (is.null(caseLabels)) {
+    if (!is.null(namesFor)) {
+      caseLabels <- namesFor
+    }
+    else if (!is.null(namesDates)) {
+      caseLabels <- namesDates
+    }
+    else if (!is.null(namesObs)) {
+      caseLabels <- namesObs
+    }
+ }
+ dimnames(object) <- list(caseLabels, namesObj)
 
+ attr(object, "ensembleSize") <- ensembleSize
+ attr(object, "exchangeable") <- exchangeable
  class(object) <- c("ensembleData", "data.frame")
  object
 }

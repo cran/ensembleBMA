@@ -1,19 +1,19 @@
 "bmaModelParameters.ensembleBMAgamma0" <-
-function(object, dates = NULL, ...) 
+function(fit, dates = NULL, ...) 
 {
- if (is.null(dates)) dates <- names(object$dateTable)
+ if (is.null(dates)) dates <- names(fit$dateTable)
 
- I <- match(dates, names(object$dateTable), nomatch=0)
+ I <- match(dates, names(fit$dateTable), nomatch=0)
 
  if (any(!I) || !length(I)) 
    stop("parameters not available for specified dates")
 
- list(weights = object$weights[,I], 
-      popCoefs = object$popCoefs[,,I],
-      biasCoefs = object$biasCoefs[,,I], 
-      varCoefs = object$varCoefs[,I],
-      transformation = object$transformation,
-      inverseTransformation = object$inverseTransformation,
+ list(weights = fit$weights[,I], 
+      prob0coefs = fit$prob0coefs[,,I],
+      biasCoefs = fit$biasCoefs[,,I], 
+      varCoefs = fit$varCoefs[,I],
+      transformation = fit$transformation,
+      inverseTransformation = fit$inverseTransformation,
       model = "gamma0")
 }
 

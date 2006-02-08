@@ -1,8 +1,9 @@
 "ensembleForecasts.ensembleData" <-
 function (x) 
 { 
+ k <- attr(x, "ensembleSize")
+ attr(x, "ensembleSize") <- NULL
  class(x) <- "data.frame"
- i <- charmatch("obs", dimnames(x)[[2]]) - 1
- as.matrix(x[, 1:i])
+ as.matrix(x[, 1:k])
 }
 

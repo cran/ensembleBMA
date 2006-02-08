@@ -1,0 +1,90 @@
+"plotBMAforecast" <-
+function(forecast, longitude, latitude, nGrid = 65, 
+         type = c("image", "contour", "persp"), ..., 
+         interpolate = FALSE, span = 0.75, map = NULL)
+{
+## col=rev(rainbow(100,start=0,end=0.85))
+
+ FIELDS <- exists("US", mode = "function") 
+ FIELDS <- FIELDS && exists("world", mode = "function")
+ FIELDS <- FIELDS && exists("image.plot", mode = "function")
+
+ type <- type[1]
+
+ lonRange <- range(longitude)
+ lon <- seq(from=lonRange[1],to=lonRange[2],length=nGrid)
+
+ latRange <- range(latitude)
+ lat <- seq(from=latRange[1],to=latRange[2],length=nGrid)
+
+ if (interpolate) {
+# use prediction on a grid from loess fit
+
+   fit <- loess( forecast ~ longitude*latitude, span = span)
+
+   pred <- predict( fit, expand.grid(list( longitude = lon, latitude = lat)))
+  }
+  else {
+# use prediction on a grid via binning
+
+    pred <- binGrid( forecast, longitude, latitude, nGrid)
+  }
+
+   if (type == "image" && FIELDS) {
+##       image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
+##                  legend.width=.015, legend.shrink=.8,
+##                  xlab="", ylab="", offset=0.02, ...)
+##       image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
+##                  xlab="", ylab="", offset = 0.075, 
+##                  legend.width = 0.015, legend.shrink = 0.8, ...)
+       image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
+                  xlab = "", ylab = "", horizontal = TRUE, offset = 0.075,
+                  legend.width = 0.015, legend.shrink = 0.8, ...)
+  }
+  else  {
+      do.call( type, c(list(x = lon, y = lat, 
+               z = pred, xlab = "", ylab = "", ...)))
+  }
+    
+
+if (is.null(map)) map <- type == "image" && FIELDS
+
+if (map) {
+
+if(min(lon) <= -124.7 & max(lon) >= -124.7){
+  US.map <- 1
+}
+if(min(lon) >= -124.7 & max(lon) <= -67.1){
+  US.map <- 1
+}
+if(min(lon) <= -67.1 & max(lon) >= -67.1){
+  US.map <- 1
+}
+if(min(lat) <= 25.2 & max(lat) >= 25.2){
+  US.map <- 1 + US.map
+}
+if(min(lat) >= 25.2 & max(lat) <= 49.4){
+  US.map <- 1 + US.map
+}
+if(min(lat) <= 49.4 & max(lat) >= 49.4){
+  US.map <- 1 + US.map
+}
+
+lonRange <- range(lon)
+latRange <- range(lat)
+
+if(US.map==2){
+  if (exists("US", mode = "function")) {
+    US( xlim = lonRange, ylim = latRange,  add=TRUE, col=1, lwd=2)
+  }
+}
+ else {
+  if (exists("world", mode = "function")) {
+     world( xlim = lonRange, ylim = latRange, add=TRUE, col=1, lwd=2)     
+  } 
+}
+}  
+
+invisible()
+}
+

@@ -5,7 +5,7 @@ function(ensembleData, date, trainingRule = list(length = 30, lag = 2))
  if (length(date) > 1) stop("one day only")
 
  nObs <- ensembleVerifObs(ensembleData)
- ensNames <- ensembleMemberNames(ensembleData)
+ ensNames <- ensembleMemberLabels(ensembleData)
  nForecasts <- length(ensNames)
 
  ensDates <- ensembleDates(ensembleData)
@@ -27,6 +27,7 @@ function(ensembleData, date, trainingRule = list(length = 30, lag = 2))
  trainingRule <- as.list(trainingRule)
  offset <- 1 - trainingRule$lag - (1:trainingRule$length)
 
+ if (any(j + offset < 1)) stop("insufficient training data")
  D <- as.logical(match(Dates, DATES[j+offset], nomatch=0))
 
  ensembleData[D,]

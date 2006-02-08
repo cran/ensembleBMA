@@ -1,7 +1,6 @@
 "gamma0BMAcdf" <-
-function (x, offset, WEIGHTS, POP, MEAN, VAR)
+function (x, WEIGHTS, PROB0, MEAN, VAR, offset = 0)
 {
-  sum(WEIGHTS*(POP+(1-POP)*pgamma(rep(x,length(WEIGHTS)),
-                                 shape=(MEAN^2/VAR),scale=VAR/MEAN)))-offset
+ sum(WEIGHTS*(PROB0+(1-PROB0)*pgamma(x,shape=(MEAN^2/VAR),scale=VAR/MEAN)))-offset
 }
 

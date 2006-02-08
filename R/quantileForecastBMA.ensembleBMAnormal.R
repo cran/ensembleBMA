@@ -1,55 +1,77 @@
 "quantileForecastBMA.ensembleBMAnormal" <-
-function(object, ensembleData, quantiles = 0.5, ...) 
+function(fit, ensembleData, quantiles = 0.5, dates = NULL, ...) 
 {
 
- ensDates <- ensembleDates(ensembleData)
+ M <- matchEnsembleMembers(ensembleData, fit)
+ nForecasts <- ensembleSize(ensembleData)
+ if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
 
- Dates <- as.numeric(ensDates)
- DATES <- sort(unique(Dates))
+ nObs <- ensembleNobs(ensembleData)
+ 
+ if (!is.null(dates)) {
+   K <- match(dates, names(fit$dateTable), nomatch=0)
+   if (any(!K) || !length(K)) 
+     stop("parameters not available for a specified date")
+   dateTable <- fit$dateTable[K]
+ }
+ else {
+   dateTable <- fit$dateTable
+   K <- 1:length(dateTable)
+  }
 
- L <- as.logical(match(as.character(ensDates),
-                 names(object$dateTable), nomatch = 0))
-
-
- K <- sapply(names(object$dateTable), function(d,D) 
-                        which(d == as.character(D))[1],
-                            D = ensDates)
- dates <- sort(Dates[K])
- nDates <- length(dates)
+ if (is.null(ensDates <- ensembleDates(ensembleData))) {
+   if (length(dateTable) > 1) stop("date ambiguity")
+   Dates <- rep(1,nObs)
+   dates <- DATES <- 1
+   L <- 1:nObs
+ }
+ else {
+   if (!is.null(dates)) {
+     L <- as.logical(match(dates, as.character(ensDates), nomatch=0))
+     if (all(!L) || !length(L)) 
+       stop("specified dates incompatible with ensemble data")
+   }
+   Dates <- as.numeric(ensDates)
+   DATES <- sort(unique(Dates))
+   L <- as.logical(match(as.character(ensDates), names(dateTable), nomatch=0))
+   if (all(!L) || !length(L)) 
+     stop("model fit dates incompatible with ensemble data")
+   dates <- sort(unique(Dates[L]))
+ }
 
  J <- match(dates, DATES, nomatch = 0)
 
  if (any(!J)) stop("specified dates not matched in data")
 
- nObs <- ensembleNobs(ensembleData)
  Q <- matrix(NA, nObs, length(quantiles))
- dimnames(Q) <- list(ensembleObsNames(ensembleData),as.character(quantiles))
+ dimnames(Q) <- list(ensembleObsLabels(ensembleData),as.character(quantiles))
 
  nForecasts <- ensembleSize(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)
 
- k <- 0
+ l <- 0
  for (j in J) {
-    k <- k + 1
+  
+    l <- l + 1
+    k <- K[l]
 
-    if (any(is.na(WEIGHTS <- object$weights[,k]))) next
+    if (any(is.na(WEIGHTS <- fit$weights[,k]))) next
 
     I <- which(as.logical(match(Dates, DATES[j], nomatch = 0)))
 
-
-    SD <- if (!is.null(dim(object$sd))) object$sd[,k] else rep(object$sd[k], nForecasts)
+    SD <- if (!is.null(dim(fit$sd))) fit$sd[,k] else rep(fit$sd[k], nForecasts)
 
     for (i in I) {
     
        f <- ensembleData[i,]
 
-       MEAN <- apply(rbind(1, f)*object$biasCoefs[,,k], 2, sum)
+       MEAN <- apply(rbind(1, f)*fit$biasCoefs[,,k], 2, sum)
 
-       Q[i,] <- sapply(quantiles,normalBMAquant,
-                       WEIGHTS=WEIGHTS,MEAN=MEAN,SD=SD)
+       Q[i,] <- sapply(quantiles, normalBMAquant,
+                       WEIGHTS=WEIGHTS, MEAN=MEAN, SD=SD)
     }
  }
 
- Q[L,, drop = FALSE]
+ Q[ L, , drop = FALSE]
 }
 

@@ -1,9 +1,9 @@
 "bmaModelParameters.fitBMAnormal" <-
-function(object, ...) 
+function(fit, ...) 
 {
- list(weights = object$weights, 
-      biasCoefs = object$biasCoefs, 
-      sd = object$sd,
+ list(weights = fit$weights, 
+      biasCoefs = fit$biasCoefs, 
+      sd = fit$sd,
       model = "normal")
 }
 

@@ -1,7 +1,7 @@
 \name{controlBMAnormal}
 \alias{controlBMAnormal}
 \title{
-  Control parameters for BMA for precipitation.
+  Control parameters for BMA mixtures of normals
 }
 \description{
    Specifies a list of values controling the Bayesian Model Averaging fit 
@@ -13,10 +13,9 @@ controlBMAnormal(maxIter, eps, equalVariance, biasCorrection, start)
 \arguments{
   \item{maxIter}{
      An integer specifying an upper limit on the number of iterations
-     for fitting the BMA mixture via EM. The default is 
-    \code{.Machine$integer.max}, which essentially sets no upper
-     limit on the number of iterations, so that the convergence
-     criterion based on \code{eps} is used.
+     for fitting the BMA mixture via EM. The default is \code{Inf}, 
+     which sets no upper limit on the number of iterations, 
+     so that the convergence criterion based on \code{eps} is used.
   }
   \item{eps}{
      A numeric convergence tolerance. The EM fit for the mixture 
@@ -57,24 +56,29 @@ controlBMAnormal(maxIter, eps, equalVariance, biasCorrection, start)
 }
 \seealso{
   \code{\link{ensembleBMAnormal}}, 
-  \code{\link{forecastBMAnormal}}, 
   \code{\link{fitBMAnormal}}
 }
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles,
+Using Bayesian model averaging to calibrate forecast ensembles,
 \emph{Monthly Weather Review 133:1155-1174, 2005}.
+
+C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
+\code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
+using Ensemble and Bayesian Model Averaging,
+Technical Report No. 516, Department of Statistics, University of
+Washington, August 2007.
 }
 
 \examples{
-  data(slp)
+  data(slpTest)
 
-  slpData <- ensembleData(forecasts = slp[c("AVN","GEM","ETA","NGM","NOGAPS")],
-                          observations = slp$obs, dates = slp$date)
+  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
+  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
+                         observations = slpTest$obs, dates = slpTest$date)
 
-  slpFit <- ensembleBMAnormal(slpData, 
-    control = controlBMAnormal(maxIter = 100, 
-                               equalVariance = FALSE,
+  slpTestFit <- ensembleBMAnormal(slpTestData, 
+    control = controlBMAnormal(maxIter = 100, equalVariance = FALSE,
                                biasCorrection = "additive"))
 }
 \keyword{models}
