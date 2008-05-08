@@ -12,7 +12,7 @@
 ensembleBMAnormal(ensembleData, dates = NULL,
                   trainingRule = list(length=NA, lag=NA), 
                   control = controlBMAnormal(), warmStart = FALSE, 
-                  minCRPS = FALSE, exchangeable = NULL)
+                  minCRPS = TRUE, exchangeable = NULL)
 }
 \arguments{
   \item{ensembleData}{
@@ -46,9 +46,9 @@ ensembleBMAnormal(ensembleData, dates = NULL,
   \item{minCRPS}{
      A logical variable indicating whether or not to add a postprocessing
      step after the BMA fit to choose the standard deviation so as to
-     minimize the CRPS for the training data. The default is not to do the CRPS minimization,
-     which can add considerable extra cost to the computation, especially
-     when unequal variances are specified in \code{control}.
+     minimize the CRPS for the training data. The default is to do
+     the CRPS minimization, althought it can add considerable extra cost
+     to the computation.
   }
  \item{exchangeable}{
      A numeric or character vector or factor indicating groups of

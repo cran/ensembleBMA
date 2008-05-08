@@ -1,6 +1,6 @@
 `ensembleBMAnormal` <-
 function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA), 
-         control = controlBMAnormal(), warmStart = FALSE, minCRPS = FALSE,
+         control = controlBMAnormal(), warmStart = FALSE, minCRPS = TRUE,
          exchangeable = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
@@ -139,7 +139,7 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA),
           fit$sd <- optimize(CRPSobjective, interval = c(0, 6*fit$sd))$minimum
         }
         else {
-          opt <- optim(fit$sd, CRPSobjective)
+          opt <- optim(fit$sd, CRPSobjective, method = "BFGS")
           if (!opt$convergence) {
             fit$sd <- opt$par
           }

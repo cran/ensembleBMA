@@ -189,7 +189,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
       n <- ncol(x)
       x <- as.vector(x)
       y <- rep(y,n)
-      glm(y ~ x + (x==0), na.action = na.omit)
+      glm(y ~ x + (x==0), family = binomial(logit), na.action = na.omit)
     }
 
     prob0coefs <- matrix(NA, 3, nForecasts)

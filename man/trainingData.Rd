@@ -7,7 +7,9 @@
   Extracts the training data corresponding to a given date and training rule.
 }
 \usage{
-trainingData( ensembleData, date, trainingRule = list( length = NA, lag = NA)) 
+trainingData( ensembleData, date,
+              trainingRule = list( length = NA, lag = NA),
+              exchangeable = NULL) 
 }
 \arguments{
   \item{ensembleData}{
@@ -23,6 +25,13 @@ trainingData( ensembleData, date, trainingRule = list( length = NA, lag = NA))
     in the training period, and the lag gives the number of time steps
     ahead of the most recent date in the training period for which the
     forecast is valid. There is no default.
+  }
+  \item{exchangeable}{
+    A numeric or character vector or factor indicating groups of
+    ensemble members that are exchangeable (indistinguishable).
+    The modeling will have equal weights and parameters within each
+    group.
+    The default determines exchangeability from \code{ensembleData}.
   }
 }
 \value{
