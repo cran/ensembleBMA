@@ -36,26 +36,31 @@ function(sd, weights, biasCoefs, ensembleData)
 
     for (l in 1:nObs) {
 
+       M <- is.na(MEAN[l,])
+
+       W <- weights/sum(weights[!M])
+
        crps1 <- crps2 <- 0
 
   # Begin computing the first term in the CRPS formula.  
   # This is a double sum since it is over w(i)*w(j) for all i and j.
 
-       for (i in 1:nForecasts) 
+       for (i in (1:nForecasts)[!M]) 
          {
-          for (j in 1:nForecasts) 
-             {
-              tvar <- VAR[i] + VAR[j]  # total variance
-              tsd <- sqrt(tvar)          # total standard deviation
-              tmean <- MEAN[l,i] - MEAN[l,j]
-              temp <- absExp(tmean,tsd)
-              term <- (weights[i]*weights[j])*temp
-              crps1 <- crps1 + term
-             }
-           tvar <- VAR[i]              # total variance
-           tsd <- sqrt(tvar)            # total standard deviation
-           tmean <- MEAN[l,i] - ensembleData$obs[l]
-           crps2 <- crps2 + weights[i]*absExp(tmean,tsd)
+            for (j in (1:nForecasts)[!M]) 
+               {
+                  tvar <- VAR[i] + VAR[j]  # total variance
+                  tsd <- sqrt(tvar)          # total standard deviation
+                  tmean <- MEAN[l,i] - MEAN[l,j]
+                  temp <- absExp(tmean,tsd)
+                  term <- (W[i]*W[j])*temp
+                  crps1 <- crps1 + term
+               }
+
+             tvar <- VAR[i]              # total variance
+             tsd <- sqrt(tvar)            # total standard deviation
+             tmean <- MEAN[l,i] - ensembleData$obs[l]
+             crps2 <- crps2 + W[i]*absExp(tmean,tsd)
         }
 
     # Using Szekely's expression for the CRPS, 

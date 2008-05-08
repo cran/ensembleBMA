@@ -9,25 +9,28 @@
    Allows specification of a training rule and forecasting dates.
 }
 \usage{
-ensembleBMAnormal(ensembleData, dates = NULL, 
-                  trainingRule = list(length=30, lag=2), 
+ensembleBMAnormal(ensembleData, dates = NULL,
+                  trainingRule = list(length=NA, lag=NA), 
                   control = controlBMAnormal(), warmStart = FALSE, 
                   minCRPS = FALSE, exchangeable = NULL)
 }
 \arguments{
   \item{ensembleData}{
-     An \code{ensembleData} object including ensemble forecasts, observations 
-     and dates of precipitation. 
+     An \code{ensembleData} object including ensemble forecasts, 
+     verification observations and dates. 
+     Missing values (indicated by \code{NA}) are allowed.
   }
   \item{dates}{
-     The dates for which forecasts are desired. 
+     The dates for which BMA forecasting models are desired. 
      By default, this will include all
      dates consistent with the training rule.
   }
   \item{trainingRule}{
-     A list giving the \code{length} and \code{lag} for the training period.
-     The default is to use a 30 time step training period for a forecast
-     2 time steps ahead of the last time step in the training period.
+    A list giving the \code{length} and \code{lag} for the training
+    period. The length gives the number of time steps (e.g. days)
+    in the training period, and the lag gives the number of time steps
+    ahead of the most recent date in the training period for which the
+    forecast is valid. There is no default.
   }
   \item{control}{
      A list of control values for the fitting functions. The defaults are
@@ -79,16 +82,17 @@ A list with the following output components:
    will be missing entries denoted by \code{NA} for dates that are too recent 
    to be forecast with  the training rule. \cr
    The following methods are available for \code{ensembleBMAnormal} objects:
-   \code{cdfBMA}, \code{quantileForecastBMA}, \code{bmaModelParameters},  
+   \code{cdf}, \code{quantileForecast}, \code{modelParameters},  
    \code{brierScore}, \code{crps} and \code{mae}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{controlBMAnormal}}, 
+  \code{\link{trainingControl}}, 
   \code{\link{fitBMAnormal}},
-  \code{\link{cdfBMA}},
-  \code{\link{quantileForecastBMA}},
-  \code{\link{bmaModelParameters}},
+  \code{\link{cdf}},
+  \code{\link{quantileForecast}},
+  \code{\link{modelParameters}},
   \code{\link{brierScore}},
   \code{\link{crps}},
   \code{\link{mae}}
@@ -103,6 +107,10 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516, Department of Statistics, University of
 Washington, August 2007.
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+BMA Forecasting with Missing and Exchangeable Ensemble Members,
+in preparation.
 }
 
 \examples{
@@ -114,10 +122,13 @@ Washington, August 2007.
                          observations = slpTest$obs, dates = slpTest$date)
 
 \dontrun{
-  slpTestFit <- ensembleBMAnormal( slpTestData, model = "normal")
+  slpTestFit <- ensembleBMA( slpTestData, model = "normal",
+                             trainingRule = list(length=30,lag=2))
 }
 
-  slpTestFit <- ensembleBMAnormal( slpTestData)
+  slpTestFit <- ensembleBMAnormal( slpTestData,
+                             trainingRule = list(length=30,lag=2))
+
 }
 }
 \keyword{models}

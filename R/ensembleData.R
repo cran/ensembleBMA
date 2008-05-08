@@ -1,9 +1,10 @@
-"ensembleData" <-
+`ensembleData` <-
 function(forecasts, caseLabels = NULL, memberLabels = NULL, 
          exchangeable = NULL,
          dates = NULL, observations = NULL, latitude = NULL,
          longitude = NULL, ...) 
 {
+ if (inherits(forecasts, "ensembleData")) class(forecasts) <- "data.frame"
  if (is.null(dim(forecasts))) forecasts <- as.matrix(forecasts)
  nObs <- nrow(forecasts)
  namesFor <- dimnames(forecasts)[[1]]
@@ -38,7 +39,10 @@ function(forecasts, caseLabels = NULL, memberLabels = NULL,
  }
  forecasts <- as.data.frame(forecasts)
  ensembleSize <- ncol(forecasts)
- if (!is.null(dates)) dates <- as.factor(dates)
+ if (!is.null(dates)) {
+    if (!all(dateCheck(dates))) stop("improperly specified date(s)")
+    dates <- as.factor(dates)
+  }
  object <- c(as.list(forecasts), list(observations = observations,
              dates = dates, 
              latitude = latitude, longitude = longitude), 

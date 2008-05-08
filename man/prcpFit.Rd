@@ -70,7 +70,7 @@ Washington, August 2007.
 \dontrun{
   data(prcpFit)
 
-  bmaModelParameters(prcpFit, date = "20030113")
+  modelParameters(prcpFit, date = "20030113")
 
   data(prcpGrid) 
 
@@ -79,10 +79,10 @@ Washington, August 2007.
                                longitude = prcpGrid[,"longitude"])
 
 # probability of precipitation
-  1 - cdfBMA( prcpFit, prcpGridData, value = 0)
+  1 - cdf( prcpFit, prcpGridData, value = 0)
 
 # probability of precipitation above 0.25 in
-  1 - cdfBMA( prcpFit, prcpGridData, date = "20030113", value = 25)
+  1 - cdf( prcpFit, prcpGridData, date = "20030113", value = 25)
   
 }
 }

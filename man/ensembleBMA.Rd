@@ -9,25 +9,28 @@
    Allows specification of a model, training rule, and forecasting dates.
 }
 \usage{
-ensembleBMA( ensembleData, dates = NULL, trainingRule = list(length=30,lag=2), 
-             control = NULL, model = NULL, warmStart = FALSE, minCRPS = NULL, 
-             exchangeable = NULL, popData = NULL)
+ensembleBMA( ensembleData, dates = NULL,
+             trainingRule = list(length=NA,lag=NA), control = NULL,
+             model = NULL, warmStart = FALSE, minCRPS = NULL, 
+             exchangeable = NULL)
 }
 \arguments{
   \item{ensembleData}{
-     An \code{ensembleData}, \code{temperatureData}, \code{pressureData}, 
-     or \code{precipitationData} object including ensemble forecasts, 
-     observations and dates. 
+     An \code{ensembleData} object including ensemble forecasts, 
+     verification observations and dates. 
+     Missing values (indicated by \code{NA}) are allowed.
   }
  \item{dates}{
-     The dates for which forecasts are desired. 
+     The dates for which BMA forecasting models are desired. 
      By default, this will include all
      dates consistent with the training rule.
   }
   \item{trainingRule}{
-     A list giving the \code{length} and \code{lag} for the training period.
-     The default is to use a 30 time step training period for a forecast
-     2 time steps ahead of the last time step in the training period.
+    A list giving the \code{length} and \code{lag} for the training
+    period. The length gives the number of time steps (e.g. days)
+    in the training period, and the lag gives the number of time steps
+    ahead of the most recent date in the training period for which the
+    forecast is valid. There is no default.
   }
   \item{control}{
      A list of control values for the fitting functions. 
@@ -62,32 +65,6 @@ ensembleBMA( ensembleData, dates = NULL, trainingRule = list(length=30,lag=2),
      The model fit will have equal weights and parameters within each group.
      The default determines exchangeability from \code{ensembleData}.
   }
-  \item{popData}{
-      Optional predictors for the logistic regression for probability of 
-      zero precipitation. This option applies to the mixture of gammas model 
-      with a point mass at zero that is used for precipitation.
-      In this model, the default predictors are an intercept, the
-      transformed forecast data, and a logical variable indicating
-      whether or not the forecast is equal to 0. 
-      In addition, the coefficient of the transformed forecast must 
-      not be greater than 0 and that of the logical variable
-      must not be less than 0 in the default. 
-      If provided, the predictors in \code{popData} would replace the logical 
-      variable in the regression, and no constraints are imposed on
-      the regression coefficients. \cr
-      To supply one pop predictor per ensemble member,
-      \code{popData} can be a matrix or data frame (if the
-      predictor is categorical) with number of rows equal to the
-      number of observations, and number of columns equal to the
-      ensemble size. \cr
-      To supply multiple numeric pop predictors per ensemble member,
-      \code{popData} can be an array of dimension (number of
-      observations) by (ensemble size) by (number of pop predictors). \cr
-      To supply multiple pop predictors per ensemble member, some of
-      which may be categorical, \code{popData} must be a list of
-     (number of observations) by (ensemble size) matrices, one
-      for each pop predictor.
- }
 }
 \value{
 A list with the following output components:
@@ -123,21 +100,22 @@ A list with the following output components:
    The training rule uses the number of days corresponding to its 
    \code{length} regardless of whether or not the dates are consecutive.\cr
    The following methods are available for the output of \code{ensembleBMA}:
-   \code{cdfBMA}, \code{quantileForecastBMA},  \code{bmaModelParameters},  
+   \code{cdf}, \code{quantileForecast},  \code{modelParameters},  
    \code{brierScore}, \code{crps} and \code{mae}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{ensembleBMAnormal}}, 
   \code{\link{ensembleBMAgamma0}},
-  \code{\link{cdfBMA}},
-  \code{\link{quantileForecastBMA}},
-  \code{\link{bmaModelParameters}}, 
+  \code{\link{cdf}},
+  \code{\link{quantileForecast}},
+  \code{\link{modelParameters}}, 
   \code{\link{brierScore}},
   \code{\link{crps}},
   \code{\link{mae}},
   \code{\link{controlBMAnormal}},
-  \code{\link{controlBMAgamma0}}
+  \code{\link{controlBMAgamma0}},
+  \code{\link{trainingControl}}
 }
 
 \references{
@@ -155,6 +133,10 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516, Department of Statistics, University of
 Washington, August 2007.
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+BMA Forecasting with Missing and Exchangeable Ensemble Members,
+in preparation.
 }
 
 \examples{
@@ -164,7 +146,8 @@ Washington, August 2007.
   slpTestData <- ensembleData(forecasts = slpTest[ ,labels],
                          observations = slpTest$obs, dates = slpTest$date)
 
-  slpTestFit <- ensembleBMA( slpTestData, model = "normal")
+  slpTestFit <- ensembleBMA( slpTestData, model = "normal",
+                             trainingRule = list(length=30,lag=2))
 
 \dontrun{
   data(prcp)
@@ -172,7 +155,8 @@ Washington, August 2007.
   labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
   prcpTestData <- ensembleData( forecasts = prcpTest[ , labels],
                           dates = prcpTest$date, observations = prcpTest$obs)
-  prcpTestFit <- ensembleBMA(prcpTestData, model = "gamma0")
+  prcpTestFit <- ensembleBMA(prcpTestData, model = "gamma0",
+                             trainingRule = list(length=30,lag=2))
 }
 }
 \keyword{models}

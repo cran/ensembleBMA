@@ -12,8 +12,10 @@ fitBMAnormal( ensembleData, control = controlBMAnormal(),
 }
 \arguments{
   \item{ensembleData}{
-     An \code{ensembleData} object with ensemble forecasts, observations 
-     and dates.
+     An \code{ensembleData} object including ensemble forecasts and 
+     verification observations.
+     Missing values (indicated by \code{NA}) are allowed. Dates are ignored
+     if they are included.  This is the training set for the model.
   }
   \item{control}{
      A list of control values for the fitting functions. The defaults are
@@ -49,16 +51,15 @@ A list with the following output components:
    It is called by \code{ensembleBMAnormal}, which can produce a sequence
    of fits over a larger data set.  \cr
    Methods available for the output of \code{fitBMAnormal} include:
-   \code{cdfBMA}, \code{quantileForecastBMA}, and 
-   \code{bmaModelParameters}. 
+   \code{cdf}, \code{quantileForecast}, and \code{modelParameters}. 
 }
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{controlBMAnormal}}, 
   \code{\link{ensembleBMAnormal}},
-  \code{\link{cdfBMA}},
-  \code{\link{quantileForecastBMA}},
-  \code{\link{bmaModelParameters}}
+  \code{\link{cdf}},
+  \code{\link{quantileForecast}},
+  \code{\link{modelParameters}}
 }
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
@@ -70,6 +71,10 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516, Department of Statistics, University of
 Washington, August 2007.
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+BMA Forecasting with Missing and Exchangeable Ensemble Members,
+in preparation.
 }
 
 \examples{

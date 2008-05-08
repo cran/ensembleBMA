@@ -77,7 +77,8 @@ Washington, August 2007.
   slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
                          observations = slpTest$obs, dates = slpTest$date)
 
-  slpTestFit <- ensembleBMAnormal(slpTestData, 
+  slpTestFit <- ensembleBMAnormal(slpTestData,
+    trainingRule = list(length =30, lag = 2),
     control = controlBMAnormal(maxIter = 100, equalVariance = FALSE,
                                biasCorrection = "additive"))
 }

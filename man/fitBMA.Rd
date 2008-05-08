@@ -8,13 +8,14 @@
 
 }
 \usage{
-fitBMA( ensembleData, control = NULL, model = NULL, 
-        exchangeable = NULL, popData = NULL)
+fitBMA( ensembleData, control = NULL, model = NULL, exchangeable = NULL)
 }
 \arguments{
   \item{ensembleData}{
-     An \code{ensembleData} object with ensemble forecasts, observations 
-     and dates. This is the training set for the model.
+     An \code{ensembleData} object including ensemble forecasts and 
+     verification observations.
+     Missing values (indicated by \code{NA}) are allowed. Dates are ignored
+     if they are included.  This is the training set for the model.
   }
   \item{control}{
      A list of control values for the fitting functions. 
@@ -33,28 +34,6 @@ fitBMA( ensembleData, control = NULL, model = NULL,
      within each group.
      The default determines exchangeability from \code{ensembleData}.
   }
- \item{popData}{
-      Optional predictors for the logistic regression for probability of 
-      zero precipitation. This option applies to the mixture of gammas model 
-      with a point mass at zero that is used for precipitation.
-      In this model, the default predictors are an intercept, the
-      transformed forecast data, and a logical variable indicating
-      whether or not the forecast is equal to 0. 
-      If provided, the predictors in \code{popData} would replace the logical 
-      variable in the regression. \cr
-      To supply one pop predictor per ensemble member,
-      \code{popData} can be a matrix or data frame (if the
-      predictor is categorical) with number of rows equal to the
-      number of observations, and number of columns equal to the
-      ensemble size. \cr
-      To supply multiple numeric pop predictors per ensemble member,
-      \code{popData} can be an array of dimension (number of
-      observations) by (ensemble size) by (number of pop predictors). \cr
-      To supply multiple pop predictors per ensemble member, some of
-      which may be categorical, \code{popData} must be a list of
-     (number of observations) by (ensemble size) matrices, one
-      for each pop predictor.
- }
 }
 \value{
 A list with the following output components:
@@ -84,17 +63,17 @@ A list with the following output components:
 \details{
    This function fits a BMA model to a training data set. \cr
    Methods available for \code{fitBMA} objects (the output of \code{fitBMA})
-   include:   \code{cdfBMA},  \code{quantileForecastBMA}, and 
-   \code{bmaModelParameters}. 
+   include: \code{cdf}, \code{quantileForecast}, and
+   \code{modelParameters}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{ensembleBMA}},
   \code{\link{fitBMAgamma0}}, 
   \code{\link{fitBMAnormal}}, 
-  \code{\link{cdfBMA}}, 
-  \code{\link{quantileForecastBMA}}, 
-  \code{\link{bmaModelParameters}}, 
+  \code{\link{cdf}}, 
+  \code{\link{quantileForecast}}, 
+  \code{\link{modelParameters}}, 
   \code{\link{controlBMAnormal}},
   \code{\link{controlBMAgamma0}}
 }
@@ -113,6 +92,10 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516, Department of Statistics, University of
 Washington, August 2007.
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+BMA Forecasting with Missing and Exchangeable Ensemble Members,
+in preparation.
 }
 
 \examples{

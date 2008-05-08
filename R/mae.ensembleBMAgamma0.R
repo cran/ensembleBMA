@@ -1,119 +1,89 @@
-"mae.ensembleBMAgamma0" <-
-function(fit, ensembleData, dates=NULL, nSamples=10000, seed=NULL, 
-         popData=NULL, ...) 
+`mae.ensembleBMAgamma0` <-
+function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...) 
 {
-## contains CRPS code for historic reasons
+ weps <- 1.e-4
 
- M <- matchEnsembleMembers(ensembleData, fit)
+ M <- matchEnsembleMembers(fit,ensembleData)
  nForecasts <- ensembleSize(ensembleData)
  if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
 
- sampleFromDist <- function( x, n=10000)
-{
-  p <- x[1]
-  q <- x[2]
-  shape <- x[3]
-  rate <- x[4]
+# remove instances missing all forecasts, obs, or dates
 
-  c(rep(0, round(p*n)), rgamma(round(q*n), shape=shape, rate=rate))
-} 
-
-# inverseLogit <- function(x) exp(x)/(1 + exp(x))
-
- inverseLogit <- function(x) {
-              if (x >= 0) {
-                if (-x >= log(.Machine$double.eps)) {
-                  1/(1+exp(-x))
-                }
-                else 1
-              }
-             else {
-                if (x >= log(.Machine$double.xmin)) {
-                  if (x >= log(.Machine$double.eps)) {
-                    x <- exp(x)
-                    x/(1+x)
-                  }
-                  else exp(x)
-                }
-                else 0
-             }
-            }
-
- if (!is.null(popData) && !is.null(dim(popData))) {
-   if (length(dim(popData)) == 2) {
-     popData <- list(popData)
-   }
-   else {
-     popData <- apply(popData, 3, list)
-   }
- }
-
- if (!is.null(seed)) set.seed(seed)
-
+ M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
+ M <- M | is.na(ensembleVerifObs(ensembleData))
+ M <- M | is.na(ensembleDates(ensembleData))
+ ensembleData <- ensembleData[!M,]
+ 
  if (is.null(obs <- ensembleVerifObs(ensembleData)))
    stop("verification observations required")
 
- nObs <- length(obs)
+#nObs <- length(obs)
+ nObs <- ensembleNobs(ensembleData)
 
- Q <- as.vector(quantileForecastBMA( fit, ensembleData, dates = dates))
+ if (!is.null(seed)) set.seed(seed)
+
+ dateTable <- names(fit$nIter)
 
  if (!is.null(dates)) {
-   K <- match(dates, names(fit$dateTable), nomatch=0)
+
+   dates <- sort(unique(as.character(dates)))
+
+   if (length(dates) > length(dateTable)) 
+     stop("parameters not available for some dates")
+
+   K <- match(dates, dateTable, nomatch=0)
+
    if (any(!K) || !length(K)) 
-     stop("parameters not available for a specified date")
-   dateTable <- fit$dateTable[K]
+     stop("parameters not available for some dates")
+
  }
  else {
    dateTable <- fit$dateTable
    K <- 1:length(dateTable)
   }
 
+ dates <- names(dateTable)
+
+## match dates in data with dateTable
  if (is.null(ensDates <- ensembleDates(ensembleData))) {
-   if (length(dateTable) > 1) stop("date ambiguity")
-   Dates <- rep(1,nObs)
-   dates <- DATES <- 1
-   L <- 1:nObs
+   if (length(dates) > 1) stop("date ambiguity")
+   Dates <- rep( dates,nObs)
  }
  else {
-   if (!is.null(dates)) {
-     L <- as.logical(match(dates, as.character(ensDates), nomatch=0))
-     if (all(!L) || !length(L)) 
-       stop("specified dates incompatible with ensemble data")
-   }
-   Dates <- as.numeric(ensDates)
-   DATES <- sort(unique(Dates))
-   L <- as.logical(match(as.character(ensDates), names(dateTable), nomatch=0))
+   Dates <- as.character(ensDates)
+   L <- as.logical(match( Dates, dates, nomatch=0))
    if (all(!L) || !length(L)) 
      stop("model fit dates incompatible with ensemble data")
-   dates <- sort(unique(Dates[L]))
+   Dates <- Dates[L]
+   ensembleData <- ensembleData[L,]
+   obs <- obs[L]
+   nObs <- length(obs)
  }
 
- J <- match(dates, DATES, nomatch = 0)
+ Q <- as.vector(quantileForecast( fit, ensembleData, dates=dates))
 
- if (any(!J)) stop("specified dates not matched in data")
+ sampleMedian <- sampleMean <- predictiveMean <- rep(NA, nObs)
+ names(sampleMedian) <- ensembleObsLabels(ensembleData)
 
  nForecasts <- ensembleSize(ensembleData) 
-
- crpsSim <- sampleMedian <- sampleMean <- predictiveMean <- rep(NA, nObs)
- names(crpsSim) <- names(sampleMedian) <- ensembleObsLabels(ensembleData)
-
  ensembleData <- ensembleForecasts(ensembleData)
 
- if (!is.null(nSamples)) {
-
  l <- 0
- for (j in J) {
+ for (d in dates) {
 
     l <- l + 1
     k <- K[l]
 
-    if (any(is.na(WEIGHTS <- fit$weights[,k]))) next
+    WEIGHTS <- fit$weights[,k]
+    if (all(Wmiss <- is.na(WEIGHTS))) next
 
-    I <- which(as.logical(match(Dates, DATES[j], nomatch = 0)))
+    I <- which(as.logical(match( Dates, d, nomatch = 0)))
 
     for (i in I) {
     
        f <- ensembleData[i,]
+
+       M <- is.na(f) | Wmiss
      
        VAR <- fit$varCoefs[1,k] + fit$varCoefs[2,k]*f
 
@@ -121,108 +91,103 @@ function(fit, ensembleData, dates=NULL, nSamples=10000, seed=NULL,
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs[,,k], 2, sum)
 
-       predictiveMean[i] <- sum(WEIGHTS*MEAN)
+       W <- WEIGHTS
+       if (any(M)) {
+         W <- W + weps
+         W <- W[!M]/sum(W[!M])
+       }
 
+       predictiveMean[i] <- sum(W*MEAN[!M])
+
+    if (!is.null(nSamples)) {
        RATE <- MEAN/VAR
        SHAPE <- MEAN*RATE
 
-       if (is.null(popData)) {
-         PROB0 <- sapply(apply(rbind( 1, fTrans, f==0) * fit$prob0coefs[,,k],
+       PROB0 <- sapply(apply(rbind( 1, fTrans, f==0)*fit$prob0coefs[,,k],
                               2,sum), inverseLogit)
-       }
-       else {
-         popi <- rbind(lapply( popData, function(x,i) x[i,], i = i))
-         PROB0 <- sapply(apply(rbind( 1, fTrans, popi) * fit$prob0coefs[,,k],
-                                    2,sum), inverseLogit)
-       }
+       RATE <- RATE[!M]
+       SHAPE <- SHAPE[!M]
+       PROB0 <- PROB0[!M]
 
-       SAMPLES <- sample( 1:nForecasts, size = nSamples, 
-                          replace = TRUE, prob = WEIGHTS)
+       SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples, 
+                          replace = TRUE, prob = W)
 
-       tab <- table(SAMPLES)
+       tab <- numeric(sum(!M))
+       names(tab) <- (1:nForecasts)[!M]
+       tabSamples <- table(SAMPLES)
+       tab[names(tabSamples)] <- tabSamples
 
-       tab <- table(unlist(apply( cbind(as.numeric(names(tab)), tab), 1,
+       Z <- tab == 0
+
+       tab <- tab[!Z]
+
+       SHAPE <- SHAPE[!Z]
+       RATE <- RATE[!Z]
+       PROB0 <- PROB0[!Z]
+
+       I <- seq(along = tab)
+
+       tab0 <- table(unlist(apply( cbind( seq(along = tab), tab), 1,
               function(nj,PROB0) {
          sample(c(nj[1],0), size = nj[2], replace = TRUE,
                 prob = c(1-PROB0[nj[1]],PROB0[nj[1]]))}, 
                 PROB0 = PROB0)))
 
-       if (length(tab) > 1) {
-          S <- apply( cbind(as.numeric(names(tab[-1])), tab[-1]), 1,
+       I <- as.numeric(names(tab0[-1]))
+       tab[] <- 0
+       tab[I] <- tab0[-1]
+
+       Z <- tab == 0
+
+       tab <- tab[!Z]
+
+       if (length(tab)) {
+
+          SHAPE <- SHAPE[!Z]
+          RATE <- RATE[!Z]
+
+          S <- apply( cbind( seq(along = tab), tab), 1,
               function(nj,SHAPE,RATE) 
                   rgamma(nj[2], shape=SHAPE[nj[1]], rate=RATE[nj[1]]),
-                                        SHAPE = SHAPE, RATE = RATE)
+                                      SHAPE = SHAPE, RATE = RATE)
            
 # model is fit to the cube root of the forecast
 
          S <- sapply(as.vector(unlist(S)),
                            fit$inverseTransformation)
 
-         SAMPLES <- c(rep(0, tab[1]), S)
+         SAMPLES <- c(rep(0, tab0[1]), S)
        }
-       else SAMPLES <- rep(0,tab[1])
+       else SAMPLES <- rep(0,tab0[1])
 
-##     p <- PROB0*WEIGHTS
-##     q <- (1-PROB0)*WEIGHTS
-
-##     SAMPLES <- apply(rbind(p=p,q=q,shape=SHAPE,rate=RATE), 2, 
-##                         sampleFromDist, n = nSamples)
-
-##       SAMPLES <- sapply(as.vector(unlist(SAMPLES)), 
-##                         fit$inverseTransformation)
-
-#      sampleMean[i] <- mean(SAMPLES) 
+       sampleMean[i] <- mean(SAMPLES) 
        sampleMedian[i] <- median(SAMPLES) 
-  
-       crps1  <- mean(abs(SAMPLES - obs[i])) 
-       crps2 <-  mean(abs(diff(sample(SAMPLES))))
-       crpsSim[i]  <- crps1 - crps2/2
     }
- }
+  }
 }
-## L <- which(!is.na(crpsSim))
-## l <- length(L)
 
-## crpsSim <- mean(crpsSim[L])
+## maeCli <- mean(abs(obs - median(obs)))
+## maeEns <- mean(abs(obs - apply(ensembleData, 1, median)))
 
- crpsCli <- sapply(obs[L], function(x,Y) mean(abs(Y-x)), Y = obs[L])
- crpsCli <- mean(crpsCli - mean(crpsCli)/2)
- 
- crpsEns1 <- apply(abs(sweep(ensembleData[L,],MARGIN=1,FUN ="-",STATS=obs[L]))
-                   ,1,mean)
- crpsEns2 <- apply(apply(ensembleData[L,], 2, function(z,Z) 
-                apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum),
-                  Z = ensembleData[L,]),1,sum)
-
- crpsEns <- mean(crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts)))
-
-## maeCli <- mean(abs(obs[L] - median(obs[L])))
-## maeEns <- mean(abs(obs[L] - apply(ensembleData[L,], 1, median)))
-
- maeCli <- mean(abs(obs[L] - mean(obs[L])))
- maeEns <- mean(abs(obs[L] - apply(ensembleData[L,], 1, mean)))
+ maeCli <- mean(abs(obs - mean(obs)))
+ maeEnsMean <- mean(abs(obs - apply(ensembleData, 1, mean, na.rm = TRUE)))
+ maeEnsMedian <- mean(abs(obs - apply(ensembleData, 1, median, na.rm = TRUE)))
 
  if (is.null(nSamples)) {
-   maeBMA <- mean(abs(obs[L] - Q))
+   maeBMAmedian <- mean(abs(obs - Q))
+   maeBMAmean <- mean(abs(obs - predictiveMean))
  }
  else {
-   maeBMA <-  maeSim <- mean(abs(obs[L] - sampleMedian[L]))
+   maeBMAmedian <- mean(abs(obs - sampleMedian))
+   maeBMAmean <-   mean(abs(obs - sampleMean))
  }
 
-## MAT <- matrix( NA, 2, 4)
-## dimnames(MAT) <- list(c("CRPS", "MAE"), 
-##                       c("climatology", "ensemble", "BMA", "simBMA"))
-
-## MAT["CRPS", "climatology"] <- crpsCli
-## MAT["CRPS", "ensemble"] <- crpsEns
-## MAT["CRPS", "simBMA"] <- crpsSim
-
-## MAT["MAE", "climatology"] <- maeCli
-## MAT["MAE", "ensemble"] <- maeEns
-## MAT["MAE", "BMA"] <- maeBMA
-## MAT["MAE", "simBMA"] <- maeSim
-
 ## c(climatology = maeCli, ensemble = maeEns, BMA = maeBMA)
- c(ensemble = maeEns, BMA = maeBMA)
+
+##matrix( c(maeEnsMean, maeEnsMedian, maeBMAmean, maeBMAmedian), 2, 2,
+##        dimnames = list(c("mean", "median"), c("ensemble", "BMA")))
+
+c(ensemble = A[2,1,1], BMA = A[2,2,1])
+c(ensemble = maeEnsMedian, BMA = maeBMAmedian)
 }
 

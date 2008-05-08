@@ -1,5 +1,4 @@
-"mae" <-
-function(fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL, 
-         popData=NULL, ...) 
+`mae` <-
+function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...) 
 UseMethod("mae")
 

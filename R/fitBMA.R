@@ -1,6 +1,6 @@
-"fitBMA" <-
+`fitBMA` <-
 function(ensembleData, control = NULL, model = NULL, 
-         exchangeable = NULL, popData = NULL)
+         exchangeable = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
  mc <- match.call()   
@@ -11,21 +11,17 @@ function(ensembleData, control = NULL, model = NULL,
    m <- pmatch( model, MODELS, nomatch=0)
    model <- if (m) MODELS[m] else "?"
  }
- else model <- "?"
+ else stop("unspecified model")
 
- if (inherits(ensembleData, "temperatureData") || 
-     inherits(ensembleData, "pressureData") ||
-     inherits(ensembleData, "precipitationData") || 
-     model == "normal") {
-   if (!is.null(popData)) 
-     warning("popData not used for normal models")
-   mc$popData <- NULL
-   mc[[1]] <- as.name("fitBMAnormal")
- }  
- else if (inherits(ensembleData, "precipitationData") || model == "gamma0") {
-   mc[[1]] <- as.name("fitBMAgamma0")
- }
- else stop("unrecognized model")
+ switch( model,
+        "normal" = {
+             mc[[1]] <- as.name("fitBMAnormal")
+          },
+        "gamma0" = {
+             mc[[1]] <- as.name("fitBMAgamma0")
+         },
+       stop("unrecognized model")
+    )
 
  if (length(attr(ensembleData, "class")) > 2) {
    attr(ensembleData, "class") <- attr(ensembleData, "class")[-1]

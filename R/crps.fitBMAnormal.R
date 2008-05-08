@@ -1,40 +1,35 @@
-"crps.fitBMAnormal" <-
-function(fit, ensembleData, dates=NULL, nSamples = NULL, seed=NULL, ...) 
+`crps.fitBMAnormal` <-
+function(fit, ensembleData, nSamples = NULL, seed=NULL, dates=NULL, ...) 
 {
-## includes mae for historical reasons
+ weps <- 1.e-4
 
- M <- matchEnsembleMembers(ensembleData, fit)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ if(!is.null(dates)) warning("dates ignored")
 
-erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
+ erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
 
-absExp <- function(mu, sig) 
+ absExp <- function(mu, sig) 
   {
    (sqrt(2)* sig)*exp(-(mu/sig)^2/2)/sqrt(pi) + 
                        mu * erf((sqrt(2)*mu)/(2*sig))
   }
 
- if (!is.null(seed)) set.seed(seed)
+ M <- matchEnsembleMembers(fit,ensembleData)
+ nForecasts <- ensembleSize(ensembleData)
+ if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+
+# remove instances missing all forecasts or obs
+
+ M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
+ M <- M | is.na(ensembleVerifObs(ensembleData))
+ ensembleData <- ensembleData[!M,]
 
  if (is.null(obs <- ensembleVerifObs(ensembleData)))
    stop("verification observations required")
 
- nObs <- length(obs)
+#nObs <- length(obs) 
+ nObs <- ensembleNobs(ensembleData)
 
- ensDates <- ensembleDates(ensembleData)
- if (!is.null(dates) && length(dates) > 1 && is.null(ensDates)) 
-   stop("date ambiguity")
-
- L <- 1:nObs
-
- if (!is.null(dates) && !is.null(ensDates)) {
-   M <- as.logical(match(as.character(ensDates), dates, nomatch=0))
-   if (!any(M)) stop("dates not matched in data")
-   L <- L[M]
- }
-
- Q <- as.vector(quantileForecastBMA( fit, ensembleData))
+ if (!is.null(seed)) set.seed(seed)
 
  nForecasts <- ensembleSize(ensembleData) 
 
@@ -43,7 +38,9 @@ absExp <- function(mu, sig)
 
  ensembleData <- ensembleForecasts(ensembleData)
 
- if (!any(is.na(WEIGHTS <- fit$weights))) {
+ WEIGHTS <- fit$weights
+     
+ if (!all(Wmiss <- is.na(WEIGHTS))) {
      
     SD <- if (!is.null(dim(fit$sd))) {
             fit$sd
@@ -54,11 +51,19 @@ absExp <- function(mu, sig)
 
     VAR <- SD*SD
 
-    for (i in L) {
+    for (i in 1:nObs) {
     
        f <- ensembleData[i,]
      
        MEAN <- apply(rbind(1, f) * fit$biasCoefs, 2, sum)
+
+       M <- is.na(f) | Wmiss
+
+       W <- WEIGHTS
+       if (any(M)) {
+         W <- W + weps
+         W <- W[!M]/sum(W[!M])
+       }
 
   # Expression of the CRPS formula and the E|x| if x ~ N(mu,sigma^2)
 
@@ -76,21 +81,21 @@ absExp <- function(mu, sig)
   # Begin computing the first term in the CRPS formula.  
   # This is a double sum since it is over w(i)*w(j) for all i and j.
 
-       for (f1 in 1:nForecasts) 
+       for (f1 in (1:nForecasts)[!M]) 
          {
-          for (f2 in 1:nForecasts) 
+          for (f2 in 1:nForecasts[!M]) 
              {
               tvar <- VAR[f1] + VAR[f2]  # total variance
              tsd <- sqrt(tvar)          # total standard deviation
               tmean <- MEAN[f1] - MEAN[f2]
               temp <- absExp(tmean,tsd)
-              term <- (WEIGHTS[f1]*WEIGHTS[f2])*temp
+              term <- (W[f1]*W[f2])*temp
               crps1 <- crps1 + term
              }
            tvar <- VAR[f1]              # total variance
            tsd <- sqrt(tvar)            # total standard deviation
            tmean <- MEAN[f1] - obs[i]
-           crps2 <- crps2 + WEIGHTS[f1]*absExp(tmean,tsd)
+           crps2 <- crps2 + W[f1]*absExp(tmean,tsd)
         }
 
     # Using Szekely's expression for the CRPS, 
@@ -100,11 +105,12 @@ absExp <- function(mu, sig)
      }
      else {
 
-       SAMPLES <- sample(1:nForecasts,size=nSamples,replace=TRUE,prob=WEIGHTS) 
+       SAMPLES <- sample((1:nForecasts)[!M],size=nSamples,
+                          replace=TRUE,prob=W[!M]) 
        tab <- table(SAMPLES)
        SAMPLES <- apply(cbind(as.numeric(names(tab)), tab), 1,
                      function(nj,MEAN,SD) rnorm(nj[2],MEAN[nj[1]],SD[nj[1]]),
-                        MEAN = MEAN, SD = SD)
+                        MEAN = MEAN[!M], SD = SD[!M])
 
        SAMPLES <- as.vector(unlist(SAMPLES))
 
@@ -118,44 +124,18 @@ absExp <- function(mu, sig)
   }
  }
 
-## L <- which(!is.na(crpsSim))
-## l <- length(L)
-
- crpsCli <- sapply(obs[L], function(x,Y) mean(abs(Y-x)), Y = obs[L])
+ crpsCli <- sapply(obs, function(x,Y) mean(abs(Y-x)), Y = obs)
  crpsCli <- mean(crpsCli - mean(crpsCli)/2)
 
- crpsEns1 <- apply(abs(sweep(ensembleData[L,],MARGIN=1,FUN ="-",STATS=obs[L]))
-                   ,1,mean)
- crpsEns2 <- apply(apply(ensembleData[L,], 2, function(z,Z) 
-                apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum),
-                  Z = ensembleData[L,]),1,sum)
+ crpsEns1 <- apply(abs(sweep(ensembleData,MARGIN=1,FUN ="-",STATS=obs)),
+                   1, mean, na.rm = TRUE)
+ crpsEns2 <- apply(apply(ensembleData, 2, function(z,Z) 
+       apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum,na.rm=TRUE),
+                  Z = ensembleData), 1, sum, na.rm = TRUE)
 
  crpsEns <- mean(crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts)))
 
- crpsBMA <- crpsSim <- mean(crpsSim[L])
-
- maeSim <- mean(abs(obs[L] - sampleMedian[L]))
-
- maeCli <- mean(abs(obs[L] - median(obs[L])))
-
- maeEns <- mean(abs(obs[L] - apply(ensembleData[L,], 1, median)))
- maeBMA <- mean(abs(obs[L] - Q[!is.na(Q)]))
-
-## MAT <- matrix( NA, 2, 4)
-## dimnames(MAT) <- list(c("CRPS", "MAE"), 
-##                       c("climatology", "ensemble", "BMA", "simBMA"))
-
-## MAT["CRPS", "climatology"] <- crpsCli
-## MAT["CRPS", "ensemble"] <- crpsEns
-## MAT["CRPS", "simBMA"] <- crpsSim
-## MAT["CRPS", "BMA"] <- mean(CRPS,na.rm=TRUE)
-
-## MAT["MAE", "climatology"] <- maeCli
-## MAT["MAE", "ensemble"] <- maeEns
-## MAT["MAE", "simBMA"] <- maeSim
-## MAT["MAE", "BMA"] <- maeBMA
-
-## MAT
+ crpsBMA <- crpsSim <- mean(crpsSim)
 
 c(climatology = crpsCli, ensemble = crpsEns, BMA = crpsBMA)
 c(ensemble = crpsEns, BMA = crpsBMA)

@@ -47,8 +47,9 @@ the Pacific Northwest,
   slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
                    observations = slpTest$obs, dates = slpTest$date)
 
-  slpTestBMA <- ensembleBMA( slpTestData, date="2000063000", model="normal")
-  slpTestForc <- quantileForecastBMA( slpTestBMA, slpTestData, 
+  slpTestBMA <- ensembleBMA( slpTestData, date="2000063000",
+        model="normal", trainingRule = list(length = 25, lag = 2))
+  slpTestForc <- quantileForecast( slpTestBMA, slpTestData, 
                                       date="2000063000")
 }
 }

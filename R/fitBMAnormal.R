@@ -1,7 +1,8 @@
-"fitBMAnormal" <-
+`fitBMAnormal` <-
 function(ensembleData, control = controlBMAnormal(),
          exchangeable = NULL)
 {
+
   if (is.null(exchangeable)) exchangeable <- ensembleGroups(ensembleData)
 
   if (length(unique(exchangeable)) == length(exchangeable))
@@ -18,41 +19,63 @@ function(ensembleData, control = controlBMAnormal(),
     dimnames(matEX) <- list(NULL, uniqueEX)
   }
 
+# remove instances missing all forecasts or obs
+
+  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
+  M <- M | is.na(ensembleVerifObs(ensembleData))
+  ensembleData <- ensembleData[!M,]
+ 
+  if (is.null(obs <- ensembleVerifObs(ensembleData)))
+   stop("verification observations required")
+
   nObs <- ensembleNobs(ensembleData)
+
   ensMemNames <- ensembleMemberLabels(ensembleData)
   nForecasts <- length(ensMemNames)
 
-  if(is.null(sd <- control$start$sd)) sd <- sd(ensembleVerifObs(ensembleData))
+  if(is.null(sd <- control$start$sd)) sd <- sd(obs)
 
-  weights <- if (is.null(control$start$weights)) 1 else control$start$weights
+  weights <- if (is.null(control$start$weights) || any(is.na(control$start.weights))) 1 else control$start$weights
   if (length(weights) == 1) weights <- rep(weights,nForecasts)
+  weights <- weights/sum(weights)
   weights <- pmax(weights,1.e-4)
   weights <- weights/sum(weights)
   if (!is.null(names(weights))) weights <- weights[ensMemNames]
 
-  obs <- ensembleVerifObs(ensembleData)
+  MISSmat <- is.na(ensembleForecasts(ensembleData))
+
+  MEAN <- RSQ <- matrix(NA,nObs,nForecasts)
+  dimnames(MEAN) <- dimnames(RSQ) <- NULL
 
 # bias correction (constraints)
 
   switch(control$biasCorrection,
          regression = {
   if (nullX) {
+
     meanFit <- apply(ensembleForecasts(ensembleData), 2, function(x, y) {
     components <- c("coefficients","fitted.values","residuals","model")
-    lm(y~x)[components]},
-    y = ensembleVerifObs(ensembleData))
+    lm(y~x, na.action = na.omit)[components]}, y = obs)
 
     biasCoefs <- lapply(meanFit, function(x) x$coefficients)
     biasCoefs <- as.matrix(data.frame(biasCoefs))
     dimnames(biasCoefs) <- list(NULL, ensMemNames)
+    
+    FIT <- lapply(meanFit, function(x) x$fitted.values)
+    RES <- lapply(meanFit, function(x) x$residuals)
 
-    MEAN <- lapply(meanFit, function(x) x$fitted.values)
+    for (i in 1:nForecasts) {
+       I <- !MISSmat[,i]
+       MEAN[I,i] <- FIT[[i]]
+       RSQ[I,i] <- RES[[i]]
+    }
+
     MEAN <- as.matrix(data.frame(MEAN))
     dimnames(MEAN) <- NULL
 
-    RSQ <- lapply(meanFit, function(x) x$residuals)
     RSQ <- as.matrix(data.frame(RSQ))
     dimnames(RSQ) <- NULL
+
   }
   else {
 
@@ -62,22 +85,19 @@ function(ensembleData, control = controlBMAnormal(),
       x <- as.vector(x)
       y <- rep(y,n)
       components <- c("coefficients","fitted.values","residuals","model")
-      lm(y ~ x)[components]
+      lm(y ~ x, na.action = na.omit)[components]
     }
 
     biasCoefs <- matrix(NA,2,nForecasts)
     dimnames(biasCoefs) <- list(NULL, ensMemNames)
 
-    MEAN <- RSQ <- matrix(NA,nObs,nForecasts)
-    dimnames(MEAN) <- dimnames(RSQ) <- NULL
-
     for (labX in uniqueEX) {
        I <- namEX == labX
-       fit <- lmFunc(ensembleForecasts(ensembleData)[, I, drop = F],
-                     ensembleVerifObs(ensembleData))
+       fit <- lmFunc(ensembleForecasts(ensembleData)[, I, drop = F], obs)
        biasCoefs[, I] <- fit$coefficients
-       MEAN[,I] <- fit$fitted.values
-       RSQ[,I] <- fit$residuals
+       M <- !MISSmat[,I,drop=FALSE]
+       MEAN[,I][M] <- fit$fitted.values
+       RSQ[,I][M] <- fit$residuals
     }
 
   }
@@ -87,7 +107,8 @@ function(ensembleData, control = controlBMAnormal(),
                      },
           additive = {
   if (nullX) {
-    intcpt <- apply(obs - ensembleForecasts(ensembleData), 2, mean)
+
+    intcpt <- apply(obs - ensembleForecasts(ensembleData), 2, mean, na.rm=TRUE)
    
     biasCoefs <- rbind(intcpt,1)
     dimnames(biasCoefs) <- NULL
@@ -95,28 +116,26 @@ function(ensembleData, control = controlBMAnormal(),
     MEAN <- sweep(ensembleForecasts(ensembleData), MARGIN = 2, 
                   FUN = "+", STATS = intcpt) 
     dimnames(MEAN) <- NULL
-    RSQ <- ensembleVerifObs(ensembleData) - MEAN
+    RSQ <- obs - MEAN
     dimnames(RSQ) <- NULL
   }
   else {
 
-    intFunc <- function(x, y, EX) {
+    intFunc <- function(x, y) {
       x <- as.matrix(x)
       n <- ncol(x)
       x <- as.vector(x)
       y <- rep(y,n)
-      uEX <- unique(EX)
-      nEX <- length(uEX)
-      intcpt <- matrix(NA,length(y),nE)
-      for (j in 1:nEX) {
-         intcpt[,j] <- y - apply(x[,EX == uEX[j],drop=FALSE],2,mean)
-      }
-      apply(intcpt, 2, mean)
+      mean(y - x, na.rm = TRUE)
     }
 
-    intcpt <- intFunc( ensembleForecasts(ensembleData), 
-                       ensembleVerifObs(ensembleData), exchangeable)
+    intcpt <- rep(NA, nForecasts)
    
+    for (labX in uniqueEX) {
+       I <- namEX == labX
+       intcpt[I] <- intFunc(ensembleForecasts(ensembleData)[,I,drop=F],obs)
+    }
+
     biasCoefs <- rbind(intcpt,1)
     dimnames(biasCoefs) <- NULL
    
@@ -124,7 +143,7 @@ function(ensembleData, control = controlBMAnormal(),
                   FUN = "+", STATS = intcpt) 
     dimnames(MEAN) <- NULL
 
-    RSQ <- ensembleVerifObs(ensembleData) - MEAN
+    RSQ <- obs - MEAN
     dimnames(RSQ) <- NULL
   }
                      },
@@ -137,6 +156,7 @@ function(ensembleData, control = controlBMAnormal(),
                      }
   )
 
+## may have missing values
   RSQ <- RSQ^2
 
   z <- matrix(0, ncol=nForecasts, nrow=nObs)
@@ -145,19 +165,12 @@ function(ensembleData, control = controlBMAnormal(),
 
   if (control$equalVariance)  sd <- rep(sd, nForecasts)
 
-  xSDeq <- function( z, RSQ, splitEX){
-      zr <- zz <- 0
-      RSQ <- z*RSQ
-      for (I in splitEX) {
-         zr <- zr + sum(apply( RSQ[, I, drop = FALSE], 1, mean))
-         zz <- zz + sum(apply(z[, I, drop = FALSE], 1, mean))
-      }
-      sqrt(zr/zz)
-  }
+## cat("\n")
 
-##  cat("\n")
     while (TRUE) # EM
          {
+
+## MEAN may have missing values
           z <- as.matrix(data.frame(lapply(1:nForecasts, 
                     function(i, y, mu, sd) dnorm(y, mean=mu[,i], sd=sd[i]), 
                       y = obs, mu = MEAN, sd = rep(sd, length = nForecasts))))
@@ -165,34 +178,39 @@ function(ensembleData, control = controlBMAnormal(),
           z <- sweep( z, MARGIN = 2, FUN = "*", STATS = weights)
           dimnames(z) <- list(dimnames(z)[[1]], ensMemNames)
 
-          zsum1 <- apply(z, 1, sum)
+          zsum1 <- apply(z, 1, sum, na.rm = TRUE)
 
           z <- sweep( z, MARGIN = 1, FUN = "/", STATS = zsum1)
 
           old <- loglik
           loglik <- sum(log(zsum1))
  
-          zsum2 <- apply(z, 2, sum)
+          zsum2 <- apply(z, 2, sum, na.rm = TRUE)
  
           weights <- zsum2/sum(zsum2)
 
           if (nullX) {
             if (control$equalVariance) {
-              sd <- sqrt(sum(z*RSQ)/sum(z))
+              sd <- sqrt(sum(z*RSQ, na.rm = TRUE)/sum(z,na.rm=TRUE))
             }
             else {
-              sd <- sqrt(apply(z*RSQ,2,sum)/zsum2)
+              sd <- sqrt(apply(z*RSQ,2,sum,na.rm=TRUE)/zsum2)
             }
           }
           else {
 
 ##          weights <- sapply(split(weights,namEX), mean)[namEX]
-            weights <- drop(crossprod(weights,matEX))[namEX]
+            weights <- drop(crossprod(weights,matEX)[,namEX])
             if (control$equalVariance) {
-              sd <- sqrt(sum((z*RSQ)%*%matEX)/sum(z%*%matEX))
+              sd <- sqrt(sum((z*RSQ)%*%matEX,na.rm=TRUE)/sum(z%*%matEX,na.rm=TRUE))
+              z <- sweep( z, MARGIN= 2, FUN = "/", STATS = nEX) 
+##
+## sd <- sqrt(apply(z*RSQ,2,sum,na.rm=TRUE)/apply(z,2,sum,na.rm=TRUE))
+## sd <- mean(sd)
+##
             }
             else {
-              sd[] <- sqrt(apply(z*RSQ,2,sum)/zsum2)
+              sd[] <- sqrt(apply(z*RSQ,2,sum,na.rm=TRUE)/zsum2)
               sd <- drop(crossprod(sd,matEX))[namEX]
             }
           }
@@ -200,6 +218,7 @@ function(ensembleData, control = controlBMAnormal(),
           nIter <- nIter + 1    
 
           ERROR <- abs(loglik - old)/(1 + abs(loglik)) 
+
 ##          cat("", nIter)
 ##          cat(" ", c(loglik, ERROR, min(weights)), "\n")
           if (nIter > 1 && ERROR < control$eps) break
@@ -211,7 +230,7 @@ function(ensembleData, control = controlBMAnormal(),
 
  structure(
   list(biasCoefs = biasCoefs, sd = sd, weights = weights, 
-       exhangeable = exchangeable, nIter = nIter),
+       exchangeable = exchangeable, nIter = nIter),
   class = "fitBMAnormal")
 }
 

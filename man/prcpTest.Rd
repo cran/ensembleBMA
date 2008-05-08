@@ -55,7 +55,8 @@ using Bayesian model averaging,
   prcpTestData <- ensembleData( forecasts = prcpTest[,labels],
                           dates = prcpTest$date, observations = prcpTest$obs)
 
-  prcpTestFit <- ensembleBMA(prcpTestData, model = "gamma0")
+  prcpTestFit <- ensembleBMA(prcpTestData, model = "gamma0",
+                             trainingRule = list(length = 30, lag = 2))
 }
 }
 \keyword{data}

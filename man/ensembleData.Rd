@@ -1,8 +1,5 @@
 \name{ensembleData}
 \alias{ensembleData}
-\alias{precipitationData}
-\alias{temperatureData}
-\alias{pressureData}
 \alias{ensembleObsLabels}
 \alias{ensembleMemberLabels}
 \alias{ensembleSize}
@@ -21,6 +18,10 @@
 \alias{ensembleGroups.ensembleData}
 \alias{[.ensembleData}
 \alias{matchEnsembleMembers}
+\alias{matchEnsembleMembers.ensembleBMAgamma0}
+\alias{matchEnsembleMembers.ensembleBMAnormal}
+\alias{matchEnsembleMembers.fitBMAgamma0}
+\alias{matchEnsembleMembers.fitBMAnormal}
 \title{
   Create an ensembleData object
 }
@@ -46,8 +47,9 @@ ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL,
   \item{memberLabels}{
      An optional set of labels assigned to the ensemble members.
      The default is to use the column names corresponding to \code{forecasts}.
-     These are important because they are used to match ensemble members
-     with BMA modeling weights and parameters.
+     These are important for BMA modeling
+     because they are used to match ensemble members
+     with BMA  modeling weights and parameters.
   }
   \item{exchangeable}{
      A numeric or character vector or factor indicating groups of 
@@ -59,9 +61,11 @@ ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL,
      exhangeable.
   }
   \item{dates}{
-    Optional vector of dates corresponding to the forecasts.
-    This must be in integer or ordered factor form. If a factor,
-    it must sort in chronological order.
+    A character vector or its factor equivalent specifying the dates corresponding
+    to the forecasts.
+    The character form of each date must be a string with format
+    format YYYYMMDDHH or YYYYMMDD, where YYYY is the year,
+    MM the monthn, DD the day, and (optionally) HH the hour.
    }
   \item{observations}{
     Optional vector of observed weather conditions corresponding 
@@ -116,8 +120,10 @@ Washington, August 2007.
          exchangeable = c(AVN=1, GEM=2, ETA=1, NGM=3, NOGAPS=4))
 
 \dontrun{
- slpTestFit <- ensembleBMAnormal( slpTestData)
- slpTestFitX <- ensembleBMAnormal( slpTestDataX)
+ slpTestFit <- ensembleBMAnormal( slpTestData,
+                                  trainingRule = list(length=25,lag=2))
+ slpTestFitX <- ensembleBMAnormal( slpTestDataX,
+                                   trainingRule = list(length=25,lag=2))
 }
   data(prcpTest)
 
@@ -127,7 +133,8 @@ Washington, August 2007.
                             
 
 \dontrun{
-  prcpTestFit <- ensembleBMAgamma0(prcpTestData)
+  prcpTestFit <- ensembleBMAgamma0(prcpTestData,
+                                   trainingRule = list(length=30,lag=2))
 }
 
 }

@@ -1,7 +1,7 @@
-"ensembleBMA" <-
-function(ensembleData, dates = NULL, trainingRule = list(length=30, lag=2), 
+`ensembleBMA` <-
+function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA), 
          control = NULL, model = NULL, warmStart = FALSE, minCRPS = NULL, 
-         exchangeable = NULL, popData = NULL)
+         exchangeable = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
  mc <- match.call()   
@@ -12,26 +12,21 @@ function(ensembleData, dates = NULL, trainingRule = list(length=30, lag=2),
    m <- pmatch( model, MODELS, nomatch=0)
    model <- if (m) MODELS[m] else "?"
  }
- else model <- "?"
+ else stop("unspecified model")
 
- if (inherits(ensembleData, "temperatureData") || 
-     inherits(ensembleData, "pressureData") ||
-     inherits(ensembleData, "precipitationData") || 
-     model == "normal") {
-   if (!is.null(popData)) {
-     warning("popData not used for normal models")
-     mc$popData <- NULL
-   }
-   if (is.null(minCRPS)) minCRPS <- FALSE
-   mc[[1]] <- as.name("ensembleBMAnormal")
- }  
- else if (inherits(ensembleData, "precipitationData") || model == "gamma0") {
-   if (!is.null(minCRPS) && minCRPS) 
-     warning("minCRPS not available for gamma0 model")
-   mc[[1]] <- as.name("ensembleBMAgamma0")
-   mc$minCRPS <- NULL
- }
- else stop("unrecognized model")
+  switch( model,
+        "normal" = {
+             mc[[1]] <- as.name("ensembleBMAnormal")
+          },
+        "gamma0" = {
+             mc[[1]] <- as.name("ensembleBMAgamma0")
+             if (!is.null(minCRPS)) {
+               if (minCRPS) warning("minCRPS not available for gamma0 model")
+               mc$minCRPS <- NULL
+             }
+         },
+       stop("unrecognized model")
+    )
 
  if (length(attr(ensembleData, "class")) > 2) {
    attr(ensembleData, "class") <- attr(ensembleData, "class")[-1]

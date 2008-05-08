@@ -1,139 +1,115 @@
-"brierScore.ensembleBMAgamma0" <-
-function(fit, ensembleData, thresholds, dates = NULL, popData = NULL, ...) 
+`brierScore.ensembleBMAgamma0` <-
+function(fit, ensembleData, thresholds, dates = NULL, ...) 
 {
+
+ weps <- 1.e-4
  
- M <- matchEnsembleMembers(ensembleData, fit)
+ M <- matchEnsembleMembers(fit,ensembleData)
  nForecasts <- ensembleSize(ensembleData)
  if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
 
-# inverseLogit <- function(x) exp(x)/(1 + exp(x))
+# remove instances missing all forecasts, obs, or dates
 
- inverseLogit <- function(x) {
-              if (x >= 0) {
-                if (-x >= log(.Machine$double.eps)) {
-                  1/(1+exp(-x))
-                }
-                else 1
-              }
-             else {
-                if (x >= log(.Machine$double.xmin)) {
-                  if (x >= log(.Machine$double.eps)) {
-                    x <- exp(x)
-                    x/(1+x)
-                  }
-                  else exp(x)
-                }
-                else 0
-             }
-            }
+ M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
+ M <- M | is.na(ensembleVerifObs(ensembleData))
+ M <- M | is.na(ensembleDates(ensembleData))
+ ensembleData <- ensembleData[!M,]
+ 
+ if (is.null(y <- ensembleVerifObs(ensembleData)))
+  stop("verification observations required")
 
- if (!is.null(popData) && !is.null(dim(popData))) {
-   if (length(dim(popData)) == 2) {
-     popData <- list(popData)
-   }
-   else {
-     popData <- apply(popData, 3, list)
-   }
- }
+#nObs <- length(y)
+ nObs <- ensembleNobs(ensembleData) 
 
- nObs <- ensembleNobs(ensembleData)
+ dateTable <- names(fit$nIter)
 
  if (!is.null(dates)) {
-   K <- match(dates, names(fit$dateTable), nomatch=0)
+
+   dates <- sort(unique(as.character(dates)))
+
+   if (length(dates) > length(dateTable)) 
+     stop("parameters not available for some dates")
+
+   K <- match( dates, dateTable, nomatch=0)
+
    if (any(!K) || !length(K)) 
-     stop("parameters not available for a specified date")
-   dateTable <- fit$dateTable[K]
+     stop("parameters not available for a some dates")
+
  }
  else {
-   dateTable <- fit$dateTable
+
+   dates <- dateTable
    K <- 1:length(dateTable)
+
  }
 
+## match dates in data with dateTable
  if (is.null(ensDates <- ensembleDates(ensembleData))) {
-   if (length(dateTable) > 1) stop("date ambiguity")
-   Dates <- rep(1,nObs)
-   dates <- DATES <- 1
-   L <- 1:nObs
+   if (length(dates) > 1) stop("date ambiguity")
+   Dates <- rep( dates, nObs)
  }
  else {
-   if (!is.null(dates)) {
-     L <- as.logical(match(dates, as.character(ensDates), nomatch=0))
-     if (all(!L) || !length(L)) 
-       stop("specified dates incompatible with ensemble data")
-   }
-   Dates <- as.numeric(ensDates)
-   DATES <- sort(unique(Dates))
-   L <- as.logical(match(as.character(ensDates), names(dateTable), nomatch=0))
+   Dates <- as.character(ensDates)
+   L <- as.logical(match(Dates, dates, nomatch=0))
    if (all(!L) || !length(L)) 
      stop("model fit dates incompatible with ensemble data")
-   dates <- sort(unique(Dates[L]))
+   Dates <- Dates[L]
+   ensembleData <- ensembleData[L,]
+   y <- y[L]
  }
 
- J <- match(dates, DATES, nomatch = 0)
-
- if (any(!J)) stop("specified dates not matched in data")
+ nObs <- length(y)
 
  nForecasts <- ensembleSize(ensembleData) 
 
- if (is.null(y <- ensembleVerifObs(ensembleData)))
-   stop("verification observations required")
-
  ensembleData <- ensembleForecasts(ensembleData)
- x <- sapply(apply( ensembleData, 1, mean), fit$transformation)
+ x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), fit$transformation)
  
  MAT <-  outer(y, thresholds, "<=")
 
-# wrong
-# bsClimatology <- apply((apply(MAT,2,mean) - MAT)^2, 2, mean)
+ bsClimatology <- apply(sweep(MAT, MARGIN = 2, FUN = "-", 
+                        STATS = apply(MAT,2,mean))^2, 2, mean)
 
- bsClimatology <- apply(sweep(MAT[L,,drop=FALSE], MARGIN = 2, FUN = "-", 
-                        STATS = apply(MAT[L,,drop=FALSE],2,mean))^2, 2, mean)
+ bsVoting <- apply((t(apply(ensembleData, 1, function(z, thresholds) 
+                 apply(outer(z, thresholds, "<="), 2, mean, na.rm = TRUE),
+                 thresholds = thresholds)) - MAT)^2, 2, mean, na.rm = TRUE)
 
- bsVoting <- apply((t(apply(ensembleData[L, ], 1, function(z, thresholds) 
-                 apply(outer(z, thresholds, "<="), 2, mean),
-                 thresholds = thresholds)) - MAT[L,])^2, 2, mean)
+# avoid training data and apply to all data
 
- offset <- 1 - fit$trainingRule$lag - (1:fit$trainingRule$length)
+logisticFit <- sapply( thresholds, 
+            function(thresh, x, y) 
+             glm((y <= thresh) ~ x,family=binomial(logit))$coef,
+             x = x, y = y)
+
+ logisticFit[2,][is.na(logisticFit[2,])] <- 0
+
+ MAT <- apply(logisticFit, 2, function(coefs,x) 
+                      sapply(coefs[1] + coefs[2]*x, inverseLogit),
+                      x = x) - outer(y, thresholds, "<=")
+
+ bsLogistic <- apply(MAT^2, 2, mean)
 
  MAT <- matrix( NA, nrow = nObs, ncol = length(thresholds))
-
- for (j in J) {
-# logistic Brier Scores
-
-    if (any(j + offset < 1)) next
-
-    TrainSet <- as.logical(match(Dates, DATES[j+offset], nomatch = 0))
-
-    logisticFit <- sapply( thresholds, 
-            function(thresh, x, y) 
-             glm((y <= thresh) ~ x, family = binomial(logit))$coef,
-             x = x[TrainSet], y = y[TrainSet])
-
-    logisticFit[2,][is.na(logisticFit[2,])] <- 0
-
-    I <- which(as.logical(match(Dates, DATES[j], nomatch = 0)))
-
-    MAT[I,] <- apply(logisticFit, 2, function(coefs,x) 
-                      sapply(coefs[1] + coefs[2]*x, inverseLogit),
-                      x = x[I]) - outer(y[I], thresholds, "<=")
- }
-
- bsLogistic <- apply(MAT[L,,drop=FALSE]^2, 2, mean)
+ dimnames(MAT) <- list(NULL, as.character(thresholds))
 
  l <- 0
- for (j in J) {
+
+ for (d in dates) {
 # BMA Brier Scores
 
     l <- l + 1
     k <- K[l]
 
-    if (any(is.na(WEIGHTS <- fit$weights[,k])))  next
+    WEIGHTS <- fit$weights[,k]
+    if (any(Wmiss <- is.na(WEIGHTS)))  next
 
-    I <- which(as.logical(match(Dates, DATES[j], nomatch = 0)))
+    I <- which(as.logical(match(Dates, d, nomatch = 0)))
 
     for (i in I) {
     
        f <- ensembleData[i,]
+
+       M <- is.na(f) | Wmiss
      
        VAR <- fit$varCoefs[1,k] + fit$varCoefs[2,k]*f
         
@@ -141,26 +117,25 @@ function(fit, ensembleData, thresholds, dates = NULL, popData = NULL, ...)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs[,,k], 2, sum)
 
-       if (is.null(popData)) {
-         PROB0 <- sapply(apply(rbind( 1, fTrans, f == 0)*fit$prob0coefs[,,k],
+       PROB0 <- sapply(apply(rbind( 1, fTrans, f == 0)*fit$prob0coefs[,,k],
                               2,sum), inverseLogit)
-       }
-       else {
-         popi <- rbind(lapply( popData, function(x,i) x[i,], i = i))
-         PROB0 <- sapply(apply(rbind( 1, fTrans, popi)*fit$prob0coefs[,,k],
-                                    2,sum), inverseLogit)
+
+       W <- WEIGHTS
+       if (any(M)) {
+         W <- W + weps
+         W <- W[!M]/sum(W[!M])
        }
 
        MAT[i,] <- sapply( sapply(thresholds,fit$transformation), 
-                          gamma0BMAcdf, 
-          WEIGHTS=WEIGHTS, PROB0=PROB0, MEAN=MEAN, VAR=VAR) -
+                          cdfBMAgamma0, 
+          WEIGHTS=W, PROB0=PROB0[!M], MEAN=MEAN[!M], VAR=VAR[!M]) -
                                                 (y[i] <= thresholds)
 
     }
 
  }
 
- bsBMA <- apply(MAT[L,,drop=FALSE]^2, 2, mean)
+ bsBMA <- apply(MAT^2, 2, mean, na.rm = TRUE)
 
  safeDiv <- function(x,y) {
               yzero <- !y

@@ -8,25 +8,27 @@
    Brier Scores
 }
 \description{
-   Computes climatology, ensemble, logistic, and BMA Brier scores
-   given observation thresholds.
+  Computes Brier Scores for climatology, raw ensemble, and ensemble
+   forecasting models  given observation thresholds.
 }
 \usage{
-brierScore( fit, ensembleData, thresholds, dates = NULL, popData = NULL, 
-                \dots)
+brierScore( fit, ensembleData, thresholds, dates = NULL, \dots)
 }
 \arguments{
   \item{fit}{
-     An ensemble BMA model fit for \code{ensembleData}.
+     A model fit to ensemble forecasting data.
   }
   \item{ensembleData}{
      An \code{ensembleData} object including ensemble
-     forecasts and observations. It need not be the object
-     used to form \code{fit}, although it must include the same
-     ensemble members. If \code{ensembleData} includes dates,
+     forecasts, verification observations and dates. 
+     Missing values (indicated by \code{NA}) are allowed. \\
+     This need not be the data used for the model \code{fit}, 
+     although it must include the same
+     ensemble members.\\
+     If \code{ensembleData} includes dates,
      they must be consistent with \code{fit} and \code{dates}. 
      If \code{ensembleData} does not include dates, they will
-     be inferred from the \code{fit} and the \code{dates} argument.
+     be inferred from \code{fit} and \code{dates}. 
   }
   \item{thresholds}{
      One or more threshold values for the Brier
@@ -36,28 +38,20 @@ brierScore( fit, ensembleData, thresholds, dates = NULL, popData = NULL,
      The dates for which the Brier score will be computed.
      These dates must be consistent with \code{fit} and \code{ensembleData}.
      The default is to use all of the dates in \code{fit}.
+     The dates are ignored if \code{fit} originates from \code{fitBMA}, 
+     which also ignores date information.
   } 
-  \item{popData}{
-    For \emph{gamma0} model fits, there is an additional \code{popData}
-    argument for providing predictors in the logistic regression for 
-    probability of zero precipitation. If \code{popData} was supplied to
-    obtain in the modeling for \code{fit}, then \code{popData} of the
-    same kind must be supplied here.
-  }
   \item{\dots}{
      Included for generic function compatibility.
   }
  }
 }
 \value{
- A data frame giving the climatology 
+ A data frame giving the Brier Scores for climatology 
 (empirical distribution of the verifying observations),
- ensemble (voting), logistic (coefficients determined by logistic regression
- on the training data), and BMA Brier scores for the specified thresholds.
-}
-\details{
-There can be a lot of warnings due to logistic fitting near the
-extremes.
+ensemble (voting), and ensemble foreacsting models
+ for the specified thresholds. \cr
+ A logistic Brier score is also given for the \emph{BMAgamma0} model.
 }
 \seealso{
   \code{\link{ensembleBMA}} 
@@ -85,7 +79,8 @@ Washington, August 2007.
   prcpTestData <- ensembleData( forecasts = prcpTest[ ,labels],
                           dates = prcpTest$date, observations = prcpTest$obs)
 \dontrun{
-  prcpTestFit <- ensembleBMAgamma0(prcpTestData)
+  prcpTestFit <- ensembleBMAgamma0(prcpTestData, trainingRule =
+                                   list(length = 30, lag = 2))
 }
  
   hist(prcpTestData$obs)

@@ -56,7 +56,7 @@ Washington, August 2007.
 
 # median forecast for Jan 13, 2003 at the grid points
 
-  quantileForecastBMA( prcpFit, prcpGridData, date = "20030113")
+  quantileForecast( prcpFit, prcpGridData, date = "20030113")
   
 }
 }

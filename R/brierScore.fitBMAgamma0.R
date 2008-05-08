@@ -1,87 +1,65 @@
-"brierScore.fitBMAgamma0" <-
-function(fit, ensembleData, thresholds, dates = NULL, popData = NULL, ...) 
+`brierScore.fitBMAgamma0` <-
+function(fit, ensembleData, thresholds, dates=NULL, ...) 
 {
+ weps <- 1.e-4
 
- M <- matchEnsembleMembers(ensembleData, fit)
+ if (!is.null(dates)) warning("dates ignored")
+
+ M <- matchEnsembleMembers(fit,ensembleData)
  nForecasts <- ensembleSize(ensembleData)
  if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
 
-# inverseLogit <- function(x) exp(x)/(1 + exp(x))
+# remove instances missing all forecasts or obs
 
- inverseLogit <- function(x) {
-              if (x >= 0) {
-                if (-x >= log(.Machine$double.eps)) {
-                  1/(1+exp(-x))
-                }
-                else 1
-              }
-             else {
-                if (x >= log(.Machine$double.xmin)) {
-                  if (x >= log(.Machine$double.eps)) {
-                    x <- exp(x)
-                    x/(1+x)
-                  }
-                  else exp(x)
-                }
-                else 0
-             }
-            }
-
- if (!is.null(popData) && !is.null(dim(popData))) {
-   if (length(dim(popData)) == 2) {
-     popData <- list(popData)
-   }
-   else {
-     popData <- apply(popData, 3, list)
-   }
- }
-
- nObs <- ensembleNobs(ensembleData)
-
- ensDates <- ensembleDates(ensembleData)
- if (!is.null(dates) && length(dates) > 1 && is.null(ensDates)) 
-   stop("date ambiguity")
+ M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
+ M <- M | is.na(ensembleVerifObs(ensembleData))
+ ensembleData <- ensembleData[!M,]
  
- L <- 1:nObs
-
- if (!is.null(dates) && !is.null(ensDates)) {
-   M <- as.logical(match(as.character(ensDates), dates, nomatch=0))
-   if (!any(M)) stop("dates not matched in data")
-   L <- L[M]
- }
-
- nForecasts <- ensembleSize(ensembleData) 
-
  if (is.null(y <- ensembleVerifObs(ensembleData)))
    stop("verification observations required")
 
+#nObs <- length(y) 
+ nObs <- ensembleNobs(ensembleData)
+
  ensembleData <- ensembleForecasts(ensembleData)
- x <- sapply(apply( ensembleData, 1, mean), fit$transformation)
+ x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), fit$transformation)
  
  MAT <-  outer(y, thresholds, "<=")
 
-# wrong
-# bsClimatology <- apply((apply(MAT,2,mean) - MAT)^2, 2, mean)
+ bsClimatology <- apply(sweep(MAT, MARGIN = 2, FUN = "-", 
+                        STATS = apply(MAT,2,mean))^2, 2, mean)
 
- bsClimatology <- apply(sweep(MAT[L,,drop=FALSE], MARGIN = 2, FUN = "-", 
-                        STATS = apply(MAT[L,,drop=FALSE],2,mean))^2, 2, mean)
-
- bsVoting <- apply((t(apply(ensembleData[L, ], 1, function(z, thresholds) 
+ bsVoting <- apply((t(apply(ensembleData, 1, function(z, thresholds) 
                  apply(outer(z, thresholds, "<="), 2, mean),
-                 thresholds = thresholds)) - MAT[L,])^2, 2, mean)
+                 thresholds = thresholds)) - MAT)^2, 2, mean)
 
- offset <- 1 - fit$trainingRule$lag - (1:fit$trainingRule$length)
+# fit doesn't have a training period so logistic fit to all data
+ logisticFit <- sapply( thresholds, 
+            function(thresh, x, y) 
+             glm((y <= thresh) ~ x,family=binomial(logit))$coef,
+             x = x, y = y)
 
- MAT <- matrix( NA, nrow = nObs, ncol = length(thresholds))
- bsLogistic <- apply(MAT[L,,drop=FALSE]^2, 2, mean)
+ logisticFit[2,][is.na(logisticFit[2,])] <- 0
+
+ MAT <- apply(logisticFit, 2, function(coefs,x) 
+                      sapply(coefs[1] + coefs[2]*x, inverseLogit),
+                      x = x) - outer(y, thresholds, "<=")
+
+ bsLogistic <- apply(MAT^2, 2, mean)
+
+ MAT <- matrix( NA, nObs, length(thresholds))
+ dimnames(MAT) <- list(NULL, as.character(thresholds))
 
 # BMA Brier Scores
 
-  if (!any(is.na(WEIGHTS <- fit$weights))) {
+  WEIGHTS <- fit$weights
+  if (!all(Wmiss <- is.na(WEIGHTS))) {
 
-    for (i in L) {
+    for (i in 1:nObs) {
     
        f <- ensembleData[i,]
+
+       M <- is.na(f) | Wmiss
      
        VAR <- fit$varCoefs[1] + fit$varCoefs[2]*f
         
@@ -89,26 +67,25 @@ function(fit, ensembleData, thresholds, dates = NULL, popData = NULL, ...)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs, 2, sum)
 
-       if (is.null(popData)) {
-         PROB0 <- sapply(apply(rbind( 1, fTrans, f == 0)*fit$prob0coefs,
+       PROB0 <- sapply(apply(rbind( 1, fTrans, f == 0)*fit$prob0coefs,
                               2,sum), inverseLogit)
-       }
-       else {
-         popi <- rbind(lapply( popData, function(x,i) x[i,], i = i))
-         PROB0 <- sapply(apply(rbind( 1, fTrans, popi)*fit$prob0coefs,
-                                    2,sum), inverseLogit)
+
+       W <- WEIGHTS
+       if (any(M)) {
+         W <- W + weps
+         W <- W[!M] / sum(W[!M])
        }
 
        MAT[i,] <- sapply( sapply(thresholds,fit$transformation), 
-                          gamma0BMAcdf, 
-          WEIGHTS=WEIGHTS, PROB0=PROB0, MEAN=MEAN, VAR=VAR) -
+                          cdfBMAgamma0, 
+          WEIGHTS=W, PROB0=PROB0[!M], MEAN=MEAN[!M], VAR=VAR[!M]) -
                                                 (y[i] <= thresholds)
 
     }
 
  }
 
- bsBMA <- apply(MAT[L,,drop=FALSE]^2, 2, mean)
+ bsBMA <- apply(MAT^2, 2, mean)
 
  safeDiv <- function(x,y) {
               yzero <- !y

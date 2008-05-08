@@ -1,5 +1,4 @@
-"crps" <-
-function(fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL, 
-         popData=NULL, ...) 
+`crps` <-
+function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...) 
 UseMethod("crps")
 

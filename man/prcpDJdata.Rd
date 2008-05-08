@@ -56,7 +56,7 @@ Washington, August 2007.
 
 \examples{
 \dontrun{
-prcpForc <- quantileForecastBMA( prcpFit, prcpDJdata, date = "20030113",
+ prcpForc <- quantileForecast( prcpFit, prcpDJdata, date = "20030113",
                                  quantiles = c( .1, .5, .9))
 }
 }

@@ -58,7 +58,8 @@ Washington, August 2007.
                             dates = srft$date, observations = srft$obs,
                             latitude = srft$lat, longitude = srft$lon)
 
-  srftFit <- ensembleBMAnormal(srftData, date = "2004012900")
+  srftFit <- ensembleBMAnormal(srftData, date = "2004012900",
+                 trainingRule = list(length=25, lag=2))
 }
 }
 \keyword{datasets}

@@ -1,3 +1,5 @@
+
+
 \name{controlBMAgamma0}
 \alias{controlBMAgamma0}
 \title{
@@ -81,8 +83,7 @@ Washington, August 2007.
 
   prcpTestFitAlt <- ensembleBMAgamma0(prcpTestData, 
                          trainingRule=list(length=25,lag=2),
-                       control = controlBMAgamma0(maxIter = 10, 
-                              transformation = function(x) x^(1/4),
+       control = controlBMAgamma0(transformation = function(x) x^(1/4),
                               inverseTransformation = function(x) x^4))
 }
 \keyword{models}

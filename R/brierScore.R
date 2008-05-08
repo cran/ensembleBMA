@@ -1,4 +1,4 @@
 "brierScore" <-
-function(fit, ensembleData, thresholds, dates = NULL, popData = NULL, ...) 
+function(fit, ensembleData, thresholds, dates = NULL, ...) 
 UseMethod("brierScore")
 

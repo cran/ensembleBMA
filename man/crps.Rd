@@ -9,29 +9,25 @@
 }
 \description{
    Computes the continuous ranked probability score (CRPS)
-   for ensemble BMA forecasts. 
+   for ensemble forecasting models. 
 }
 \usage{
-crps( fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL, 
-            popData=NULL, \dots)
+crps( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
 }
 \arguments{
   \item{fit}{
-     An ensemble BMA model fit for \code{ensembleData}.
+     A model fit to ensemble forecasting data.
   }
   \item{ensembleData}{
-     An \code{ensembleData} object including ensemble
-     forecasts and observations. It need not be the object
-     used to form \code{fit}, although it must include the same
-     ensemble members. If \code{ensembleData} includes dates,
+     An \code{ensembleData} object that includes ensemble forecasts,
+     verification observations and dates. 
+     Missing values (indicated by \code{NA}) are allowed. \\
+     This need not be the data used for the model \code{fit}, 
+     although it must include the same ensemble members. \\
+     If \code{ensembleData} includes dates,
      they must be consistent with \code{fit} and \code{dates}. 
      If \code{ensembleData} does not include dates, they will
-     be inferred from the \code{fit} and the \code{dates} argument.
-  }
- \item{dates}{
-     The dates for which the CRPS will be computed.
-     These dates must be consistent with \code{fit} and \code{ensembleData}.
-     The default is to use all of the dates in \code{fit}.
+     be inferred from \code{fit} and \code{dates}. 
   }
   \item{nSamples}{
      The number of simulation samples for CRPS via simulation.
@@ -43,12 +39,12 @@ crps( fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL,
   \item{seed}{
      Argument to \code{set.seed} for random number generation in simulation.
   }
-  \item{popData}{ 
-    For \emph{gamma0} model fits, there is an additional \code{popData}
-    argument for providing predictors in the logistic regression for 
-    probability of zero precipitation. If \code{popData} was supplied to
-    obtain in the modeling for \code{fit}, then \code{popData} of the
-    same kind must be supplied here.
+ \item{dates}{
+     The dates for which the CRPS will be computed.
+     These dates must be consistent with \code{fit} and \code{ensembleData}.
+     The default is to use all of the dates in \code{fit}.
+     The dates are ignored if \code{fit} originates from \code{fitBMA}, 
+     which also ignores date information.
   }
   \item{\dots}{
      Included for generic function compatibility.
@@ -56,10 +52,10 @@ crps( fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL,
 }
 \value{
 A vector giving the CRPS for the raw ensemble
-and the BMA probabilistic forecast.
+and the probabilistic forecast.
 }
 \details{
-   This method is generic, and can be applied to all ensemble BMA forecasting
+   This method is generic, and can be applied to all ensemble forecasting
    models. \cr
    Note the model may have been applied to a transformation of the data,
    but that information is included in the input \code{fit}, and
@@ -88,6 +84,10 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516, Department of Statistics, University of
 Washington, August 2007.
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+BMA Forecasting with Missing and Exchangeable Ensemble Members,
+in preparation.
 }
 
 \examples{
@@ -97,7 +97,8 @@ Washington, August 2007.
   slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
                          observations = slpTest$obs, dates = slpTest$date)
 
-  slpTestFit <- ensembleBMAnormal(slpTestData)
+  slpTestFit <- ensembleBMAnormal(slpTestData,
+                  trainingRule = list(length=30, lag=2))
 
   crps( slpTestFit, slpTestData)
 }

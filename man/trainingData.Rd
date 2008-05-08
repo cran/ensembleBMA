@@ -7,20 +7,22 @@
   Extracts the training data corresponding to a given date and training rule.
 }
 \usage{
-trainingData( ensembleData, date, trainingRule = list(length=30, lag=2)) 
+trainingData( ensembleData, date, trainingRule = list( length = NA, lag = NA)) 
 }
 \arguments{
   \item{ensembleData}{
-     An \code{ensembleData} object including ensemble forecasts, observations 
-     and dates. 
-  }
+     An \code{ensembleData} object that includes, ensemble
+     forecasts, observations and dates.
+    }
   \item{date}{
      The date for which the training data is desired. 
   }
   \item{trainingRule}{
-     A list giving the \code{length} and \code{lag} for the training period.
-     The default is to use a 30 day training period for a forecast
-     2 days ahead of the last day in the training period.
+    A list giving the \code{length} and \code{lag} for the training
+    period. The length gives the number of time steps (e.g. days)
+    in the training period, and the lag gives the number of time steps
+    ahead of the most recent date in the training period for which the
+    forecast is valid. There is no default.
   }
 }
 \value{
@@ -33,7 +35,8 @@ the given date relative to \code{ensembleData}.
 }
 \seealso{
   \code{\link{ensembleBMA}}, 
-  \code{\link{fitBMA}} 
+  \code{\link{fitBMA}}, 
+  \code{\link{trainingControl}}
 }
 
 \references{
@@ -51,6 +54,10 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516, Department of Statistics, University of
 Washington, August 2007.
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+BMA Forecasting with Missing and Exchangeable Ensemble Members,
+in preparation.
 }
 
 \examples{
@@ -62,7 +69,7 @@ Washington, August 2007.
                          observations = slpTest$obs, dates = slpTest$date)
 
   trainDat <- trainingData(slpTestData, date = "2000063000",
-                           trainingRule = list(length=30,lag =2))
+                           trainingRule = list(length=30,lag=2))
  
   slpTestFitTD <- fitBMAnormal(trainDat)
 }
