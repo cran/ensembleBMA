@@ -21,7 +21,7 @@ function(fit, ensembleData, values, dates = NULL, ...)
 
  if (!is.null(dates)) {
 
-   dates <- sort(unqiue(as.character(dates)))
+   dates <- sort(unique(as.character(dates)))
 
    if (length(dates) > length(dateTable)) 
      stop("parameters not available for a some dates")

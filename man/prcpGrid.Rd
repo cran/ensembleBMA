@@ -40,8 +40,8 @@ using Bayesian model averaging,
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter, 
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Ensemble Forecasting 
 using Bayesian Model Averaging,
-Technical Report No. 516, Department of Statistics, University of
-Washington, August 2007.
+Technical Report No. 516R, Department of Statistics, University of
+Washington, May 2008.
 }
 
 \examples{

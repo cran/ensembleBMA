@@ -1,5 +1,5 @@
 `ymdhTOjul` <-
-function (YYYYMMDDHH, origin. = c(month = 1, day = 1, year = 2000)) 
+function (YYYYMMDDHH, origin = c(month = 1, day = 1, year = 2000)) 
 {
  if (!exists("chron")) library("chron")
  YYYYMMDDHH <- sapply(YYYYMMDDHH, as.character)
@@ -10,13 +10,7 @@ function (YYYYMMDDHH, origin. = c(month = 1, day = 1, year = 2000))
  year <- as.numeric(sapply( YYYYMMDDHH, substring, first = 1, last = 4))
  month <- as.numeric(sapply( YYYYMMDDHH, substring, first = 5, last = 6))
  day <- as.numeric(sapply( YYYYMMDDHH, substring, first = 7, last = 8))
- julianDate <- julian( month, day, year, origin. = origin.)
- ymdh <- julTOymdh( julianDate, dropHour = (l == 8), origin = origin.)
- I <- ymdh == YYYYMMDDHH
- if (any(!I)) {
-   print(YYYYMMDDHH[!I])
-   stop("improper date(s)")
- }
+ julianDate0 <- julian( month, day, year, origin = origin)
  L <- length(YYYYMMDDHH)
  if (l == 8) {
   hour <- rep( 0, L)
@@ -24,6 +18,13 @@ function (YYYYMMDDHH, origin. = c(month = 1, day = 1, year = 2000))
  else {
    hour <- as.numeric(sapply(YYYYMMDDHH, substring, first = 9, last = 10))
  }
- structure(julianDate + hour/24, origin = origin., nchar = l)
+ julianDate <- structure(julianDate0 + hour/24, origin = origin, nchar = l)
+ ymdh <- julTOymdh( julianDate, dropHour = (l == 8), origin = origin)
+ I <- ymdh == YYYYMMDDHH
+ if (any(!I)) {
+   print(YYYYMMDDHH[!I])
+   stop("improper date(s)")
+ }
+ julianDate
 }
 

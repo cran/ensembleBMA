@@ -184,10 +184,10 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 
 ## c(climatology = maeCli, ensemble = maeEns, BMA = maeBMA)
 
-##matrix( c(maeEnsMean, maeEnsMedian, maeBMAmean, maeBMAmedian), 2, 2,
+##A <- matrix( c(maeEnsMean, maeEnsMedian, maeBMAmean, maeBMAmedian), 2, 2,
 ##        dimnames = list(c("mean", "median"), c("ensemble", "BMA")))
 
-c(ensemble = A[2,1,1], BMA = A[2,2,1])
+##c(ensemble = A[2,1,1], BMA = A[2,2,1])
 c(ensemble = maeEnsMedian, BMA = maeBMAmedian)
 }
 

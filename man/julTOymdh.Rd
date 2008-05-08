@@ -7,13 +7,13 @@
   Converts Julian dates to YYYYMMDDHH or YYYYMMDD character format.
 }
 \usage{
- julTOymdh( julianDates, origin. = NULL, dropHour = NULL)
+ julTOymdh( julianDates, origin = NULL, dropHour = NULL)
 }
 \arguments{
   \item{julianDates}{
      A numeric vector specifying Julian dates.
   }
-  \item{origin.}{
+  \item{origin}{
     A named vector specifying the month, day, and year for the
     origin of the Julian dates. The default is
     \code{c(month = 1, day = 1, year = 2000)}.

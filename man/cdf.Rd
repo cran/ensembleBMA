@@ -75,8 +75,8 @@ using Bayesian model averaging,
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensemble and Bayesian Model Averaging,
-Technical Report No. 516, Department of Statistics, University of
-Washington, August 2007.
+Technical Report No. 516R, Department of Statistics, University of
+Washington, May 2008.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
 BMA Forecasting with Missing and Exchangeable Ensemble Members,

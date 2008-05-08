@@ -40,11 +40,11 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
   Xvar <- ensembleData[!Y0, ]
 
-  LM0 <- function(coefs, Xy, XX, R)(crossprod(R %*% coefs) - 2*sum(coefs*Xy))/2
+##LM0 <- function(coefs, Xy, XX, R)(crossprod(R %*% coefs) - 2*sum(coefs*Xy))/2
 
-  LM1 <- function(coefs, Xy, XX, R) XX %*% coefs - Xy
+##LM1 <- function(coefs, Xy, XX, R) XX %*% coefs - Xy
 
-  LM2 <- function(coefs, Xy, XX, R) XX
+##LM2 <- function(coefs, Xy, XX, R) XX
 
   LM0 <- function(coefs, X, y, XX) {
     r <- y - X %*% coefs

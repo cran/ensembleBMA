@@ -12,7 +12,7 @@ function(forecasts, caseLabels = NULL, memberLabels = NULL,
    memberLabels <- dimnames(forecasts)[[2]]
  }
  if (is.null(memberLabels)) {
-   if (!is.null(exchangeable) && !is.null(names(exhangeable)))
+   if (!is.null(exchangeable) && !is.null(names(exchangeable)))
      stop("exchangeable labels but no member labels")
    memberLabels <- as.character(1:ncol(forecasts))
    dimnames(forecasts) <- list(dimnames(forecasts)[[1]], memberLabels)

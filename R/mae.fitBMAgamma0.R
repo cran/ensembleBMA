@@ -33,9 +33,9 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 
  WEIGHTS <- fit$weights
 
- if (!all(is.na(WEIGHTS))) {
+ if (!all(Wmiss <- is.na(WEIGHTS))) {
 
-    for (i in L) {
+    for (i in 1:nObs) {
     
        f <- ensembleData[i,]
 
@@ -99,8 +99,8 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 ## maeCli <- mean(abs(obs - median(obs)))
 ## maeEns <- mean(abs(obs - apply(ensembleData, 1, median)))
 
- maeCli <- mean(abs(obs - mean(obs[L])))
- maeEns <- mean(abs(obs[L] - apply(ensembleData, 1, mean)))
+ maeCli <- mean(abs(obs - mean(obs)))
+ maeEns <- mean(abs(obs - apply(ensembleData, 1, mean)))
 
  if (is.null(nSamples)) {
 ## maeBMA <- mean(abs(obs - predictiveMean))

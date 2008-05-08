@@ -1,22 +1,27 @@
 `julTOymdh` <-
-function (julianDates, origin. = NULL, dropHour = NULL) 
+function (julianDates, origin = NULL, dropHour = NULL) 
 {
 
  if (!is.null(orig <- attr( julianDates, "origin"))) {
-   if (!is.null(origin.)) stop("origin is not uniquely specified")
-   origin. <- orig
+   if (!is.null(origin)) {
+     bad <- origin["month"] != orig["month"]
+     bad <- origin["day"] != orig["day"] || bad
+     bad <- origin["year"] != orig["year"] || bad
+     if (bad) stop("origin is not uniquely specified")
+   }
+   origin <- orig
  }
- else if (is.null(origin.)) stop("origin is not specified")
+ else if (is.null(origin)) stop("origin is not specified")
 
  hour <- round(24*as.vector(julianDates - floor(julianDates)))
- x <- month.day.year( as.vector(round(julianDates)), origin. = origin.)
+ x <- month.day.year( as.vector(floor(julianDates)), origin = origin)
 
  if (is.null(dropHour)) {
    l <- attr(julianDates, "nchar")
    dropHour <- is.null(l) || l == 8
  }
  
- if (any(hour) || dropHour == FALSE) {
+ if (any(hour != 0) || !dropHour) {
    x <- lapply(c(x[c("year", "month", "day")], list(hour = hour)), 
                  as.character)
  }

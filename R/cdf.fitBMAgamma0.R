@@ -24,7 +24,7 @@ function(fit, ensembleData, values, dates=NULL, ...)
 
  WEIGHTS <- fit$weights
 
- if (!all(is.na(WEIGHTS)))  {
+ if (!all(Wmiss <- is.na(WEIGHTS)))  {
 
     for (i in 1:nObs) {
     

@@ -7,7 +7,7 @@
   Converts YYYYMMDDHH or YYYYMMDD dates to Julian dates.
 }
 \usage{
- ymdhTOjul( YYYYMMDDHH, origin. = c(month = 1, day = 1, year = 2000))
+ ymdhTOjul( YYYYMMDDHH, origin = c(month = 1, day = 1, year = 2000))
 }
 \arguments{
   \item{YYYYMMDDHH}{
@@ -15,7 +15,7 @@
     YYYYMMDDHH or YYYYMMDD, in which YYYY specifies the year, MM the
     month, DD the day, and (optionally) HH the hour.
   }
-  \item{origin.}{
+  \item{origin}{
     A named vector specifying the month, day, and year for the
     origin of the Julian dates. The default is
     \code{c(month = 1, day = 1, year = 2000)}.
