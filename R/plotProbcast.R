@@ -1,13 +1,17 @@
 `plotProbcast` <-
 function(forecast, longitude, latitude, nGrid = 65, 
          type = c("image", "contour", "persp"), ..., 
-         interpolate = FALSE, span = 0.75, map = NULL)
+         interpolate = FALSE, span = 0.75, maps = NULL)
 {
 ## col=rev(rainbow(100,start=0,end=0.85))
 
  FIELDS <- exists("US", mode = "function") 
  FIELDS <- FIELDS && exists("world", mode = "function")
  FIELDS <- FIELDS && exists("image.plot", mode = "function")
+
+ MAPS <- exists("map", mode = "function") 
+ MAPS <- MAPS & exists("area.map", mode = "function") 
+ MAPS <- MAPS & exists("match.map", mode = "function") 
 
  type <- type[1]
 
@@ -31,15 +35,8 @@ function(forecast, longitude, latitude, nGrid = 65,
   }
 
    if (type == "image" && FIELDS) {
-##       image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
-##                  legend.width=.015, legend.shrink=.8,
-##                  xlab="", ylab="", offset=0.02, ...)
-##       image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
-##                  xlab="", ylab="", offset = 0.075, 
-##                  legend.width = 0.015, legend.shrink = 0.8, ...)
        image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
-                  xlab = "", ylab = "", horizontal = TRUE, offset = 0.075,
-                  legend.width = 0.015, legend.shrink = 0.8, ...)
+                  xlab = "", ylab = "", horizontal = TRUE, ...)
   }
   else  {
       do.call( type, c(list(x = lon, y = lat, 
@@ -47,9 +44,9 @@ function(forecast, longitude, latitude, nGrid = 65,
   }
     
 
-if (is.null(map)) map <- type == "image" && FIELDS
+if (is.null(maps)) maps <- type == "image" && FIELDS
 
-if (map) {
+if (maps) {
 
 if(min(lon) <= -124.7 & max(lon) >= -124.7){
   US.map <- 1
@@ -76,6 +73,10 @@ latRange <- range(lat)
 if(US.map==2){
   if (exists("US", mode = "function")) {
     US( xlim = lonRange, ylim = latRange,  add=TRUE, col=1, lwd=2)
+  }
+  if (MAPS) {
+    map('world', 'Canada', interior = TRUE, 
+        xlim = lonRange, ylim = latRange, add=TRUE, col=1, lwd=2 )
   }
 }
  else {

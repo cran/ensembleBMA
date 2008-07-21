@@ -11,8 +11,8 @@
 \usage{
 ensembleBMAnormal(ensembleData, dates = NULL,
                   trainingRule = list(length=NA, lag=NA), 
-                  control = controlBMAnormal(), warmStart = FALSE, 
-                  minCRPS = TRUE, exchangeable = NULL)
+                  control = controlBMAnormal(), exchangeable = NULL,
+                  minCRPS = FALSE)
 }
 \arguments{
   \item{ensembleData}{
@@ -36,25 +36,18 @@ ensembleBMAnormal(ensembleData, dates = NULL,
      A list of control values for the fitting functions. The defaults are
      given by the function \code{controlBMAnormal}.
   }
-  \item{warmStart}{
-      A logical variable indicating whether or not estimation of models 
-      for a sequence of dates or time steps should be initialized with 
-      the weights from the previous date or time step. The default is 
-      for the initialization to be independent of the result at the 
-      previous time step.
-  }
-  \item{minCRPS}{
-     A logical variable indicating whether or not to add a postprocessing
-     step after the BMA fit to choose the standard deviation so as to
-     minimize the CRPS for the training data. The default is to do
-     the CRPS minimization, althought it can add considerable extra cost
-     to the computation.
-  }
  \item{exchangeable}{
      A numeric or character vector or factor indicating groups of
      ensemble members that are exchangeable (indistinguishable).
      The modeling will have equal weights and parameters within each group.
      The default determines exchangeability from \code{ensembleData}.
+  }
+  \item{minCRPS}{
+     A logical variable indicating whether or not to add a postprocessing
+     step after the BMA fit to choose the standard deviation so as to
+     minimize the CRPS for the training data. The default is not to do
+     the CRPS minimization, because it can add considerable extra cost
+     to the computation, particularly when there are many ensemble members.
   }
 }
 \value{

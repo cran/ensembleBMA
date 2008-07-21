@@ -1,10 +1,12 @@
 `ensembleBMAnormal` <-
 function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA), 
-         control = controlBMAnormal(), warmStart = FALSE, minCRPS = TRUE,
-         exchangeable = NULL)
+         control = controlBMAnormal(), exchangeable = NULL, minCRPS = FALSE)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
+
  call <- match.call()
+
+ warmStart <- FALSE
 
  trainingRule <- as.list(trainingRule)
 
@@ -100,14 +102,16 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA),
  trainTable <- rep(0, nDates)
  names(trainTable) <- dates
 
- nIter <- rep(0, nDates)
- names(nIter) <- dates
+ nIter <- loglikelihood <- rep(0, nDates)
+ names(nIter) <- names(loglikelihood) <- dates
 
  L <- length(juliandates)
  twin <- 1:trainingRule$length
 
 ## temp <- data.frame(julian = julianDATES,date = DATES)
 ## print(temp)
+
+ K <- 1:nForecasts
 
  cat("\n")
 
@@ -126,13 +130,28 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA),
       if (!any(D)) stop("this should not happen")
       cat("modeling for date", dates[i], "...")
 
+      kNA <- apply(ensembleForecasts(ensembleData[D,]), 2, 
+                   function(x) all(is.na(x)))
+
+      if (any(kNA)) {
+        if (!is.null(x <- exchangeable)) x <- exchangeable[-K[kNA]]
+        fit <- fitBMAnormal(ensembleData[D,-K[kNA]], control = control,
+                            exchangeable = x)
+      }
+      else {
+        fit <- fitBMAnormal(ensembleData[D,], control = control,
+                            exchangeable = exchangeable)
+      }
   
-      fit <- fitBMAnormal(ensembleData[D,], control = control,
-                          exchangeable = exchangeable)
       if (minCRPS) {
 
         CRPSobjective <- function(SD) {
-            crpsNormal(SD, fit$weights, fit$biasCoefs, ensembleData[D,])
+            if (any(kNA)) {
+              crpsNormal(SD, fit$weights, fit$biasCoefs, ensembleData[D,-K[kNA]])
+            }
+            else {
+              crpsNormal(SD, fit$weights, fit$biasCoefs, ensembleData[D,])
+            }
          }
 
         if (control$equalVariance) {
@@ -151,22 +170,24 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA),
        l <- j ## last model fit
        trainTable[i] <- length(unique(Dates[D]))
        nIter[i] <- fit$nIter
+       loglikelihood[i] <- fit$loglikelihood
        if (warmStart) control$start$weights <- weights[,i]
        cat("\n")
      }
    else {
-     trainTable[i] <- -trainTable[i-1]
-     nIter[i] <- -nIter[i-1]
+     trainTable[i] <- -abs(trainTable[i-1])
+     nIter[i] <- -abs(nIter[i-1])
+     loglikelihood[i] <- loglikelihood[i-1]
    }
 
-   biasCoefs[,,i] <- fit$biasCoefs
-   weights[,i] <- fit$weights
+   biasCoefs[,K[!kNA],i] <- fit$biasCoefs
+   weights[K[!kNA],i] <- fit$weights
 
    if (control$equalVariance) {
      sd[i] <- fit$sd 
    }
    else {
-     sd[,i] <- as.vector(fit$sd)
+     sd[K[!kNA],i] <- as.vector(fit$sd)
    }
 
  }

@@ -2,7 +2,7 @@
 function(fit, dates = NULL, ...) 
 {
 
- dateTable <- names(fit$nIter)
+ dateTable <- dimnames(fit$weights)[[2]]
 
  if (is.null(dates)) dates <- dateTable
 

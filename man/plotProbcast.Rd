@@ -11,7 +11,7 @@
 \usage{
 plotProbcast( forecast, longitude, latitude, nGrid = 65,
                  type = c("image", "contour", "persp"), \dots, 
-                 interpolate = FALSE, span = 0.75, map = NULL) 
+                 interpolate = FALSE, span = 0.75, maps = NULL) 
 }
 \arguments{
 \item{forecast}{
@@ -47,7 +47,7 @@ plotProbcast( forecast, longitude, latitude, nGrid = 65,
    The default value is \code{0.75}, which is 
    the default for \code{loess}.
  }
-\item{map}{
+\item{maps}{
    A logical value indicating whether or not to include
    a map outline. The default is to include an outline
    if \code{type = "image"} and the \code{fields} library 

@@ -283,7 +283,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     g <- array(0,dim(v))
     rate <- m/v
     g <- dgamma(Y, shape=rate*m, rate=rate, log=TRUE)
-    gmax <- max(g)
+    gmax <- apply(g, 1, max)
     g <- p1 * exp(g - gmax) # safeguard for over/underflow
     g  <- sweep(g, MARGIN=2, FUN= "*", STATS = w)
 ##  print(-sum(gmax+log(apply(g,1,sum))))
@@ -312,7 +312,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     G[!miss] <- dgamma(matrix(Y,nObs,nFor)[!miss],
                 shape=(rate*m)[!miss], rate=rate[!miss], log=TRUE)
 
-    gmax <- max(G, na.rm = TRUE)
+    gmax <- apply( G, 1, max, na.rm = TRUE)
     G <- p1 * exp(G - gmax) # safeguard for over/underflow
     G  <- G * W
     -sum(gmax+log(apply(G, 1, sum, na.rm = TRUE)), na.rm = TRUE)
@@ -368,6 +368,8 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   objold <- 0
 
  # main EM algorithm
+ 
+ newLL <- 0
 
   while(TRUE)
   {
@@ -387,15 +389,25 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
  RATE <- MEAN/VAR
  SHAPE <- RATE*MEAN
- 
+
  for (i in 1:nEsteps) {
 
     z[!Y0,][!miss] <- dgamma(matrix(obs, nPrecip, nForecasts)[!miss], 
                              shape=SHAPE[!miss], rate=RATE[!miss], log=TRUE) 
-    z[!Y0,] <- sweep(z[!Y0,], MARGIN=1, FUN="-", 
-                     STATS=apply(z[!Y0,],1,max,na.rm=TRUE))  
-    z[!Y0,] <- sweep(PROB1, MARGIN = 2, FUN="*", STATS=weights)*exp(z[!Y0,])
-    z[Y0,] <- sweep(PROB0, MARGIN=2, FUN="*", STATS=weights)
+    zmax = apply( z[!Y0,], 1, max, na.rm=TRUE) 
+    z[!Y0,] <- sweep( z[!Y0,], MARGIN=1, FUN="-", STATS=zmax)  
+    z[!Y0,] <- sweep( PROB1, MARGIN = 2, FUN="*", STATS=weights)*exp(z[!Y0,])
+    z[Y0,] <- sweep( PROB0, MARGIN=2, FUN="*", STATS=weights)
+
+    oldLL <- newLL
+
+##  if (nIter > 0) {
+##    opt <-  sum( zmax + log( apply( z[!Y0,], 1, sum, na.rm = TRUE))) 
+##     print(c(opt, optimResult$value))
+##   }
+
+    newLL <-  sum( zmax + log( apply( z[!Y0,], 1, sum, na.rm = TRUE))) 
+    newLL <- newLL + sum( log( apply( z[Y0,], 1, sum, na.rm=TRUE)))
  
     # normalize the latent variables
     z <- z/apply(z, 1, sum, na.rm = TRUE)
@@ -434,14 +446,17 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
 #   if (weps < tol && veps < tol) break
 
-    nIter <- nIter + 1
+    if (nIter > 0) {
+      error <- abs(oldLL - newLL)/(1 + abs(newLL))
+     if (error < eps) break
+    }
 
-    if (nIter > 1 & ERROR < eps) break
+    nIter <- nIter + 1
     if (nIter >= maxIter) break
   }
 
 ## if (nIter >= maxIter && ERROR >= eps && max(c(veps,weps)) >= tol)
-  if (nIter >= maxIter && ERROR >= eps)
+  if (nIter >= maxIter && error > eps)
     warning("iteration limit reached")
 
  dimnames(biasCoefs) <- list(NULL, ensMemNames)
@@ -450,7 +465,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
   structure(
   list(prob0coefs = prob0coefs, biasCoefs = biasCoefs, varCoefs = varCoefs,
-       weights = weights, nIter = nIter, 
+       weights = weights, nIter = nIter, loglikelihood = newLL,
        transformation = control$transformation,
        inverseTransformation = control$inverseTransformation),
        class = "fitBMAgamma0")

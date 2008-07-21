@@ -83,7 +83,7 @@ function(fit, ensembleData, nSamples = NULL, seed=NULL, dates=NULL, ...)
 
        for (f1 in (1:nForecasts)[!M]) 
          {
-          for (f2 in 1:nForecasts[!M]) 
+          for (f2 in (1:nForecasts)[!M]) 
              {
               tvar <- VAR[f1] + VAR[f2]  # total variance
              tsd <- sqrt(tvar)          # total standard deviation

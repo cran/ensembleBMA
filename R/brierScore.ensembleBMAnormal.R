@@ -16,13 +16,15 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
  
  if (is.null(y <- ensembleVerifObs(ensembleData)))
    stop("verification observations required")
+## remove instances missing all forecasts
 
-#nObs <- length(y)
- nObs <- ensembleNobs(ensembleData)
-
+ M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
+ M <- M | is.na(ensembleVerifObs(ensembleData))
+ ensembleData <- ensembleData[!M,]
+ 
 ## match specified dates with dateTable in fit
 
- dateTable <- names(fit$nIter)
+ dateTable <- dimnames(fit$weights)[[2]]
 
  if (!is.null(dates)) {
 
@@ -31,7 +33,7 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
    if (length(dates) > length(dateTable)) 
      stop("parameters not available for some dates")
 
-   K <- match(  dates, dateTable, nomatch=0)
+   K <- match( dates, dateTable, nomatch=0)
 
    if (any(!K) || !length(K)) 
      stop("parameters not available for some dates")
@@ -42,27 +44,33 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
    dates <- dateTable
    K <- 1:length(dateTable)
 
- }
+  }
 
- dateTable
+ ensDates <- ensembleDates(ensembleData)
 
 ## match dates in data with dateTable
- if (is.null(ensDates <- ensembleDates(ensembleData))) {
-
+ if (is.null(ensDates) || all(is.na(ensDates))) {
    if (length(dates) > 1) stop("date ambiguity")
-
+   nObs <- nrow(ensembleData)
    Dates <- rep( dates, nObs)
  }
  else {
+## remove instances missing dates
+   if (any(M <- is.na(ensDates))) {
+     ensembleData <- ensembleData[!M,]
+     ensDates <- ensembleDates(ensembleData)
+   }
    Dates <- as.character(ensDates)
-   L <- as.logical(match(Dates, dates, nomatch=0))
+   L <- as.logical(match( Dates, dates, nomatch=0))
    if (all(!L) || !length(L)) 
      stop("model fit dates incompatible with ensemble data")
    Dates <- Dates[L]
    ensembleData <- ensembleData[L,]
-   obs <- obs[L]
-   nObs <- length(obs)
+   nObs <- length(Dates)
  }
+
+ y <- ensembleVerifObs(ensembleData)
+ nForecasts <- ensembleSize(ensembleData) 
 
  ensembleData <- ensembleForecasts(ensembleData)
  

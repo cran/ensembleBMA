@@ -1,7 +1,6 @@
 `ensembleBMA` <-
 function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA), 
-         control = NULL, model = NULL, warmStart = FALSE, minCRPS = NULL, 
-         exchangeable = NULL)
+         control = NULL, model = NULL, exchangeable = NULL, minCRPS = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
  mc <- match.call()   

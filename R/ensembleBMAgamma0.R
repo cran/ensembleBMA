@@ -1,10 +1,12 @@
 `ensembleBMAgamma0` <-
 function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
-         control = controlBMAgamma0(), warmStart = FALSE, 
-         exchangeable = NULL)
+         control = controlBMAgamma0(), exchangeable = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
+
  call <- match.call()
+
+ warmStart <- FALSE
 
  trainingRule <- as.list(trainingRule)
 
@@ -86,21 +88,20 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
                       dimnames = list(NULL, ensMemNames, dates))
  biasCoefs <- array( NA, c(2, nForecasts, nDates),
                       dimnames = list(NULL, ensMemNames, dates))
- varCoefs <- array( NA, c(2, nDates), dimnames = dates)
+ varCoefs <- array( NA, c(2, nDates), dimnames = list(NULL, dates))
  weights <- array( NA, c(nForecasts, nDates),
                       dimnames = list(ensMemNames, dates))
 
  trainTable <- rep(0, nDates)
  names(trainTable) <- dates
 
- nIter <- rep(0, nDates)
- names(nIter) <- dates
+ nIter <- loglikelihood <- rep(0, nDates)
+ names(nIter) <- names(loglikelihood) <- dates
+
+ K <- 1:nForecasts
 
  L <- length(juliandates)
  twin <- 1:trainingRule$length
-
-## temp <- data.frame(julian = julianDATES,date = DATES)
-## print(temp)
 
  cat("\n")
  l <- 0
@@ -120,24 +121,36 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
 
       cat("modeling for date", dates[i], "...")
 
-      fit <- fitBMAgamma0(ensembleData[D,], control = control,
-                          exchangeable = exchangeable)
+      kNA <- apply(ensembleForecasts(ensembleData[D,]), 2, 
+                   function(x) all(is.na(x)))
+
+      if (any(kNA)) {
+        if (!is.null(x <- exchangeable)) x <- exchangeable[-K[kNA]]
+        fit <- fitBMAgamma0(ensembleData[D,-K[kNA]], control = control,
+                            exchangeable = x)
+      }
+      else {
+        fit <- fitBMAgamma0(ensembleData[D,], control = control,
+                            exchangeable = exchangeable)
+      }
 
       l <- j ## last model fit
       trainTable[i] <- length(unique(Dates[D]))
       nIter[i] <- fit$nIter 
+      loglikelihood[i] <- fit$loglikelihood
       if (warmStart) control$start$weights <- weights[,i]
       cat("\n")
      }
    else {
-     trainTable[i] <- -trainTable[i-1]
-     nIter[i] <- -nIter[i-1]
+     trainTable[i] <- -abs(trainTable[i-1])
+     nIter[i] <- -abs(nIter[i-1])
+     loglikelihood[i] <- loglikelihood[i-1]
    }
 
-   prob0coefs[,,i] <- fit$prob0coefs
-   biasCoefs[,,i] <- fit$biasCoefs
+   prob0coefs[,K[!kNA],i] <- fit$prob0coefs
+   biasCoefs[,K[!kNA],i] <- fit$biasCoefs
    varCoefs[,i] <- fit$varCoefs
-   weights[,i] <- fit$weights
+   weights[K[!kNA],i] <- fit$weights
 
  }
 

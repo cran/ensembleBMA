@@ -230,7 +230,8 @@ function(ensembleData, control = controlBMAnormal(),
 
  structure(
   list(biasCoefs = biasCoefs, sd = sd, weights = weights, 
-       exchangeable = exchangeable, nIter = nIter),
+       exchangeable = exchangeable, nIter = nIter, 
+       loglikelihood = loglik),
   class = "fitBMAnormal")
 }
 

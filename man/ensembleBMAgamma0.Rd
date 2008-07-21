@@ -11,8 +11,7 @@
 \usage{
 ensembleBMAgamma0( ensembleData, dates = NULL, 
                    trainingRule = list(length = NA, lag = NA), 
-                   control = controlBMAgamma0(), warmStart = FALSE, 
-                   exchangeable = NULL)
+                   control = controlBMAgamma0(), exchangeable = NULL)
 }
 \arguments{
   \item{ensembleData}{
@@ -35,13 +34,6 @@ ensembleBMAgamma0( ensembleData, dates = NULL,
   \item{control}{
      A list of control values for the fitting functions. The defaults are
      given by the function \code{controlBMAgamma0}.
-  }
-  \item{warmStart}{
-      A logical variable indicating whether or not estimation of models 
-      for a sequence of dates or time steps should be initialized with 
-      the weights from the previous date or time step. The default is 
-      for the initialization to be independent of the result at the 
-      previous time step.
   }
   \item{exchangeable}{
      A numeric or character vector or factor indicating groups of

@@ -17,6 +17,7 @@ function (YYYYMMDDHH, origin = c(month = 1, day = 1, year = 2000))
  }
  else {
    hour <- as.numeric(sapply(YYYYMMDDHH, substring, first = 9, last = 10))
+   if (any(hour >= 24)) stop("hour should be less than 24")
  }
  julianDate <- structure(julianDate0 + hour/24, origin = origin, nchar = l)
  ymdh <- julTOymdh( julianDate, dropHour = (l == 8), origin = origin)

@@ -13,7 +13,15 @@ function (julianDates, origin = NULL, dropHour = NULL)
  }
  else if (is.null(origin)) stop("origin is not specified")
 
- hour <- round(24*as.vector(julianDates - floor(julianDates)))
+
+ eps <- abs(round(julianDates) - julianDates)
+
+ if (any(eps > 0)) {
+   julianDates <- round(julianDates*24)/24
+   hour <- round(24*as.vector(julianDates - floor(julianDates)))
+ }
+ else hour <- 0
+
  x <- month.day.year( as.vector(floor(julianDates)), origin = origin)
 
  if (is.null(dropHour)) {
