@@ -61,9 +61,11 @@ ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL,
      exhangeable.
   }
   \item{dates}{
-    A character vector or its factor equivalent specifying the dates corresponding
-    to the forecasts.
-    The character form of each date must be a string with format
+    A numeric or character vector or factor specifying the dates
+    corresponding to the forecasts. If numeric, it is interpreted
+    as a Julian date if it has an \code{origin} attribute specifying
+    the month, day, and year, e.g. \code{c(month = 1, day = 1, year = 2000)}.
+    Otherwise the character form of each date must be a string with format
     format YYYYMMDDHH or YYYYMMDD, where YYYY is the year,
     MM the monthn, DD the day, and (optionally) HH the hour.
    }
@@ -79,12 +81,11 @@ ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL,
     Optional vector of longitudes of the forecast locations.
    }
   \item{...}{
-    A named list of additional attributes such as station name and station type.
-   }
+    A named list of additional attributes such as station name and station type.   }
 }
 \value{
-   An \code{ensembleData} object, incorporating forecasts and (optionally) observations
-   with the associated dates.
+  An \code{ensembleData} object, incorporating forecasts and
+  (optionally) observations with the associated dates.
 }
 \details{
     Methods for \code{ensembleData} objects include \code{ensembleSize},

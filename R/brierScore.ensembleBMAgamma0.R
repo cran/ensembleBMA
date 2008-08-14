@@ -67,15 +67,17 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
  ensembleData <- ensembleForecasts(ensembleData)
 
  x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), fit$transformation)
+
+ MAT <-  t(outer(y, thresholds, "<="))
+
+ bsClimatology <- apply(sweep(MAT, MARGIN = 1, FUN = "-", 
+                        STATS = apply(MAT,1,mean))^2, 1, mean)
  
- MAT <-  outer(y, thresholds, "<=")
-
- bsClimatology <- apply(sweep(MAT, MARGIN = 2, FUN = "-", 
-                        STATS = apply(MAT,2,mean))^2, 2, mean)
-
- bsVoting <- apply((t(apply(ensembleData, 1, function(z, thresholds) 
+ bsVotingEns <- apply(ensembleData, 1, function(z, thresholds) 
                  apply(outer(z, thresholds, "<="), 2, mean, na.rm = TRUE),
-                 thresholds = thresholds)) - MAT)^2, 2, mean, na.rm = TRUE)
+                 thresholds = thresholds)
+
+ bsVoting <- apply((bsVotingEns - MAT)^2, 1, mean, na.rm = TRUE)
 
 # avoid training data and apply to all data
 

@@ -20,14 +20,14 @@
     The default is \code{attr(julianDates, "origin")} if it exists.
   }
   \item{dropHour}{
-    A logical vector indicating whether of not the hour information
+    A logical value indicating whether of not the hour information
     should be drop from the specifiation of the dates if none of the
     Julian dates are fractional.
     The default is \code{attr(julianDates, "dropHour")} if it exists.
   }
 }
 \value{
-    A character vector of dates in the form
+    A character vector or numeric equivalent of dates in the form
     YYYYMMDDHH or YYYYMMDD, in which YYYY specifies the year, MM the
     month, DD the day, and (optionally) HH the hour
     corresponding to the Julian input.

@@ -44,7 +44,6 @@ brierScore( fit, ensembleData, thresholds, dates = NULL, \dots)
   \item{\dots}{
      Included for generic function compatibility.
   }
- }
 }
 \value{
  A data frame giving the Brier Scores for climatology 
