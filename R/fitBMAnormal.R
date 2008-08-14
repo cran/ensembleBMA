@@ -93,7 +93,7 @@ function(ensembleData, control = controlBMAnormal(),
 
     for (labX in uniqueEX) {
        I <- namEX == labX
-       fit <- lmFunc(ensembleForecasts(ensembleData)[, I, drop = F], obs)
+       fit <- lmFunc(ensembleForecasts(ensembleData)[, I, drop = FALSE], obs)
        biasCoefs[, I] <- fit$coefficients
        M <- !MISSmat[,I,drop=FALSE]
        MEAN[,I][M] <- fit$fitted.values
@@ -133,7 +133,7 @@ function(ensembleData, control = controlBMAnormal(),
    
     for (labX in uniqueEX) {
        I <- namEX == labX
-       intcpt[I] <- intFunc(ensembleForecasts(ensembleData)[,I,drop=F],obs)
+       intcpt[I] <- intFunc(ensembleForecasts(ensembleData)[,I,drop=FALSE],obs)
     }
 
     biasCoefs <- rbind(intcpt,1)

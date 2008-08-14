@@ -2,7 +2,7 @@
 function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA), 
          control = controlBMAnormal(), exchangeable = NULL, minCRPS = FALSE)
 {
- if (!inherits(ensembleData,"ensembleData")) stoU113p("not an ensembleData object")
+ if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
 
  call <- match.call()
 
@@ -87,7 +87,7 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA, lag=NA),
      dates <- sapply( dates, function(s) paste(s, "00", sep =""))
    }
    else if (ld < lD) {
-     dates <- sapply( dates, function(s) subtring(s, 1, 8))
+     dates <- sapply( dates, function(s) substring(s, 1, 8))
    }
 
    if (any(dates < julTOymdh(min(Jdates),origin=origin,dropHour=(lD == 8)))) {

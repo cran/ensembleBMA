@@ -201,13 +201,13 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
     for (labX in uniqueX) {
        I <- namX == labX
-       fit <- logisticFunc(ensembleData[, I, drop = F], Y0)
+       fit <- logisticFunc(ensembleData[, I, drop = FALSE], Y0)
        coefs <- fit$coefficients
        if (any(!(fit$coefficients[2] <= 0 && fit$coefficients[3] >= 0))) {
          fit <- LRopt0(fit)
        }
        prob0coefs[,I] <- fit$coefficients
-       miss <- is.na(ensembleData[, I, drop = F])
+       miss <- is.na(ensembleData[, I, drop = FALSE])
        miss <- as.vector(as.matrix(miss))
        PROB0[,I][!miss] <- fit$fitted.values
     }
@@ -272,11 +272,11 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     i <- 1
     for (labX in uniqueX) {
        I <- namX == labX
-       fit <- lmFunc(ensembleData[, I, drop = F], obs)
+       fit <- lmFunc(ensembleData[, I, drop = FALSE], obs)
        if (!(fit$coefficients[1] >=0 && fit$coefficients[2] >= 0)) 
          fit <- LMopt0(fit)
        biasCoefs[, I] <- fit$coefficients
-       miss <- is.na(ensembleData[, I, drop = F])
+       miss <- is.na(ensembleData[, I, drop = FALSE])
        miss <- as.vector(as.matrix(miss))
        MEAN[,I][!miss] <- fit$fitted.values
     }
