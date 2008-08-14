@@ -34,6 +34,8 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   Y0 <- obs == 0
   n0obs <- sum(Y0)
 
+  if (sum(Y0) < 2) stop("less than 2 nonzero obs")
+
 # untransformed weather data for variance model  
 
   ensembleData <- ensembleForecasts(ensembleData)
@@ -228,8 +230,17 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
   if (nullX) {
     meanFit <- apply(ensembleData, 2, function(x, y) {
-              components <- c("coefficients","fitted.values","model","formula")
-                     lm( y~x, na.action=na.omit)[components]}, y = obs)
+              components <- c("coefficients","fitted.values","model")
+                     c(lm( y~x, na.action=na.omit)[components],
+                       list(formula = as.formula(y~x)))}, y = obs)
+
+    meanFit <- lapply(meanFit, function(z) {
+                                coefs <- z$coefficients
+                                if (is.na(coefs[1])) stop("NA intercept")
+          # second coefiecient can be NA if all forecasts are 0
+                                if (is.na(coefs[2])) z$coefficients[2] <- 0
+                                z
+                               })
 
     meanCheck1 <- unlist(lapply(meanFit, function(z) {
                                 coefs <- z$coefficients

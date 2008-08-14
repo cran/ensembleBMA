@@ -53,11 +53,16 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
 
 ## determine the modeling dates
 
- dl <- nchar(DATES[1])
+ DATEShh <- getHH(DATES)
+
+ if (length(DATEShh) != 1) stop("forecast hour in data should be unique")
+
+ if (!(lD <- unique(sapply(DATES,nchar)))) 
+   stop("all dates in data should have same character length")
 
  if (nullDates <- is.null(dates)) {
 
-   dates <- julTOymdh(Jdates, origin = origin, dropHour = (dl == 8))
+   dates <- julTOymdh(Jdates, origin = origin, dropHour = (lD == 8))
 
  }
  else {
@@ -67,19 +72,32 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
    if (!all(dateCheck(dates))) 
      stop("improperly specified date(s) in dates argument")
 
-   if (nchar(dates[1]) != dl)
-     stop("format of dates argument does not match date format in data")
+    datesHH <- getHH(dates)
 
-   if (any(dates < julTOymdh(min(Jdates),origin=origin,dropHour=(dl == 8)))) {
+    if (length(datesHH) != 1) stop("forecast hour in dates should be unique")
+   
+    if (datesHH != DATEShh) stop("specified dates incompatible with data")
+
+    if (!(ld <- unique(sapply(dates,nchar)))) 
+      stop("all specified dates should have same character length")
+
+    if (ld < lD) {
+      dates <- sapply( dates, function(s) paste(s, "00", sep =""))
+    }
+    else if (ld < lD) {
+      dates <- sapply( dates, function(s) subtring(s, 1, 8))
+    }
+
+    if (any(dates < julTOymdh(min(Jdates),origin=origin,dropHour=(lD == 8)))) {
      stop("some dates precede the first training period")
    }
 
-   if (any(dates > julTOymdh(max(Jdates),origin=origin,dropHour=(dl == 8)))) {
+   if (any(dates > julTOymdh(max(Jdates),origin=origin,dropHour=(lD == 8)))) {
      warning("there are dates beyond the last training period")
    }
 
  }
-
+ 
  juliandates <- ymdhTOjul( dates, origin = origin)
 
  nDates <- length(dates)

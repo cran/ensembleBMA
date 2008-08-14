@@ -1,6 +1,5 @@
 \name{prcpDJdata}
 \alias{prcpDJdata}
-\alias{prcpDJdata}
 \title{
    Precipitation Data
 }

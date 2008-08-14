@@ -1,5 +1,6 @@
 \name{dateCheck}
 \alias{dateCheck}
+\alias{getHH}
 \title{
     Checks date format.
 }
