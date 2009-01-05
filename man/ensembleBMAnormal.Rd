@@ -1,5 +1,6 @@
 \name{ensembleBMAnormal}
 \alias{ensembleBMAnormal}
+\alias{[.ensembleBMAnormal}
 \alias{crpsNormal}
 \title{
     BMA mixture of normals modeling
@@ -9,8 +10,7 @@
    Allows specification of a training rule and forecasting dates.
 }
 \usage{
-ensembleBMAnormal(ensembleData, dates = NULL,
-                  trainingRule = list(length=NA, lag=NA), 
+ensembleBMAnormal(ensembleData, trainingDays, dates = NULL, 
                   control = controlBMAnormal(), exchangeable = NULL,
                   minCRPS = FALSE)
 }
@@ -20,17 +20,14 @@ ensembleBMAnormal(ensembleData, dates = NULL,
      verification observations and dates. 
      Missing values (indicated by \code{NA}) are allowed.
   }
+  \item{trainingDays}{
+    An integer giving the number of time steps (e.g. days)
+    in the training period. There is no default.
+  }
   \item{dates}{
      The dates for which BMA forecasting models are desired. 
      By default, this will include all
      dates consistent with the training rule.
-  }
-  \item{trainingRule}{
-    A list giving the \code{length} and \code{lag} for the training
-    period. The length gives the number of time steps (e.g. days)
-    in the training period, and the lag gives the number of time steps
-    ahead of the most recent date in the training period for which the
-    forecast is valid. There is no default.
   }
   \item{control}{
      A list of control values for the fitting functions. The defaults are
@@ -51,13 +48,10 @@ ensembleBMAnormal(ensembleData, dates = NULL,
   }
 }
 \value{
-A list with the following output components:
-  \item{dateTable}{
-    The table of observations corresponding to the dates in 
-    \code{ensembleData} in chronological order.
-  }
-  \item{trainingRule}{
-    The training rule specified as input.
+ A list with the following output components:
+  \item{training}{
+    A list containing information on the training length and lag and
+    the number of instances used for training for each modeling day.
   }
  \item{biasCoefs}{
     The fitted bias-correction coefficients for each ensemble member at each date.
@@ -81,7 +75,6 @@ A list with the following output components:
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{controlBMAnormal}}, 
-  \code{\link{trainingControl}}, 
   \code{\link{fitBMAnormal}},
   \code{\link{cdf}},
   \code{\link{quantileForecast}},
@@ -99,30 +92,35 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-BMA Forecasting with Missing and Exchangeable Ensemble Members,
-in preparation.
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
-\dontrun{
-  data(slpTest)
+  data(ensBMAtest)
 
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-\dontrun{
-  slpTestFit <- ensembleBMA( slpTestData, model = "normal",
-                             trainingRule = list(length=30,lag=2))
-}
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensMemNames, sep = ".")
 
-  slpTestFit <- ensembleBMAnormal( slpTestData,
-                             trainingRule = list(length=30,lag=2))
 
-}
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+  tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
+
+## equivalent to
+##   tempTestFit <- ensembleBMA( tempTestData, trainingDays = 30,
+##                                model = "normal")
 }
 \keyword{models}
 % docclass is function

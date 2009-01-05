@@ -1,2 +1,14 @@
-10/02/08 fixed brierScore so that it works with one threshold
-         fixed help file syntax
+01/09 added subsetting (via date) for fitted BMA models
+      changed ensembleDates to ensembleValidDates
+
+12/08 modified ensembleData function for efficiency    
+      added forecastHour requirement for ensembleData
+      trainingRule changed to trainingDays
+      added wind speed data modeling
+      changed eps to tol in control functions
+
+11/08 added pit function
+
+10/08 fixed brierScore so that it works with one threshold
+      fixed help file syntax
+

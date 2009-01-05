@@ -105,8 +105,14 @@ function(fit, ensembleData, nSamples = NULL, seed=NULL, dates=NULL, ...)
      }
      else {
 
-       SAMPLES <- sample((1:nForecasts)[!M],size=nSamples,
-                          replace=TRUE,prob=W[!M]) 
+       if (sum(!M) > 1) {
+         SAMPLES <- sample((1:nForecasts)[!M],size=nSamples,
+                           replace=TRUE,prob=W[!M]) 
+       }
+       else {
+         SAMPLES <- rep( (1:nForecasts)[!M], nSamples)
+       }
+
        tab <- table(SAMPLES)
        SAMPLES <- apply(cbind(as.numeric(names(tab)), tab), 1,
                      function(nj,MEAN,SD) rnorm(nj[2],MEAN[nj[1]],SD[nj[1]]),

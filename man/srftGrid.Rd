@@ -44,15 +44,33 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 \examples{
-\dontrun{
+\dontrun{ # R check
+  data(srft)
   data(srftGrid)
 
   labels <- c("CMCG","ETA","GASP","GFS","JMA","NGPS","TCWB","UKMO")
-  srftGridData <- ensembleData(forecasts = srftGrid[ ,labels],
-                           latitude = srftGrid$lat, longitude = srftGrid$lon)
-}
-}
+
+  srftData <- ensembleData( forecasts = srft[ ,labels],
+                            dates = srft$date,
+                            observations = srft$obs,
+                            latitude = srft$lat,
+                            longitude = srft$lon,
+                            forecastHour = 48,
+                            initializationTime = "00Z")
+
+  srftFit <- ensembleBMAnormal( srftData, date = "2004012900",
+                                trainingDays = 25)
+
+
+  srftGridData <- ensembleData( forecasts = srftGrid[ ,labels],
+                                latitude = srftGrid$lat,
+                                longitude = srftGrid$lon,
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+    crps( srtGridData, srftFit)
+}}
 \keyword{datasets}

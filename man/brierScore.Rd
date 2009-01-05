@@ -1,7 +1,9 @@
 \name{brierScore}
 \alias{brierScore}
+\alias{brierScore.ensembleBMAgamma}
 \alias{brierScore.ensembleBMAgamma0}
 \alias{brierScore.ensembleBMAnormal}
+\alias{brierScore.fitBMAgamma}
 \alias{brierScore.fitBMAgamma0}
 \alias{brierScore.fitBMAnormal}
 \title{
@@ -68,23 +70,33 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
-  data(prcpTest)
-                                      
-  labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
-  prcpTestData <- ensembleData( forecasts = prcpTest[ ,labels],
-                          dates = prcpTest$date, observations = prcpTest$obs)
-\dontrun{
-  prcpTestFit <- ensembleBMAgamma0(prcpTestData, trainingRule =
-                                   list(length = 30, lag = 2))
-}
- 
+  data(ensBMAtest)
+
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
+  
+  obs <- paste("PCP24","obs", sep = ".")
+  ens <- paste("PCP24", ensMemNames, sep = ".")
+
+  prcpTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"], 
+                                observations = ensBMAtest[,obs], 
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+\dontrun{ # R check
+  prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)
+} 
+
   hist(prcpTestData$obs)
 
-  brierScore(prcpTestFit, prcpTestData, thresholds = c(0, 5, 10, 15, 20))
+  brierScore(prcpTestFit, prcpTestData,
+             thresholds = seq(from = 0, to = .5, by = .1))
+
 }
 \keyword{models}
 % docclass is function

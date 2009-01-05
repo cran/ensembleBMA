@@ -1,7 +1,9 @@
 \name{modelParameters}
 \alias{modelParameters}
+\alias{modelParameters.ensembleBMAgamma}
 \alias{modelParameters.ensembleBMAgamma0}
 \alias{modelParameters.ensembleBMAnormal}
+\alias{modelParameters.fitBMAgamma}
 \alias{modelParameters.fitBMAgamma0}
 \alias{modelParameters.fitBMAnormal}
 \title{
@@ -28,33 +30,44 @@ modelParameters( fit, \dots)
 \value{
   A list of parameters (including weights) corresponding to the
   ensemble forecasting model for the specified dates. 
-The list may also include a transformation and its inverse
-if the data was transformed to obtain the model parameters.
+  The list may also include a power by which the forecasts were
+  transformed to obtain the model parameters.
 }
 \seealso{
+  \code{\link{ensembleBMAgamma}},
   \code{\link{ensembleBMAgamma0}},
   \code{\link{ensembleBMAnormal}}, 
+  \code{\link{fitBMAgamma}},
   \code{\link{fitBMAgamma0}},
   \code{\link{fitBMAnormal}} 
 }
 \examples{
-  data(slpTest)
+  data(ensBMAtest)
 
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  slpTestFit1 <- ensembleBMAnormal(slpTestData, date = "2000063000",
-                            trainingRule = list(length=30, lag=2))
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensMemNames, sep = ".")
 
-  modelParameters( slpTestFit1, date = "2000063000")
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
 
-  trainDat <- trainingData( slpTestData, date = "2000063000",
-                            trainingRule = slpTestFit1$training)
- 
-  slpTestFit2 <- fitBMAnormal(trainDat)
- 
-  modelParameters( slpTestFit2)
+\dontrun{ # R check
+  tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
+}
+
+  modelParameters( tempTestFit, date = "2008010100")
+
+  tempTrain <- trainingData( tempTestData, date = "2008010100",
+                             trainingDays = tempTestFit$training$days)
+
+  tempTrainFit <- fitBMAnormal( tempTrain)
+
+  modelParameters( tempTrainFit)
 }
 \keyword{models}
 % docclass is function

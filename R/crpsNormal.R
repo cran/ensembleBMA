@@ -1,4 +1,4 @@
-"crpsNormal" <-
+`crpsNormal` <-
 function(sd, weights, biasCoefs, ensembleData)
 {
   #a couple of helper functions

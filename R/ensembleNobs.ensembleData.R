@@ -1,4 +1,4 @@
-"ensembleNobs.ensembleData" <-
+`ensembleNobs.ensembleData` <-
 function (x) 
 {
  nrow(x)

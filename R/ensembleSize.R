@@ -1,4 +1,4 @@
-"ensembleSize" <-
+`ensembleSize` <-
 function (x) 
 UseMethod("ensembleSize")
 

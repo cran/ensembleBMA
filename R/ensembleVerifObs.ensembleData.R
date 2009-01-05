@@ -1,4 +1,4 @@
-"ensembleVerifObs.ensembleData" <-
+`ensembleVerifObs.ensembleData` <-
 function (x) 
 {
  class(x) <- "data.frame" 

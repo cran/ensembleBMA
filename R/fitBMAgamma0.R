@@ -1,6 +1,9 @@
 `fitBMAgamma0` <-
 function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL) 
 {
+ powfun <- function(x,power) x^power
+ powinv <- function(x,power) x^(1/power)
+
   if (is.null(exchangeable)) exchangeable <- ensembleGroups(ensembleData)
 
   if (length(unique(exchangeable)) == length(exchangeable))
@@ -13,7 +16,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   }
 
   maxIter <- control$maxIter
-  tol <- eps <- control$eps
+  tol <- eps <- control$tol
   nEsteps <- control$nEsteps
 
 # remove instances missing all forecasts or obs
@@ -34,7 +37,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   Y0 <- obs == 0
   n0obs <- sum(Y0)
 
-  if (sum(Y0) < 2) stop("less than 2 nonzero obs")
+  if (sum(!Y0) < 2) stop("less than 2 nonzero obs")
 
 # untransformed weather data for variance model  
 
@@ -157,7 +160,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
                       }
   
   ensembleData <- apply(ensembleData, 2, 
-                       function(x) sapply(x,control$transformation))
+                       function(x) sapply(x, powfun, power = control$power))
 
   miss <- as.vector(as.matrix(is.na(ensembleData)))
 
@@ -217,7 +220,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   PROB1 <- (1-PROB0)[!Y0,]
   PROB0 <- PROB0[Y0,]
 
-  obs <- sapply(obs, function(x) sapply(x,control$transformation))
+  obs <- sapply(obs, function(x) sapply( x, powfun, power = control$power))
   obs <- obs[!Y0]
  
   nPrecip <- length(obs)
@@ -237,7 +240,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     meanFit <- lapply(meanFit, function(z) {
                                 coefs <- z$coefficients
                                 if (is.na(coefs[1])) stop("NA intercept")
-          # second coefiecient can be NA if all forecasts are 0
+          # second coefficient can be NA if all forecasts are 0
                                 if (is.na(coefs[2])) z$coefficients[2] <- 0
                                 z
                                })
@@ -439,6 +442,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
     weps <- max(abs(wold - weights)/(1+abs(weights)))
 
+    if (nIter < 5) break
 } 
 
       fn <- gammaLoglikEMmiss(weights, MEAN, PROB1, Xvar, obs)
@@ -477,8 +481,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   structure(
   list(prob0coefs = prob0coefs, biasCoefs = biasCoefs, varCoefs = varCoefs,
        weights = weights, nIter = nIter, loglikelihood = newLL,
-       transformation = control$transformation,
-       inverseTransformation = control$inverseTransformation),
-       class = "fitBMAgamma0")
+       power = control$power), class = "fitBMAgamma0")
 }
 

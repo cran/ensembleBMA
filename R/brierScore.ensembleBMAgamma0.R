@@ -2,6 +2,9 @@
 function(fit, ensembleData, thresholds, dates = NULL, ...) 
 {
 
+ powfun <- function(x, power) x^power
+ powinv <- function(x, power) x^(1/power)
+
  weps <- 1.e-4
  
  M <- matchEnsembleMembers(fit,ensembleData)
@@ -38,7 +41,7 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
 
   }
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
 
 ## match dates in data with dateTable
  if (is.null(ensDates) || all(is.na(ensDates))) {
@@ -50,7 +53,7 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
 ## remove instances missing dates
    if (any(M <- is.na(ensDates))) {
      ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleDates(ensembleData)
+     ensDates <- ensembleValidDates(ensembleData)
    }
    Dates <- as.character(ensDates)
    L <- as.logical(match( Dates, dates, nomatch=0))
@@ -66,7 +69,8 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
 
  ensembleData <- ensembleForecasts(ensembleData)
 
- x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), fit$transformation)
+ x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), powfun,
+             power = fit$power)
 
  MAT <-  t(outer(y, thresholds, "<="))
 
@@ -119,7 +123,7 @@ logisticFit <- sapply( thresholds,
      
        VAR <- fit$varCoefs[1,k] + fit$varCoefs[2,k]*f
         
-       fTrans <- sapply(f, fit$transformation)
+       fTrans <- sapply(f, powfun, power = fit$power)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs[,,k], 2, sum)
 
@@ -132,9 +136,9 @@ logisticFit <- sapply( thresholds,
          W <- W[!M]/sum(W[!M])
        }
 
-       MAT[i,] <- sapply( sapply(thresholds,fit$transformation), 
+       MAT[i,] <- sapply( sapply( thresholds, powfun, power = fit$power), 
                           cdfBMAgamma0, 
-          WEIGHTS=W, PROB0=PROB0[!M], MEAN=MEAN[!M], VAR=VAR[!M]) -
+          WEIGHTS=W,  MEAN=MEAN[!M], VAR=VAR[!M], PROB0=PROB0[!M]) -
                                                 (y[i] <= thresholds)
 
     }

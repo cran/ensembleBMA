@@ -70,7 +70,7 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
@@ -80,11 +80,13 @@ Washington, May 2008.
 
   srftData <- ensembleData( forecasts = srft[,labels],
                             dates = srft$date, observations = srft$obs,
-                            latitude = srft$lat, longitude = srft$lon)
+                            latitude = srft$lat, longitude = srft$lon,
+                            forecastHour = 48, initializationTime = "00Z")
 
-\dontrun{
-  bmaFit <- ensembleBMA( srftData, date = "2004012900",  
-             model = "normal",trainingRule = list(length = 25, lag = 2))
+\dontrun{ # R check
+
+  bmaFit <- ensembleBMA( srftData, date = "2004012900", trainingDays = 25,
+                         model = "normal")
 
   bmaForc <- quantileForecast( bmaFit, srftData, date = "2004021400",  
                                   quantiles = c(.1, .5. .9))
@@ -106,7 +108,8 @@ Washington, May 2008.
   memberLabels <- c("CMCG","ETA","GASP","GFS","JMA","NGPS","TCWB","UKMO")
  
   srftGridData <- ensembleData(forecasts = srftGrid[,memberLabels],
-      latitude = srftGrid[,"latitude"], longitude = srftGrid[,"longitude"])
+      latitude = srftGrid[,"latitude"], longitude = srftGrid[,"longitude"],
+                            forecastHour = 48, initializationTime = "00Z")
 
   gridForc <- quantileForecast( bmaFit, srftGridData, 
                     date = "2004021400", quantiles = c( .1, .5, .9))
@@ -124,8 +127,7 @@ Washington, May 2008.
                    type="image",col=gray((32:0)/32))
   title("Probability of Freezing", cex = 0.5)
 
-}
+}}
 
-}
 \keyword{models}
 % docclass is function

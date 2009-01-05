@@ -1,4 +1,4 @@
-"ensembleNobs" <-
+`ensembleNobs` <-
 function (x) 
 UseMethod("ensembleNobs")
 

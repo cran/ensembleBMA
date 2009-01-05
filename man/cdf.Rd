@@ -1,9 +1,12 @@
 \name{cdf}
 \alias{cdf}
+\alias{cdf.ensembleBMAgamma}
 \alias{cdf.ensembleBMAgamma0}
 \alias{cdf.ensembleBMAnormal}
+\alias{cdf.fitBMAgamma}
 \alias{cdf.fitBMAgamma0}
 \alias{cdf.fitBMAnormal}
+\alias{cdfBMAgamma}
 \alias{cdfBMAgamma0}
 \alias{cdfBMAnormal}
 \title{
@@ -53,7 +56,7 @@ cdf( fit, ensembleData, values, dates = NULL, \dots)
 \details{
    This method is generic, and can be applied to any ensemble forecasting
    model. \cr
-   Note the model may have been applied to a transformation of the data,
+   Note the model may have been applied to a power transformation of the data,
    but that information is included in the input \code{fit}, and
    the output is transformed appropriately.
 }
@@ -76,30 +79,40 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensemble and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-BMA Forecasting with Missing and Exchangeable Ensemble Members,
-in preparation.
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
+  data(ensBMAtest)
 
-  data(slpTest)
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensMemNames, sep = ".")
 
-  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
 
-  slpTestFit <- ensembleBMAnormal(slpTestData,
-                   trainingRule = list(length=30, lag = 2))
+\dontrun{# R check
+  tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
+}
 
-  slpTestForc <- quantileForecast( slpTestFit, slpTestData)
-  range(slpTestForc)
+  tempTestForc <- quantileForecast( tempTestFit, tempTestData)
+  range(tempTestForc)
 
-  slpTestCDF <- cdf( slpTestFit, slpTestData, 
-                        values = seq(from=1005, to=1025, by = 5))
+  tempTestCDF <- cdf( tempTestFit, tempTestData, 
+                      values = seq(from=277, to=282, by = 1))
+
+  tempTestCDF
 }
 \keyword{models}
 % docclass is function

@@ -46,18 +46,12 @@ A list with the following output components:
   \item{nIter}{
     The number of EM iterations.
   }
-  \item{transformation}{
-    The function corresponding to the transformation (if any) of the data used 
-    to fit the models for the  point mass at 0 and mean of nonzero 
-    observations. 
+  \item{power}{
+    A scalar value giving the power (if any) by which the data was transformed
+    for modeling.
     The untransformed forecast is used to fit the variance model.
-    This is input as part of \code{control}.
-   }
-  \item{inverseTransformation}{
-    The function corresponding to the inverse of \code{transformation} 
-   (if any).
-    Used for quantile forecasts and verification.
-    This is input as part of \code{control}.
+    This is input as part of \code{control},
+    and applies only to certain models.
    }
 }
 \details{
@@ -69,13 +63,15 @@ A list with the following output components:
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{ensembleBMA}},
+  \code{\link{fitBMAgamma}}, 
   \code{\link{fitBMAgamma0}}, 
   \code{\link{fitBMAnormal}}, 
   \code{\link{cdf}}, 
   \code{\link{quantileForecast}}, 
   \code{\link{modelParameters}}, 
-  \code{\link{controlBMAnormal}},
-  \code{\link{controlBMAgamma0}}
+  \code{\link{controlBMAgamma}},
+  \code{\link{controlBMAgamma0}},
+  \code{\link{controlBMAnormal}}
 }
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
@@ -91,29 +87,38 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-BMA Forecasting with Missing and Exchangeable Ensemble Members,
-in preparation.
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
-\dontrun{
-  data(slpTest)
+  data(ensBMAtest)
 
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  ensNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  DATE <- sort(unique(slpTestData$dates))[27]
-  trainDat <- trainingData( slpTestData, date=DATE, 
-                            trainingRule=list(length=25,lag=2))
-  slpFitA <- fitBMA(trainDat, model = "normal")
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensNames, sep = ".")
 
-  D <- as.numeric(slpTestData$dates) <= 25
-  slpFitB <- fitBMA(slpTestData[D, ], model = "normal")
-}
+
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                dates = ensBMAtest[,"vdate"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+  tempTrain <- trainingData( tempTestData, trainingDays = 30,
+                             date  = "2008010100")
+
+  tempTrainFit <- fitBMA( tempTrain, model = "normal")
+
+## equivalent to
+##    tempTrainFit <- fitBMAnormal( tempTrain)
+
 }
 \keyword{models}
 % docclass is function

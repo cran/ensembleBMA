@@ -1,6 +1,10 @@
 `crps.ensembleBMAgamma0` <-
 function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...) 
 {
+
+ powfun <- function(x,power) x^power
+ powinv <- function(x,power) x^(1/power)
+
  weps <- 1.e-4
 
  if (is.null(nSamples)) nSamples <- 10000
@@ -38,7 +42,7 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
 
   }
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
 
 ## match dates in data with dateTable
  if (is.null(ensDates) || all(is.na(ensDates))) {
@@ -50,7 +54,7 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
 ## remove instances missing dates
    if (any(M <- is.na(ensDates))) {
      ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleDates(ensembleData)
+     ensDates <- ensembleValidDates(ensembleData)
    }
    Dates <- as.character(ensDates)
    L <- as.logical(match( Dates, dates, nomatch=0))
@@ -88,7 +92,7 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
      
        VAR <- fit$varCoefs[1,k] + fit$varCoefs[2,k]*f
 
-       fTrans <- sapply(f, fit$transformation)
+       fTrans <- sapply(f, powfun, power = fit$power)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs[,,k], 2, sum)
 
@@ -101,14 +105,15 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
        SHAPE <- SHAPE[!M]
        PROB0 <- PROB0[!M]
 
-       W <- WEIGHTS
-       if (any(M)) {
-         W <- W + weps
+       if (sum(!M) > 1) {
+         W <- WEIGHTS + weps
          W <- W[!M] / sum(W[!M])
+         SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples, 
+                           replace = TRUE, prob = W)
        }
-
-       SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples, 
-                          replace = TRUE, prob = W)
+       else {
+         SAMPLES <- rep( (1:nForecasts)[!M], nSamples)
+       }
 
        tab <- numeric(sum(!M))
        names(tab) <- (1:nForecasts)[!M]
@@ -137,8 +142,6 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
 
        tab <- tab[!Z]
 
-       if (!length(tab)) cat("HERE\n")
-
        if (length(tab)) {
 
           RATE  <- RATE[!Z]
@@ -151,8 +154,7 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
            
 # model is fit to the cube root of the forecast
 
-         S <- sapply(as.vector(unlist(S)),
-                           fit$inverseTransformation)
+         S <- sapply(as.vector(unlist(S)), powinv, power = fit$power)
 
          SAMPLES <- c(rep(0, tab0[1]), S)
        }
@@ -172,9 +174,16 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
  crpsEns1 <- apply(abs(sweep(ensembleData,MARGIN=1,FUN ="-",STATS=obs))
                    ,1,mean,na.rm=TRUE)
 
- crpsEns2 <- apply(apply(ensembleData, 2, function(z,Z) 
-      apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum,na.rm=TRUE),
-                  Z = ensembleData),1,sum,na.rm=TRUE)
+ if (nrow(ensembleData) > 1) {
+   crpsEns2 <- apply(apply(ensembleData, 2, function(z,Z) 
+     apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum,na.rm=TRUE),
+                  Z = ensembleData),1,sum, na.rm = TRUE)
+ }
+ else {
+   crpsEns2 <- sum(sapply(as.vector(ensembleData), 
+                   function(z,Z) sum( Z-z, na.rm = TRUE),
+                   Z = as.vector(ensembleData)), na.rm = TRUE)
+ }
 
  crpsEns <- mean(crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts)))
 

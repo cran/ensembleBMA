@@ -1,42 +1,36 @@
 `trainingData` <-
-function(ensembleData, date = NULL, trainingRule = list(length=NA, lag=NA), 
-         exchangeable = NULL)
+function(ensembleData, trainingDays, date = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
- call <- match.call()
 
- trainingRule <- as.list(trainingRule)
+ if (is.list(trainingDays)) trainingsDays <- trainingDays[[1]]
 
- if (is.null(trainingRule$length) || is.na(trainingRule$length) ||
-     is.null(trainingRule$lag) || is.na(trainingRule$lag))
-   stop("length and lag must be specified in training rule")
-
- if (trainingRule$length < 0 || trainingRule$lag < 0) 
-   stop("improperly specified training rule")
+ if (length(trainingDays) > 1 || trainingDays <= 0 
+       || (trainingDays - trunc(trainingDays)) != 0) 
+   stop("trainingDays improperly specified")
+ 
+ lag <- ceiling( ensembleFhour(ensembleData) / 24 )
 
  ensMemNames <- ensembleMemberLabels(ensembleData)
  nForecasts <- length(ensMemNames)
-
- exchangeable <- getExchangeable( exchangeable, ensembleGroups(ensembleData),
-                                  nForecasts)
 
 # remove instances missing all forecasts, obs or dates
 
  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
  M <- M | is.na(ensembleVerifObs(ensembleData))
- M <- M | is.na(ensembleDates(ensembleData))
+ M <- M | is.na(ensembleValidDates(ensembleData))
  ensembleData <- ensembleData[!M,]
  
  nObs <- ensembleNobs(ensembleData)
  if (!nObs) stop("no observations")
 
- ensDates <- ensembleDates(ensembleData)
- if (is.null(ensDates)) stop("dates unavailable")
+ ensDates <- ensembleValidDates(ensembleData)
 
  Dates <- as.character(ensDates)
  DATES <- sort(unique(Dates))
 
- if (trainingRule$length+trainingRule$lag > length(DATES)) 
+ if (trainingDays+lag > length
+(DATES)) 
    stop("insufficient training data")
 
  julianDATES <- ymdhTOjul(DATES)
@@ -45,63 +39,76 @@ function(ensembleData, date = NULL, trainingRule = list(length=NA, lag=NA),
 
 ## dates that can be modeled by the training data (ignoring gaps)
 
- Jdates <- seq(from = julianDATES[trainingRule$length]+trainingRule$lag*incr,
-               to = max(julianDATES)+trainingRule$lag*incr, by = incr)
+ Jdates <- seq(from = julianDATES[trainingDays]+lag*incr,
+               to = max(julianDATES)+lag*incr, by = incr)
 
 ## determine the modeling dates
 
- dl <- nchar(DATES[1])
+ DATEShh <- getHH(DATES)
 
- if (nullDates <- is.null(dates)) stop("date must be specified")
+ if (length(DATEShh) != 1) stop("forecast hour in data should be unique")
 
- dates <- date
+ if (!(lD <- unique(sapply(DATES,nchar)))) 
+   stop("all dates in data should have same character length")
 
-
-   dates <- sort(unique(as.character(dates)))
+   dates <- date
 
    if (!all(dateCheck(dates))) 
      stop("improperly specified date(s) in dates argument")
 
-   if (nchar(dates[1]) != dl)
-     stop("format of dates argument does not match date format in data")
+    datesHH <- getHH(dates)
 
-   if (any(dates < julTOymdh(min(Jdates),origin=origin,dropHour=(dl == 8)))) {
+    if (length(datesHH) != 1) stop("forecast hour in dates should be unique")
+   
+    if (datesHH != DATEShh) stop("specified dates incompatible with data")
+
+    if (!(ld <- unique(sapply(dates,nchar)))) 
+      stop("all specified dates should have same character length")
+
+    if (ld < lD) {
+      dates <- sapply( dates, function(s) paste(s, "00", sep =""))
+    }
+    else if (ld < lD) {
+      dates <- sapply( dates, function(s) substring(s, 1, 8))
+    }
+
+    if (any(dates < julTOymdh(min(Jdates),origin=origin,dropHour=(lD == 8)))) {
      stop("some dates precede the first training period")
    }
 
-   if (any(dates > julTOymdh(max(Jdates),origin=origin,dropHour=(dl == 8)))) {
+   if (any(dates > julTOymdh(max(Jdates),origin=origin,dropHour=(lD == 8)))) {
      warning("there are dates beyond the last training period")
    }
 
  juliandates <- ymdhTOjul( dates, origin = origin)
 
- nDates <- length(dates)
+ K <- 1:nForecasts
 
  L <- length(juliandates)
- twin <- 1:trainingRule$length
+ twin <- 1:trainingDays
 
  cat("\n")
-
  l <- 0
  for(i in seq(along = juliandates)) {
 
-    I <- (juliandates[i]-trainingRule$lag*incr) >= julianDATES
+    I <- (juliandates[i]-lag*incr) >= julianDATES
     if (!any(I)) stop("insufficient training data")
 
     j <- which(I)[sum(I)]
 
     if (j != l) {
 
-      twin <- (j+1) - (1:trainingRule$length)
+      twin <- (j+1) - (1:trainingDays)
+
       D <- as.logical(match(Dates, DATES[twin], nomatch=0))
       if (!any(D)) stop("this should not happen")
-  
-     DATA <- ensembleData[D,]
 
-    }
+      trainData <- ensembleData[D,]
+   }
+
  }
 
- attr( DATA, "exchangeable") <- exchangeable
- DATA
+  trainData
+
 }
 

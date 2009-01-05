@@ -15,7 +15,8 @@
  Precipitation amounts are quantized to hundredths of an inch.
 }
 \format{
-A list with the following arguments:
+  A list with the following arguments:
+\describe{
 \item{\code{dateTable}}{
  A named vector in which the names are the dates and the entries are
  the number of observations for each date.
@@ -35,11 +36,10 @@ A list with the following arguments:
 \item{\code{weights}}{
  The BMA weights for the models.
 }
-\item{\code{transformation}}{
- An \code{R} function giving transformation of the data used in the BMA fitting.
+\item{\code{power}}{
+  An scalar value giving the power by which the forecasts are transformed
+  for the BMA fitting.
 }
-\item{\code{inverseTransformation}}{
- An \code{R} function giving the inverse of \code{transformation}.
 }
 }
 
@@ -58,16 +58,16 @@ Probabilistic quantitative precipitation forecasting
 using Bayesian model averaging,
 \emph{Monthly Weather Review 135:3309--3320, 2007}.
 
-
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
-\dontrun{
+\dontrun{ # R check
+
   data(prcpFit)
 
   modelParameters(prcpFit, date = "20030113")
@@ -76,7 +76,9 @@ Washington, May 2008.
 
   prcpGridData <- ensembleData(forecasts = prcpGrid[,1:9], 
                                latitude = prcpGrid[,"latitude"],
-                               longitude = prcpGrid[,"longitude"])
+                               longitude = prcpGrid[,"longitude"],
+                               forecsatHour = 48,
+                               initializationTime = "00Z")
 
 # probability of precipitation
   1 - cdf( prcpFit, prcpGridData, value = 0)
@@ -84,8 +86,7 @@ Washington, May 2008.
 # probability of precipitation above 0.25 in
   1 - cdf( prcpFit, prcpGridData, date = "20030113", value = 25)
   
-}
-}
+}}
 \keyword{data}
 
 % docclass is function

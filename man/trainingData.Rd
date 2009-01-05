@@ -4,34 +4,23 @@
     Extract Training Data
 }
 \description{
-  Extracts the training data corresponding to a given date and training rule.
+  Extracts a subset of an \code{ensembleData} object corresponding
+  to a given date and number of  training days.
 }
 \usage{
-trainingData( ensembleData, date,
-              trainingRule = list( length = NA, lag = NA),
-              exchangeable = NULL) 
+trainingData( ensembleData, trainingDays, date) 
 }
 \arguments{
   \item{ensembleData}{
      An \code{ensembleData} object that includes, ensemble
      forecasts, observations and dates.
     }
+  \item{trainingDays}{
+    An integer specifying the number of days in the training period.
+    
+  }
   \item{date}{
      The date for which the training data is desired. 
-  }
-  \item{trainingRule}{
-    A list giving the \code{length} and \code{lag} for the training
-    period. The length gives the number of time steps (e.g. days)
-    in the training period, and the lag gives the number of time steps
-    ahead of the most recent date in the training period for which the
-    forecast is valid. There is no default.
-  }
-  \item{exchangeable}{
-    A numeric or character vector or factor indicating groups of
-    ensemble members that are exchangeable (indistinguishable).
-    The modeling will have equal weights and parameters within each
-    group.
-    The default determines exchangeability from \code{ensembleData}.
   }
 }
 \value{
@@ -39,13 +28,12 @@ An \code{ensembleData} object corresponding to the training data for
 the given date relative to \code{ensembleData}.
 }
 \details{
-  The training rule uses the most recent days for the given period
+  The most recent days are used for training
   regardless of whether or not they are consecutive.
 }
 \seealso{
   \code{\link{ensembleBMA}}, 
-  \code{\link{fitBMA}}, 
-  \code{\link{trainingControl}}
+  \code{\link{fitBMA}}
 }
 
 \references{
@@ -62,26 +50,35 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, December 2008.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-BMA Forecasting with Missing and Exchangeable Ensemble Members,
-in preparation.
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
-\dontrun{
-  data(slpTest)
+  data(ensBMAtest)
 
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData( forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  ensNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  trainDat <- trainingData(slpTestData, date = "2000063000",
-                           trainingRule = list(length=30,lag=2))
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensNames, sep = ".")
+
+
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                dates = ensBMAtest[,"vdate"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+  tempTrain <- trainingData( tempTestData, trainingDays = 30,
+                             date  = "2008010100")
  
-  slpTestFitTD <- fitBMAnormal(trainDat)
-}
+  tempTrainFit <- fitBMAnormal( tempTrain)
+
 }
 \keyword{models}
 % docclass is function

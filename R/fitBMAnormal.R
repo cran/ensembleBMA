@@ -221,7 +221,7 @@ function(ensembleData, control = controlBMAnormal(),
 
 ##          cat("", nIter)
 ##          cat(" ", c(loglik, ERROR, min(weights)), "\n")
-          if (nIter > 1 && ERROR < control$eps) break
+          if (nIter > 1 && ERROR < control$tol) break
 
           if (nIter >= control$maxIter) break
         }

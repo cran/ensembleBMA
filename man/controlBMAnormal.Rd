@@ -8,7 +8,7 @@
    of a mixture of normals to ensemble forecasts.
 }
 \usage{
-controlBMAnormal(maxIter, eps, equalVariance, biasCorrection, start) 
+controlBMAnormal(maxIter, tol, equalVariance, biasCorrection, start) 
 }
 \arguments{
   \item{maxIter}{
@@ -17,10 +17,10 @@ controlBMAnormal(maxIter, eps, equalVariance, biasCorrection, start)
      which sets no upper limit on the number of iterations, 
      so that the convergence criterion based on \code{eps} is used.
   }
-  \item{eps}{
+  \item{tol}{
      A numeric convergence tolerance. The EM fit for the mixture 
      model is terminated when the relative error in successive 
-     objective values in the M-step falls below \code{eps}.
+     objective values in the M-step falls below \code{tol}.
      The default is \code{sqrt(.Machine$double.eps)}, 
      which is approximately \code{1.e-8} on IEEE compliant machines.
   }
@@ -67,20 +67,26 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensemble and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
-  data(slpTest)
+  data(ensBMAtest)
 
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  slpTestFit <- ensembleBMAnormal(slpTestData,
-    trainingRule = list(length =30, lag = 2),
-    control = controlBMAnormal(maxIter = 100, equalVariance = FALSE,
-                               biasCorrection = "additive"))
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensMemNames, sep = ".")
+
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+  tempTestFit1 <- ensembleBMAnormal(tempTestData, trainingDays = 30,
+    control = controlBMAnormal(maxIter = 100, biasCorrection = "additive"))
 }
 \keyword{models}
 % docclass is function

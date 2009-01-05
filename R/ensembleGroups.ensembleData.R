@@ -1,4 +1,4 @@
-"ensembleGroups.ensembleData" <-
+`ensembleGroups.ensembleData` <-
 function(x) 
 { 
  attr(x, "exchangeable")

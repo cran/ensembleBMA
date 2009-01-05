@@ -1,4 +1,4 @@
-"getExchangeable" <-
+`getExchangeable` <-
 function (argument, attribute, nForecasts) 
 {
  if (is.null(argument)) return(attribute)

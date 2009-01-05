@@ -1,4 +1,4 @@
-"ensembleVerifObs" <-
+`ensembleVerifObs` <-
 function (x) 
 UseMethod("ensembleVerifObs")
 

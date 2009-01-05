@@ -1,4 +1,4 @@
-"ensembleObsLabels" <-
+`ensembleObsLabels` <-
 function (x) 
 UseMethod("ensembleObsLabels")
 

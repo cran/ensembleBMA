@@ -41,16 +41,19 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Ensemble Forecasting 
 using Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
-\dontrun{
+\dontrun{ # R check
+
   data(prcpGrid) 
 
   prcpGridData <- ensembleData(forecasts = prcpGrid[,1:9], 
                                latitude = prcpGrid[,"latitude"],
-                               longitude = prcpGrid[,"longitude"])
+                               longitude = prcpGrid[,"longitude"],
+                               forecastHour = 48,
+                               initilaizationTime = "00Z")
 
   data(prcpFit)
 
@@ -58,8 +61,7 @@ Washington, May 2008.
 
   quantileForecast( prcpFit, prcpGridData, date = "20030113")
   
-}
-}
+}}
 \keyword{data}
 
 % docclass is function

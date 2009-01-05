@@ -1,7 +1,9 @@
 \name{crps}
 \alias{crps}
+\alias{crps.ensembleBMAgamma}
 \alias{crps.ensembleBMAgamma0}
 \alias{crps.ensembleBMAnormal}
+\alias{crps.fitBMAgamma}
 \alias{crps.fitBMAgamma0}
 \alias{crps.fitBMAnormal}
 \title{
@@ -57,7 +59,7 @@ and the probabilistic forecast.
 \details{
    This method is generic, and can be applied to all ensemble forecasting
    models. \cr
-   Note the model may have been applied to a transformation of the data,
+   Note the model may have been applied to a power transformation of the data,
    but that information is included in the input \code{fit}, and
    the output is transformed appropriately.\cr
    For the gamma0 model for precipitation, the CRPS is only available
@@ -83,24 +85,33 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-BMA Forecasting with Missing and Exchangeable Ensemble Members,
-in preparation.
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
-  data(slpTest)
-  
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  data(ensBMAtest)
 
-  slpTestFit <- ensembleBMAnormal(slpTestData,
-                  trainingRule = list(length=30, lag=2))
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  crps( slpTestFit, slpTestData)
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensMemNames, sep = ".")
+
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+\dontrun{# R check
+  tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
+}
+  crps( tempTestFit, tempTestData)
 }
 \keyword{models}
 % docclass is function

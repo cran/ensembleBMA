@@ -1,6 +1,10 @@
 `brierScore.fitBMAgamma0` <-
 function(fit, ensembleData, thresholds, dates=NULL, ...) 
 {
+
+ powfun <- function(x,power) x^power
+ powinv <- function(x,power) x^(1/power)
+
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
@@ -22,7 +26,8 @@ function(fit, ensembleData, thresholds, dates=NULL, ...)
  nObs <- ensembleNobs(ensembleData)
 
  ensembleData <- ensembleForecasts(ensembleData)
- x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), fit$transformation)
+ x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), 
+                    powfun, power = fit$power)
  
  MAT <-  outer(y, thresholds, "<=")
 
@@ -63,7 +68,7 @@ function(fit, ensembleData, thresholds, dates=NULL, ...)
      
        VAR <- fit$varCoefs[1] + fit$varCoefs[2]*f
         
-       fTrans <- sapply(f, fit$transformation)
+       fTrans <- sapply(f, powfun, power = fit$power)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs, 2, sum)
 
@@ -76,9 +81,9 @@ function(fit, ensembleData, thresholds, dates=NULL, ...)
          W <- W[!M] / sum(W[!M])
        }
 
-       MAT[i,] <- sapply( sapply(thresholds,fit$transformation), 
+       MAT[i,] <- sapply( sapply( thresholds, powfun, power = fit$power), 
                           cdfBMAgamma0, 
-          WEIGHTS=W, PROB0=PROB0[!M], MEAN=MEAN[!M], VAR=VAR[!M]) -
+          WEIGHTS=W, MEAN=MEAN[!M], VAR=VAR[!M], PROB0=PROB0[!M]) -
                                                 (y[i] <= thresholds)
 
     }

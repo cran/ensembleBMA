@@ -1,9 +1,12 @@
 \name{quantileForecast}
 \alias{quantileForecast}
+\alias{quantileForecast.ensembleBMAgamma}
 \alias{quantileForecast.ensembleBMAgamma0}
 \alias{quantileForecast.ensembleBMAnormal}
+\alias{quantileForecast.fitBMAgamma}
 \alias{quantileForecast.fitBMAgamma0}
 \alias{quantileForecast.fitBMAnormal}
+\alias{quantBMAgamma}
 \alias{quantBMAgamma0}
 \alias{quantBMAnormal}
 \title{
@@ -51,7 +54,7 @@ A vector of forecasts corresponding to the desired quantiles.
 \details{
    This method is generic, and can be applied to any ensemble forecasting
    model. \cr
-   Note the model may have been applied to a transformation of the data,
+   Note the model may have been applied to a power transformation of the data,
    but that information is included in the input \code{fit}, and
    the output is transformed appropriately. \cr
    This can be used to compute prediction intervals for the PDF. 
@@ -75,45 +78,63 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-BMA Forecasting with Missing and Exchangeable Ensemble Members,
-in preparation.
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
+  data(ensBMAtest)
 
-  data(slpTest)
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  labels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData( forecasts = slpTest[ ,labels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensMemNames, sep = ".")
 
-  slpTestFit <- ensembleBMAnormal(slpTestData,
-                  trainingRule = list(length = 25, lag = 2))
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
 
-  slpTestForc <- quantileForecast( slpTestFit, slpTestData)
+\dontrun{ # R check
+  tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
+}
 
-\dontrun{
+  tempTestForc <- quantileForecast( tempTestFit, tempTestData)
+
+
+\dontrun{ # R check
+
   data(srft)
 
   labels <- c("CMCG","ETA","GASP","GFS","JMA","NGPS","TCWB","UKMO")
+
   srftData <- ensembleData( forecasts = srft[ ,labels],
-                            dates = srft$date, observations = srft$obs,
-                            latitude = srft$lat, longitude = srft$lon)
+                            dates = srft$date,
+                            observations = srft$obs,
+                            latitude = srft$lat,
+                            longitude = srft$lon,
+                            forecastHour = 48,
+                            initializationTime = "00Z")
 
   srftFit <- ensembleBMAnormal(srftData, date = "2004012900",
-               trainingRule = list(length = 25, lag = 2))
+                               trainingDays = 25)
 
   data(srftGrid)
 
   srftGridData <- ensembleData(forecasts = srftGrid[ ,labels],
-                           latitude = srftGrid$lat, longitude = srftGrid$lon)
+                               latitude = srftGrid$lat,
+                               longitude = srftGrid$lon,
+                               forecastHour = 48,
+                               initializationTime = "00Z")
 
   srftGridForc <- quantileForecast( srftFit, srftGridData, 
                      date = "2004012900")
-}
-}
+}}
 \keyword{models}
 % docclass is function

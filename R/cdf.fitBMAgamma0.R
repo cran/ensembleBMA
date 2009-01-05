@@ -1,6 +1,10 @@
 `cdf.fitBMAgamma0` <-
 function(fit, ensembleData, values, dates=NULL, ...) 
 {
+ 
+ powfun <- function(x,power) x^power
+ powinv <- function(x,power) x^(1/power)
+
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
@@ -34,7 +38,7 @@ function(fit, ensembleData, values, dates=NULL, ...)
 
        VAR <- fit$varCoefs[1] + fit$varCoefs[2]*f
         
-       fTrans <- sapply(f, fit$transformation)
+       fTrans <- sapply(f, powfun, power = fit$power)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs, 2, sum)
 
@@ -47,9 +51,9 @@ function(fit, ensembleData, values, dates=NULL, ...)
          W <- W[!M]/sum(W[!M])
        }
 
-       CDF[i,] <- sapply( sapply( values, fit$transformation), 
-                          cdfBMAgamma0, WEIGHTS = W, PROB0 = PROB0[!M], 
-                          MEAN = MEAN[!M], VAR = VAR[!M]) 
+       CDF[i,] <- sapply( sapply( values, powfun, power = fit$power), 
+             cdfBMAgamma0, WEIGHTS = W, MEAN = MEAN[!M], VAR = VAR[!M], 
+                           PROB0 = PROB0[!M]) 
     }
 
  }

@@ -1,5 +1,6 @@
 \name{ensembleBMAgamma0}
 \alias{ensembleBMAgamma0}
+\alias{[.ensembleBMAgamma0}
 \title{
     BMA precipitation modeling 
 }
@@ -9,8 +10,7 @@
    Allows specification of a training rule and forecasting dates.
 }
 \usage{
-ensembleBMAgamma0( ensembleData, dates = NULL, 
-                   trainingRule = list(length = NA, lag = NA), 
+ensembleBMAgamma0( ensembleData, trainingDays, dates = NULL, 
                    control = controlBMAgamma0(), exchangeable = NULL)
 }
 \arguments{
@@ -19,17 +19,14 @@ ensembleBMAgamma0( ensembleData, dates = NULL,
       verification observations and dates. 
       Missing values (indicated by \code{NA}) are allowed.
   }
+  \item{trainingDays}{
+    An integer giving the number of time steps (e.g. days)
+    in the training period. There is no default.
+  }
   \item{dates}{
      The dates for which forecasting models are desired. 
      By default, this will include all
      dates consistent with the training rule.
-  }
-  \item{trainingRule}{
-    A list giving the \code{length} and \code{lag} for the training
-    period. The length gives the number of time steps (e.g. days)
-    in the training period, and the lag gives the number of time steps
-    ahead of the most recent date in the training period for which the
-    forecast is valid. There is no default.
   }
   \item{control}{
      A list of control values for the fitting functions. The defaults are
@@ -43,13 +40,10 @@ ensembleBMAgamma0( ensembleData, dates = NULL,
   }
 }
 \value{
-A list with the following output components:
-  \item{dateTable}{
-    The table of observations corresponding to the dates in 
-    \code{ensembleData}  in chronological order.
-  }
-  \item{trainingRule}{
-    The training rule specified as input.
+  A list with the following output components:
+  \item{training}{
+    A list containing information on the training length and lag and
+    the number of instances used for training for each modeling day.
   }
   \item{prob0coefs}{
     The fitted coefficients in the model for the point mass at 0 
@@ -68,15 +62,10 @@ A list with the following output components:
   \item{weights}{
     The fitted BMA weights for the gamma components for each ensemble member at each date.
   }
-  \item{transformation}{
-    The function corresponding to the transformation of the data used to fit 
-    the models for the  point mass at 0 and the bias model. 
+  \item{power}{
+    A scalar value giving to the power by which the data was transformed
+    to fit the models for the  point mass at 0 and the bias model. 
     The untransformed forecast is used to fit the variance model.
-    This is input as part of \code{control}.
-   }
-  \item{inverseTransformation}{
-    The function corresponding to the inverse of \code{transformation}.
-    Used for quantile forecasts and verification.
     This is input as part of \code{control}.
    }
 }
@@ -91,7 +80,6 @@ A list with the following output components:
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{controlBMAgamma0}}, 
-  \code{\link{trainingControl}}, 
   \code{\link{fitBMAgamma0}},
   \code{\link{cdf}},
   \code{\link{quantileForecast}},
@@ -110,25 +98,34 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
-\dontrun{
-  data(prcpTest)
+  data(ensBMAtest)
 
-  labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
+  
+  obs <- paste("PCP24","obs", sep = ".")
+  ens <- paste("PCP24", ensMemNames, sep = ".")
 
-  prcpTestData <- ensembleData( forecasts = prcpTest[ ,labels],
-                          dates = prcpTest$date, observations = prcpTest$obs)
+  prcpTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"], 
+                                observations = ensBMAtest[,obs], 
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
 
-\dontrun{
-  prcpTestFit <- ensembleBMA( prcpTestData, model = "gamma0",
-                              trainingRule = list(length=30,lag=2))
-}
-  prcpTestFit <- ensembleBMAgamma0( prcpTestData,
-                              trainingRule = list(length=30,lag=2))
-}
+  prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)
+
+## equivalent to
+##    prcpTestFit <- ensembleBMA( prcpTestData, trainingDays = 30,
+##                                model = "gamma0")
 }
 \keyword{models}
 % docclass is function

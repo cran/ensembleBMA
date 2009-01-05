@@ -1,5 +1,3 @@
-
-
 \name{controlBMAgamma0}
 \alias{controlBMAgamma0}
 \title{
@@ -7,12 +5,11 @@
 }
 \description{
    Specifies a list of values controling the Bayesian Model Averaging fit 
-   of a mixture gammas with a point mass at 0 to ensemble forecasts for
+   of a mixture of gammas with a point mass at 0 to ensemble forecasts for
    precipitation.
 }
 \usage{
-controlBMAgamma0(maxIter, eps, nEsteps, transformation, inverseTransformation, 
-                start)
+controlBMAgamma0(maxIter, tol, nEsteps, power = (1/3), start)
 }
 \arguments{
   \item{maxIter}{
@@ -21,29 +18,27 @@ controlBMAgamma0(maxIter, eps, nEsteps, transformation, inverseTransformation,
     \code{Inf}, which sets no upper limit on the number of iterations, 
      so that the convergence criterion based on \code{eps} is used.
   }
-  \item{eps}{
+  \item{tol}{
      A numeric convergence tolerance. The EM fit for the mixture of
      gammas is terminated when the relative error in successive 
-     objective values in the M-step falls below \code{eps}.
+     objective values in the M-step falls below \code{tol}.
      The default is \code{sqrt(.Machine$double.eps)}, 
      which is approximately \code{1.e-8} on IEEE compliant machines.
   }
   \item{nEsteps}{
-     The number of E-steps per M-step. The default is 1, but using
-     more E-steps per M-step will cause the convergence criterion
-     to be satisfied in fewer iterations. This is a heuristic for
-     a gain in speed since the results for multiple M-steps
-     often are  not much different from the results with one 
-     E-step per M-step.
+    The number of E-steps per M-step, after five iterations of standard
+    EM. The default is 1, but using more E-steps per M-step causes
+    the convergence criterion to be satisfied in fewer iterations.
+    This is a heuristic to speed things up since the results for
+    multiple E-steps often are not much different from the results
+    with one E-step per M-step.
   }
-  \item{transformation}{
-    The function corresponding to the transformation of the data used to fit 
-    the models for the  point mass at 0 and mean of nonzero observations. 
+  \item{power}{
+    A scalar value giving the power by which the data will be
+    transformed to fit the models for the point mass at 0
+    and mean of nonzero observations. The default is to use the 1/3
+    power of the data.
     The untransformed forecast is used to fit the variance model.
-   }
-  \item{inverseTransformation}{
-    The function corresponding to the inverse of \code{transformation}.
-    Used for quantile forecasts and verification.
    }
   \item{start}{
      An optional list of starting values for variance coefficients
@@ -71,20 +66,27 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Ensemble Forecasting
 using Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
-  data(prcpTest)
+  data(ensBMAtest)
 
-  labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
-  prcpTestData <- ensembleData( forecasts = prcpTest[ , labels],
-                          dates = prcpTest$date, observations = prcpTest$obs)
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
+  
+  obs <- paste("PCP24","obs", sep = ".")
+  ens <- paste("PCP24", ensMemNames, sep = ".")
 
-  prcpTestFitAlt <- ensembleBMAgamma0(prcpTestData, 
-                         trainingRule=list(length=25,lag=2),
-       control = controlBMAgamma0(transformation = function(x) x^(1/4),
-                              inverseTransformation = function(x) x^4))
+  prcpTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"], 
+                                observations = ensBMAtest[,obs], 
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+  prcpTestFit1 <- ensembleBMAgamma0( prcpTestData, trainingDays = 30,
+       control = controlBMAgamma0(power = (1/4)))
 }
 \keyword{models}
 % docclass is function
+

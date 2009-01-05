@@ -39,7 +39,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 
   }
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
 
 ## match dates in data with dateTable
  if (is.null(ensDates) || all(is.na(ensDates))) {
@@ -51,7 +51,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 ## remove instances missing dates
    if (any(M <- is.na(ensDates))) {
      ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleDates(ensembleData)
+     ensDates <- ensembleValidDates(ensembleData)
    }
    Dates <- as.character(ensDates)
    L <- as.logical(match( Dates, dates, nomatch=0))

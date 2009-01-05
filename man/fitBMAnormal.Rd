@@ -70,29 +70,37 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-BMA Forecasting with Missing and Exchangeable Ensemble Members,
-in preparation.
+Using Bayesian Model Averaging to Calibrate Forecast Ensembles
+with Missing and Exchangeable Ensemble Members,
+(in preparation).
 }
 
 \examples{
-  data(slpTest)
+  data(ensBMAtest)
 
-  memberLabels <- c("AVN","GEM","ETA","NGM","NOGAPS")
-  slpTestData <- ensembleData(forecasts = slpTest[ ,memberLabels],
-                         observations = slpTest$obs, dates = slpTest$date)
+  ensNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  DATE <- sort(unique(slpTestData$dates))[27]
-  trainDat <- trainingData( slpTestData, date = DATE, 
-                            trainingRule=list(length=25,lag=2))
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensNames, sep = ".")
 
-\dontrun{
-  slpTestFit <- fitBMA(trainDat, model = "normal")
-}
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                dates = ensBMAtest[,"vdate"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
 
-  slpTestFit <- fitBMAnormal(trainDat)
+  tempTrain <- trainingData( tempTestData, trainingDays = 30,
+                             date  = "2008010100")
+
+  tempTrainFit <- fitBMAnormal( tempTrain)
+
+## equivalent to
+##    tempTrainFit <- fitBMA( tempTrain, model = "normal")
+
 }
 \keyword{models}
 % docclass is function

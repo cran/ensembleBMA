@@ -1,5 +1,5 @@
 `ensembleBMAgamma0` <-
-function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
+function(ensembleData, trainingDays, dates = NULL, 
          control = controlBMAgamma0(), exchangeable = NULL)
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
@@ -8,14 +8,13 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
 
  warmStart <- FALSE
 
- trainingRule <- as.list(trainingRule)
+ if (is.list(trainingDays)) trainingDays <- trainingDays[1]
 
- if (is.null(trainingRule$length) || is.na(trainingRule$length) ||
-     is.null(trainingRule$lag) || is.na(trainingRule$lag))
-   stop("length and lag must be specified in training rule")
+ if (length(trainingDays) > 1 || trainingDays <= 0 
+       || (trainingDays - trunc(trainingDays)) != 0) 
+   stop("trainingDays improperly specified")
 
- if (trainingRule$length < 0 || trainingRule$lag < 0) 
-   stop("improperly specified training rule")
+ lag <- ceiling( ensembleFhour(ensembleData) / 24 )
 
  ensMemNames <- ensembleMemberLabels(ensembleData)
  nForecasts <- length(ensMemNames)
@@ -27,19 +26,19 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
 
  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
  M <- M | is.na(ensembleVerifObs(ensembleData))
- M <- M | is.na(ensembleDates(ensembleData))
+ M <- M | is.na(ensembleValidDates(ensembleData))
  ensembleData <- ensembleData[!M,]
  
  nObs <- ensembleNobs(ensembleData)
  if (!nObs) stop("no observations")
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
  if (is.null(ensDates)) stop("dates unavailable")
 
  Dates <- as.character(ensDates)
  DATES <- sort(unique(Dates))
 
- if (trainingRule$length+trainingRule$lag > length(DATES)) 
+ if (trainingDays+lag > length(DATES)) 
    stop("insufficient training data")
 
  julianDATES <- ymdhTOjul(DATES)
@@ -48,8 +47,8 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
 
 ## dates that can be modeled by the training data (ignoring gaps)
 
- Jdates <- seq(from = julianDATES[trainingRule$length]+trainingRule$lag*incr,
-               to = max(julianDATES)+trainingRule$lag*incr, by = incr)
+ Jdates <- seq(from = julianDATES[trainingDays]+lag*incr,
+               to = max(julianDATES)+lag*incr, by = incr)
 
 ## determine the modeling dates
 
@@ -119,20 +118,20 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
  K <- 1:nForecasts
 
  L <- length(juliandates)
- twin <- 1:trainingRule$length
+ twin <- 1:trainingDays
 
  cat("\n")
  l <- 0
  for(i in seq(along = juliandates)) {
 
-    I <- (juliandates[i]-trainingRule$lag*incr) >= julianDATES
+    I <- (juliandates[i]-lag*incr) >= julianDATES
     if (!any(I)) stop("insufficient training data")
 
     j <- which(I)[sum(I)]
 
     if (j != l) {
 
-      twin <- (j+1) - (1:trainingRule$length)
+      twin <- (j+1) - (1:trainingDays)
 
       D <- as.logical(match(Dates, DATES[twin], nomatch=0))
       if (!any(D)) stop("this should not happen")
@@ -172,12 +171,10 @@ function(ensembleData, dates = NULL, trainingRule = list(length=NA,lag=NA),
 
  }
 
- structure(list(trainingRule = trainingRule, 
+ structure(list(training = list(days=trainingDays,lag=lag,table=trainTable), 
                 prob0coefs = prob0coefs, biasCoefs = biasCoefs, 
                 varCoefs = varCoefs, weights = weights, nIter = nIter,
-                exchangeable = exchangeable,
-                transformation = fit$transformation, 
-                inverseTransformation = fit$inverseTransformation),
+                exchangeable = exchangeable, power = fit$power),
                 call = match.call(), class = "ensembleBMAgamma0")
 }
 

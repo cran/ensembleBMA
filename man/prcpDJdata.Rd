@@ -4,13 +4,13 @@
    Precipitation Data
 }
 \description{
-A subset of daily 48 hour forecasts of 24 hour accumulated 
+ A subset of daily 48 hour forecasts of 24 hour accumulated 
  precipitation over the US Pacific Northwest region 
  from December 2002 to January 2003 based 
  on a 9 member version of the University of Washington mesoscale ensemble
 (Grimit and Mass 2002; Eckel and Mass 2005). 
-Precipitation amounts are quantized to hundredths of an inch. \cr
-Note that forecasts are not available for some of the interim dates.
+ Precipitation amounts are quantized to hundredths of an inch. \cr
+ Note that forecasts are not available for some of the interim dates.
 }
 \format{
 A data frame with 175 rows and 15 columns: \cr
@@ -50,15 +50,18 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting 
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
-\dontrun{
+\dontrun{ # R check
+
+ data(prcpDJdata)
+ data(prcpFit)
+
  prcpForc <- quantileForecast( prcpFit, prcpDJdata, date = "20030113",
-                                 quantiles = c( .1, .5, .9))
-}
-}
+                               quantiles = c( .1, .5, .9))
+}}
 \keyword{data}
 
 % docclass is function

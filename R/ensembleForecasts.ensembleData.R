@@ -1,4 +1,4 @@
-"ensembleForecasts.ensembleData" <-
+`ensembleForecasts.ensembleData` <-
 function (x) 
 { 
  k <- attr(x, "ensembleSize")

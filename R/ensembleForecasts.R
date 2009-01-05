@@ -1,4 +1,4 @@
-"ensembleForecasts" <-
+`ensembleForecasts` <-
 function (x) 
 UseMethod("ensembleForecasts")
 

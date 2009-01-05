@@ -45,7 +45,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 
   }
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
 
 ## match dates in data with dateTable
  if (is.null(ensDates) || all(is.na(ensDates))) {
@@ -57,7 +57,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 ## remove instances missing dates
    if (any(M <- is.na(ensDates))) {
      ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleDates(ensembleData)
+     ensDates <- ensembleValidDates(ensembleData)
    }
    Dates <- as.character(ensDates)
    L <- as.logical(match( Dates, dates, nomatch=0))
@@ -153,8 +153,13 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
          MEAN <- MEAN[!M]
          SD <- SD[!M]
 
-         SAMPLES <- sample((1:nForecasts)[!M],size=nSamples,
-                           replace=TRUE,prob=W) 
+         if (sum(!M) > 1) {
+           SAMPLES <- sample((1:nForecasts)[!M],size=nSamples,
+                             replace=TRUE,prob=W) 
+         }
+         else {
+           SAMPLES <- rep( (1:nForecasts)[!M], nSamples)
+         }
 
          tab <- table(SAMPLES)
 
@@ -187,10 +192,18 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
  crpsCli <- mean(crpsCli - mean(crpsCli)/2)
 
  crpsEns1 <- apply(abs(sweep(ensembleData,MARGIN=1,FUN ="-",STATS=obs))
-                   ,1, mean, na.rm = TRUE)
- crpsEns2 <- apply(apply(ensembleData, 2, function(z,Z) 
+                   ,1,mean,na.rm=TRUE)
+
+ if (nrow(ensembleData) > 1) {
+   crpsEns2 <- apply(apply(ensembleData, 2, function(z,Z) 
      apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum,na.rm=TRUE),
                   Z = ensembleData),1,sum, na.rm = TRUE)
+ }
+ else {
+   crpsEns2 <- sum(sapply(as.vector(ensembleData), 
+                   function(z,Z) sum( Z-z, na.rm = TRUE),
+                   Z = as.vector(ensembleData)), na.rm = TRUE)
+ }
 
  crpsEns <- mean(crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts)))
 

@@ -1,6 +1,10 @@
 `quantileForecast.ensembleBMAgamma0` <-
 function(fit, ensembleData, quantiles=0.5, dates=NULL, ...) 
 {
+
+ powfun <- function(x,power) x^power
+ powinv <- function(x,power) x^(1/power)
+ 
  weps <- 1.e-4
 
  M <- matchEnsembleMembers(fit,ensembleData)
@@ -36,7 +40,7 @@ function(fit, ensembleData, quantiles=0.5, dates=NULL, ...)
 
   }
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
 
 ## match dates in data with dateTable
  if (is.null(ensDates) || all(is.na(ensDates))) {
@@ -48,7 +52,7 @@ function(fit, ensembleData, quantiles=0.5, dates=NULL, ...)
 ## remove instances missing dates
    if (any(M <- is.na(ensDates))) {
      ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleDates(ensembleData)
+     ensDates <- ensembleValidDates(ensembleData)
    }
    Dates <- as.character(ensDates)
    L <- as.logical(match( Dates, dates, nomatch=0))
@@ -85,7 +89,7 @@ function(fit, ensembleData, quantiles=0.5, dates=NULL, ...)
 
        VAR <- fit$varCoefs[1,k] + fit$varCoefs[2,k]*f
 
-       fTrans <- sapply(f, fit$transformation)
+       fTrans <- sapply( f, powfun, power = fit$power)
 
        PROB0 <- sapply(apply(rbind( 1, fTrans, f==0)*fit$prob0coefs[,,k],
                                     2,sum), inverseLogit)
@@ -99,10 +103,10 @@ function(fit, ensembleData, quantiles=0.5, dates=NULL, ...)
        }
 
        Q[i,] <- sapply(quantiles, quantBMAgamma0, WEIGHTS=W,
-                       PROB0=PROB0[!M], MEAN=MEAN[!M], VAR=VAR[!M])
+                       MEAN=MEAN[!M], VAR=VAR[!M], PROB0=PROB0[!M])
     }
  }
 
-  apply(Q, 2, fit$inverseTransformation)
+  apply(Q, 2, powinv, power = fit$power)
 }
 

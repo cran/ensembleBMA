@@ -35,9 +35,12 @@
 }
 
 \examples{
-  data(slpTest)
+  data(ensBMAtest)
 
-  ymdhTOjul(slpTest$date)
+  julianVdates <- ymdhTOjul(ensBMAtest$vdate)
+  all.equal( julTOymdh(julianVdates), as.character(ensBMAtest$vdate))
+
+  all.equal( ymdhTOjul(ensBMAtest$idate), julianVdates-2)
 }
 \keyword{chron}
 % docclass is function

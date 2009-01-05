@@ -7,6 +7,8 @@ function (x, i, j)
     if (missing(i)) matchCall$i <- 1:nrow(x)
     nForcs <- nForecasts <- ensembleSize(x)
     exchangeable <- attr(x, "exchangeable")
+    forecastHour <- attr(x, "forecastHour")
+    initializationTime <- attr(x, "initializationTime")
     if (!missing(j) && !is.null(j)) {
       if (is.logical(j)) {
         if (length(j) != nForecasts)
@@ -53,6 +55,8 @@ function (x, i, j)
     }
     matchCall$drop <- FALSE
     x <- eval(matchCall, parent.frame())
+    attr(x, "initializationTime") <- initializationTime
+    attr(x, "forecastHour") <- forecastHour
     attr(x, "exchangeable") <- exchangeable 
     attr(x, "ensembleSize") <- nForcs
     x

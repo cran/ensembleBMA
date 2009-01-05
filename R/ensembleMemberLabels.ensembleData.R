@@ -1,4 +1,4 @@
-"ensembleMemberLabels.ensembleData" <-
+`ensembleMemberLabels.ensembleData` <-
 function (x) 
 { 
  k <- attr(x, "ensembleSize")

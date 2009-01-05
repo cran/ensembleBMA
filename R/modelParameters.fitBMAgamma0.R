@@ -5,8 +5,7 @@ function(fit, ...)
       popCoefs = fit$popCoefs,
       biasCoefs = fit$biasCoefs, 
       varCoefs = fit$varCoefs,
-      transformation = fit$transformation,
-      inverseTransformation = fit$inverseTransformation,
+      power = fit$power,
       model = "gamma0")
 }
 

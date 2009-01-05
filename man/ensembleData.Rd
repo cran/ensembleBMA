@@ -1,25 +1,31 @@
 \name{ensembleData}
 \alias{ensembleData}
-\alias{ensembleObsLabels}
-\alias{ensembleMemberLabels}
-\alias{ensembleSize}
-\alias{ensembleNobs}
 \alias{ensembleForecasts}
-\alias{ensembleDates}
-\alias{ensembleVerifObs}
+\alias{ensembleFhour}
 \alias{ensembleGroups}
-\alias{ensembleObsLabels.ensembleData}
+\alias{ensembleItime}
+\alias{ensembleMemberLabels}
+\alias{ensembleNobs}
+\alias{ensembleObsLabels}
+\alias{ensembleSize}
+\alias{ensembleValidDates}
+\alias{ensembleVerifObs}
 \alias{ensembleMemberLabels.ensembleData}
+\alias{ensembleFhour.ensembleData}
+\alias{ensembleForecasts.ensembleData}
+\alias{ensembleGroups.ensembleData}
+\alias{ensembleItime.ensembleData}
+\alias{ensembleObsLabels.ensembleData}
 \alias{ensembleSize.ensembleData}
 \alias{ensembleNobs.ensembleData}
-\alias{ensembleForecasts.ensembleData}
-\alias{ensembleDates.ensembleData}
+\alias{ensembleValidDates.ensembleData}
 \alias{ensembleVerifObs.ensembleData}
-\alias{ensembleGroups.ensembleData}
 \alias{[.ensembleData}
 \alias{matchEnsembleMembers}
+\alias{matchEnsembleMembers.ensembleBMAgamma}
 \alias{matchEnsembleMembers.ensembleBMAgamma0}
 \alias{matchEnsembleMembers.ensembleBMAnormal}
+\alias{matchEnsembleMembers.fitBMAgamma}
 \alias{matchEnsembleMembers.fitBMAgamma0}
 \alias{matchEnsembleMembers.fitBMAnormal}
 \title{
@@ -31,34 +37,13 @@
    such as latitude, longitude, and station type may be included as well.
 }
 \usage{
-ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL, 
-              exchangeable = NULL, dates = NULL, observations = NULL, 
-              latitude = NULL, longitude = NULL, ...)
+ensembleData( forecasts, dates = NULL, observations = NULL, ...,
+              forecastHour, initializationTime, exchangeable = NULL)
 }
 \arguments{
   \item{forecasts}{
      A matrix with columns corresponding to forecasts from individual members 
      of an ensemble and rows corresponding to forecasts for the same date.
-  }
-  \item{caseLabels}{
-     An optional set of labels assigned to the forecast instances.
-     The default is to use the row names corresponding to \code{forecasts}.
-  }
-  \item{memberLabels}{
-     An optional set of labels assigned to the ensemble members.
-     The default is to use the column names corresponding to \code{forecasts}.
-     These are important for BMA modeling
-     because they are used to match ensemble members
-     with BMA  modeling weights and parameters.
-  }
-  \item{exchangeable}{
-     A numeric or character vector or factor indicating groups of 
-     ensemble members that are exchangeable (indistinguishable).
-     The models fit will have equal weights and parameters
-     within each group.
-     The same names/labels should be used as for the forecasts.     
-     The default assumes that none of the ensemble members are
-     exhangeable.
   }
   \item{dates}{
     A numeric or character vector or factor specifying the dates
@@ -74,14 +59,25 @@ ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL,
     to the forecasts. Must be supplied if the data is to be
     used for BMA modeling. 
   }
-  \item{latitude}{
-    Optional vector of latitudes of the forecast locations.
-   }
-  \item{longitude}{
-    Optional vector of longitudes of the forecast locations.
-   }
   \item{...}{
-    A named list of additional attributes such as station name and station type.   }
+    A named list of additional attributes such as latitude
+    and longitude.
+  }
+  \item{forecastHour}{
+     A numeric vector giving the forecast hour.
+  }
+  \item{initializationTime}{
+     A numeric or character vector giving the initialization time.
+  }
+  \item{exchangeable}{
+     A numeric or character vector or factor indicating groups of 
+     ensemble members that are exchangeable (indistinguishable).
+     The models fit will have equal weights and parameters
+     within each group.
+     The same names/labels should be used as for the forecasts.     
+     The default assumes that none of the ensemble members are
+     exhangeable.
+  }
 }
 \value{
   An \code{ensembleData} object, incorporating forecasts and
@@ -89,13 +85,15 @@ ensembleData( forecasts, caseLabels = NULL, memberLabels = NULL,
 }
 \details{
     Methods for \code{ensembleData} objects include \code{ensembleSize},
-    \code{ensembleForecasts}, \code{ensembleVerifObs}, and \code{ensembleDates}. \cr
+    \code{ensembleForecasts}, \code{ensembleValidDates}, and
+    \code{ensembleVerifObs}. \cr
     Subsetting is possible, but in the case of columns it applies only to
     the ensemble forecasts.
 }
 
 \seealso{
   \code{\link{ensembleBMA}}, 
+  \code{\link{ensembleBMAgamma}}, 
   \code{\link{ensembleBMAgamma0}}, 
   \code{\link{ensembleBMAnormal}}
 }
@@ -105,39 +103,63 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, May 2008.
+Washington, 2009.
 }
 
 \examples{
+  data(ensBMAtest)
 
- data(slpTest)
+  ensMemNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
- labels <- c("AVN","GEM","ETA","NGM","NOGAPS")
- slpTestData <- ensembleData(forecasts = slpTest[ ,labels],
-                        observations = slpTest$obs, dates = slpTest$date)
+  obs <- paste("T2","obs", sep = ".")
+  ens <- paste("T2", ensMemNames, sep = ".")
 
- slpTestDataX <- ensembleData(forecasts = slpTest[ ,labels],
-                        observations = slpTest$obs, dates = slpTest$date,
-         exchangeable = c(AVN=1, GEM=2, ETA=1, NGM=3, NOGAPS=4))
 
-\dontrun{
- slpTestFit <- ensembleBMAnormal( slpTestData,
-                                  trainingRule = list(length=25,lag=2))
- slpTestFitX <- ensembleBMAnormal( slpTestDataX,
-                                   trainingRule = list(length=25,lag=2))
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+\dontrun{ # R check
+
+  tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
+
 }
-  data(prcpTest)
 
-  labels <- c("CENT","AVN","CMCG","ETA","GASP","JMA","NGPS","TCWB","UKMO")
-  prcpTestData <- ensembleData( forecasts = prcpTest[ ,labels],
-                          dates = prcpTest$date, observations = prcpTest$obs)
-                            
+  obs <- paste("PCP24","obs", sep = ".")
+  ens <- paste("PCP24", ensMemNames, sep = ".")
 
-\dontrun{
-  prcpTestFit <- ensembleBMAgamma0(prcpTestData,
-                                   trainingRule = list(length=30,lag=2))
+  prcpTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"], 
+                                observations = ensBMAtest[,obs], 
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+\dontrun{ # R check
+
+  prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)
+
+}
+
+  obs <- paste("MAXWSP10","obs", sep = ".")
+  ens <- paste("MAXWSP10", ensMemNames, sep = ".")
+
+  windTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                dates = ensBMAtest[,"vdate"], 
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00Z")
+
+\dontrun{ # R check
+
+ windTestFit <- ensembleBMAgamma(windTestData, trainingDays = 30)
+
 }
 
 }
 \keyword{data}
 % docclass is function
+

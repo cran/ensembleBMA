@@ -20,8 +20,7 @@ function(fit, dates = NULL, ...)
       prob0coefs = fit$prob0coefs[,,I],
       biasCoefs = fit$biasCoefs[,,I], 
       varCoefs = fit$varCoefs[,I],
-      transformation = fit$transformation,
-      inverseTransformation = fit$inverseTransformation,
+      power = fit$power,
       model = "gamma0")
 }
 

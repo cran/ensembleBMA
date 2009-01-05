@@ -1,4 +1,4 @@
-"inverseLogit" <-
+`inverseLogit` <-
 function(x) {
 
 ## inverse logit function exp(x) / (1 + exp(x))

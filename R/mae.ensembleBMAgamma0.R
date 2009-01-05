@@ -1,6 +1,10 @@
 `mae.ensembleBMAgamma0` <-
 function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...) 
 {
+
+ powfun <- function(x,power) x^power
+ powinv <- function(x,power) x^(1/power)
+
  weps <- 1.e-4
 
  if (!is.null(seed)) set.seed(seed)
@@ -38,7 +42,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 
   }
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
 
 ## match dates in data with dateTable
  if (is.null(ensDates) || all(is.na(ensDates))) {
@@ -50,7 +54,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 ## remove instances missing dates
    if (any(M <- is.na(ensDates))) {
      ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleDates(ensembleData)
+     ensDates <- ensembleValidDates(ensembleData)
    }
    Dates <- as.character(ensDates)
    L <- as.logical(match( Dates, dates, nomatch=0))
@@ -90,7 +94,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
      
        VAR <- fit$varCoefs[1,k] + fit$varCoefs[2,k]*f
 
-       fTrans <- sapply(f, fit$transformation)
+       fTrans <- sapply(f, powfun, power = fit$power)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs[,,k], 2, sum)
 
@@ -156,8 +160,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
            
 # model is fit to the cube root of the forecast
 
-         S <- sapply(as.vector(unlist(S)),
-                           fit$inverseTransformation)
+         S <- sapply(as.vector(unlist(S)), powinv, power = fit$power)
 
          SAMPLES <- c(rep(0, tab0[1]), S)
        }

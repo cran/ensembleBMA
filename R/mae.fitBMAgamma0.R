@@ -1,6 +1,10 @@
 `mae.fitBMAgamma0` <-
 function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...) 
 {
+ 
+ powfun <- function(x,power) x^power
+ powinv <- function(x,power) x^(1/power)
+ 
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
@@ -43,7 +47,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
      
        VAR <- fit$varCoefs[1] + fit$varCoefs[2]*f
 
-       fTrans <- sapply(f, fit$transformation)
+       fTrans <- sapply( f, powfun, power = fit$power)
 
        MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs, 2, sum)
 
@@ -82,8 +86,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
            
 # model is fit to the cube root of the forecast
 
-         S <- sapply(as.vector(unlist(S)),
-                           fit$inverseTransformation)
+         S <- sapply(as.vector(unlist(S)), powinv, power = fit$power)
 
          SAMPLES <- c(rep(0, tab[1]), S)
        }

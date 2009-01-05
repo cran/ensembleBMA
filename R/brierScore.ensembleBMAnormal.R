@@ -11,7 +11,7 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
 
  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
  M <- M | is.na(ensembleVerifObs(ensembleData))
- M <- M | is.na(ensembleDates(ensembleData))
+ M <- M | is.na(ensembleValidDates(ensembleData))
  ensembleData <- ensembleData[!M,]
  
  if (is.null(y <- ensembleVerifObs(ensembleData)))
@@ -46,7 +46,7 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
 
   }
 
- ensDates <- ensembleDates(ensembleData)
+ ensDates <- ensembleValidDates(ensembleData)
 
 ## match dates in data with dateTable
  if (is.null(ensDates) || all(is.na(ensDates))) {
@@ -58,7 +58,7 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
 ## remove instances missing dates
    if (any(M <- is.na(ensDates))) {
      ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleDates(ensembleData)
+     ensDates <- ensembleValidDates(ensembleData)
    }
    Dates <- as.character(ensDates)
    L <- as.logical(match( Dates, dates, nomatch=0))
