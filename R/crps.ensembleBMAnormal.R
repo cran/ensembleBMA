@@ -109,7 +109,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
        W <- WEIGHTS
        if (any(M)) {
          W <- W + weps
-         W <- W[!M] / sum(W[!M])
+         W[!M] <- W[!M] / sum(W[!M])
        }
 
   # Expression of the CRPS formula and the E|x| if x ~ N(mu,sigma^2)
@@ -157,7 +157,7 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 
          if (sum(!M) > 1) {
            SAMPLES <- sample((1:nForecasts)[!M],size=nSamples,
-                             replace=TRUE,prob=W) 
+                             replace=TRUE,prob=W[!M]) 
          }
          else {
            SAMPLES <- rep( (1:nForecasts)[!M], nSamples)

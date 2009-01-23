@@ -23,7 +23,7 @@ function(forecasts, dates = NULL, observations = NULL, ...,
   }
  else attr(object, "forecastHour") <- forecastHour
  if (missing(initializationTime)) {
-   warning("initilaization time not specified")
+   warning("initialization time not specified")
  }
  else  attr(object, "initializationTime") <- initializationTime
  attr(object, "exchangeable") <- exchangeable

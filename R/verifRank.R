@@ -1,6 +1,6 @@
 `verifRank` <-
-function (forecasts, observations) 
+function(forecasts, observations) 
 {
- apply((forecasts > observations),1,sum)+1
+ apply((forecasts > observations),1,sum)
 }
 

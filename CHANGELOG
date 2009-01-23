@@ -1,3 +1,5 @@
+03/08 changed nonunique forecast error exit to warning
+
 01/09 added subsetting (via date) for fitted BMA models
       changed ensembleDates to ensembleValidDates
       added forecastHour and initializationTime attrributes to model fits  

@@ -92,11 +92,11 @@ function(fit, ensembleData, quantiles = 0.5, dates = NULL, ...)
        W <- WEIGHTS
        if (any(M)) {
          W <- W + weps
-         W <- W[!M]/sum(W[!M])
+         W[!M] <- W[!M]/sum(W[!M])
        }
 
        Q[i,] <- sapply(quantiles, quantBMAnormal,
-                       WEIGHTS=W, MEAN=MEAN[!M], SD=SD[!M])
+                       WEIGHTS=W[!M], MEAN=MEAN[!M], SD=SD[!M])
     }
  }
 

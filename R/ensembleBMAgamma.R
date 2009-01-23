@@ -55,7 +55,8 @@ function(ensembleData, trainingDays, dates = NULL,
 
  DATEShh <- getHH(DATES)
 
- if (length(DATEShh) != 1) stop("forecast hour in data should be unique")
+ if (length(DATEShh) != 1) 
+   warning("valid dates do not have a unique forecast hour")
 
  if (!(lD <- unique(sapply(DATES,nchar)))) 
    stop("all dates in data should have same character length")
@@ -74,9 +75,10 @@ function(ensembleData, trainingDays, dates = NULL,
 
     datesHH <- getHH(dates)
 
-    if (length(datesHH) != 1) stop("forecast hour in dates should be unique")
+    if (length(datesHH) != 1) 
+      warning("dates do not have a unique forecast hour")
    
-    if (datesHH != DATEShh) stop("specified dates incompatible with data")
+    if (any(datesHH != DATEShh)) stop("specified dates incompatible with data")
 
     if (!(ld <- unique(sapply(dates,nchar)))) 
       stop("all specified dates should have same character length")
