@@ -99,7 +99,7 @@ with Missing and Exchangeable Ensemble Members,
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
 \dontrun{ # R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
@@ -120,7 +120,7 @@ with Missing and Exchangeable Ensemble Members,
                             latitude = srft$lat,
                             longitude = srft$lon,
                             forecastHour = 48,
-                            initializationTime = "00Z")
+                            initializationTime = "00")
 
   srftFit <- ensembleBMAnormal(srftData, date = "2004012900",
                                trainingDays = 25)
@@ -131,7 +131,7 @@ with Missing and Exchangeable Ensemble Members,
                                latitude = srftGrid$lat,
                                longitude = srftGrid$lon,
                                forecastHour = 48,
-                               initializationTime = "00Z")
+                               initializationTime = "00")
 
   srftGridForc <- quantileForecast( srftFit, srftGridData, 
                      date = "2004012900")

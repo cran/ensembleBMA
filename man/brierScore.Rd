@@ -86,7 +86,7 @@ Washington, 2009.
                                 observations = ensBMAtest[,obs], 
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
 \dontrun{ # R check
   prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)

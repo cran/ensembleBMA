@@ -91,7 +91,7 @@ with Missing and Exchangeable Ensemble Members,
                                 station = ensBMAtest[,"station"],
                                 dates = ensBMAtest[,"vdate"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   tempTrain <- trainingData( tempTestData, trainingDays = 30,
                              date  = "2008010100")

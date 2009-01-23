@@ -54,33 +54,29 @@ pit( fit, ensembleData, dates = NULL, \dots)
    are ignored. \cr
    Note the model may have been applied to a power transformation of the data,
    but that information is included in the input \code{fit}, and
-   the output is transformed appropriately.
+   the output is transformed appropriately. \cr
+   The PIT is a continuous analog of the verification rank.
 }
 \seealso{
   \code{\link{ensembleBMA}}, 
   \code{\link{fitBMA}}, 
-  \code{\link{quantileForecast}}
+  \code{\link{quantileForecast}},
+  \code{\link{verifRank}},
 }
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
 Using Bayesian model averaging to calibrate forecast ensembles,
 \emph{Monthly Weather Review 133:1155--1174, 2005}.
 
-J. M. Sloughter, A. E. Raftery, T. Gneiting and C. Fraley,
-Probabilistic quantitative precipitation forecasting
-using Bayesian model averaging,
-\emph{Monthly Weather Review 135:3209--3220, 2007}.
+T. Gneiting, F. Balabdaoui and A. Raftery,
+Probabilistic forecasts, calibration and sharpness.
+\emph{Journal of the Royal Statistical Society, Series B 69:243--268, 2007}.
 
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensemble and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
-
-C. Fraley, A. E. Raftery, T. Gneiting,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles
-with Missing and Exchangeable Ensemble Members,
-(in preparation).
+Washington, revised 2009.
 }
 
 \examples{
@@ -96,7 +92,7 @@ with Missing and Exchangeable Ensemble Members,
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
 \dontrun{ # R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)

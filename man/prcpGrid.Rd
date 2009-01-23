@@ -53,7 +53,7 @@ Washington, 2009.
                                latitude = prcpGrid[,"latitude"],
                                longitude = prcpGrid[,"longitude"],
                                forecastHour = 48,
-                               initilaizationTime = "00Z")
+                               initilaizationTime = "00")
 
   data(prcpFit)
 

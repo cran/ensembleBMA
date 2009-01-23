@@ -14,7 +14,8 @@ function(ensembleData, trainingDays, dates = NULL,
        || (trainingDays - trunc(trainingDays)) != 0) 
    stop("trainingDays improperly specified")
 
- lag <- ceiling( ensembleFhour(ensembleData) / 24 )
+ forecastHour <- ensembleFhour(ensembleData)
+ lag <- ceiling( forecastHour / 24 )
 
  ensMemNames <- ensembleMemberLabels(ensembleData)
  nForecasts <- length(ensMemNames)
@@ -214,6 +215,8 @@ function(ensembleData, trainingDays, dates = NULL,
  structure(list(training = list(days=trainingDays,lag= lag,table=trainTable),
                 biasCoefs = biasCoefs, sd = sd, weights = weights,
                 nIter = nIter, exchangeable = exchangeable),
+                forecastHour = forecastHour, 
+                initializationTime = ensembleItime(ensembleData),
                 call = match.call(), class = "ensembleBMAnormal")
 }
 

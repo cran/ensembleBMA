@@ -6,6 +6,8 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
  powinv <- function(x, power) x^(1/power)
 
  weps <- 1.e-4
+
+ matchITandFH(fit,ensembleData)
  
  M <- matchEnsembleMembers(fit,ensembleData)
  nForecasts <- ensembleSize(ensembleData)

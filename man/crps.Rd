@@ -6,6 +6,8 @@
 \alias{crps.fitBMAgamma}
 \alias{crps.fitBMAgamma0}
 \alias{crps.fitBMAnormal}
+\alias{CRPS}
+\alias{CRPS.default}
 \title{
    Continuous Ranked Probability Score
 }
@@ -15,6 +17,7 @@
 }
 \usage{
 crps( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
+CRPS( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
 }
 \arguments{
   \item{fit}{
@@ -53,20 +56,20 @@ crps( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
   }
 }
 \value{
-A vector giving the CRPS for the raw ensemble
-and the probabilistic forecast.
+  \code{crps} is a matrix giving the CRPS for each instance in the data
+  for both the raw ensemble and the median probabilistic forecast. \cr
+  \code{CRPS} is a vector giving the mean of the CRPS over all
+  instances for the raw ensemble and the median probabilistic forecast.
 }
 \details{
-   This method is generic, and can be applied to all ensemble forecasting
+   These methods are generic, and can be applied to all ensemble forecasting
    models. \cr
-   Note the model may have been applied to a power transformation of the data,
-   but that information is included in the input \code{fit}, and
-   the output is transformed appropriately.\cr
-   For the gamma0 model for precipitation, the CRPS is only available
-   through simulation,  because a transformation of the forecast values 
-   is being modeled  rather than the forecast values themselves (the 
-   default transformation is the cube root). The default number of
-   simulation samples in this case is 10,000. \cr
+   For \code{gamma0} model for precipitation and the \code{gamma} model
+   for wind speed the CRPS is only available through simulation.
+   The default number of simulation samples is 10,000. \cr
+   Note that the \code{gamma0} model for precipitation and the
+   \code{gamma} model for wind speed may have been applied to a power
+   transformation of the data. \cr
    For normal models for temperature and pressure, analytic computation 
    of the CRPS is the default. CRPS will be computed via simulation for
    normal models only if \code{nSamples} is set to a positive value.
@@ -106,12 +109,15 @@ with Missing and Exchangeable Ensemble Members,
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
 \dontrun{# R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
 }
-  crps( tempTestFit, tempTestData)
+  crpsValues <- crps( tempTestFit, tempTestData)
+  colMeans(crpsValues)
+
+  CRPS( tempTestFit, tempTestData)
 }
 \keyword{models}
 % docclass is function

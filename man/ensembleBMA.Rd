@@ -14,14 +14,14 @@ ensembleBMA( ensembleData, trainingDays, dates = NULL, control = NULL,
 }
 \arguments{
   \item{ensembleData}{
-     An \code{ensembleData} object including ensemble forecasts, 
-     verification observations and dates. 
+     An \code{ensembleData} object including ensemble forecasts with the 
+     corresponding verifying observations and their dates. 
      Missing values (indicated by \code{NA}) are allowed.
   }
  \item{dates}{
      The dates for which BMA forecasting models are desired. 
-     By default, this will include all
-     dates consistent with the training rule.
+     By default, this will be all dates in \code{ensembleData}
+     for which modeling is allowed given training rule.
   }
   \item{trainingDays}{
     An integer giving the number of time steps (e.g. days)
@@ -85,7 +85,7 @@ A list with the following output components:
    \code{length} regardless of whether or not the dates are consecutive.\cr
    The following methods are available for the output of \code{ensembleBMA}:
    \code{cdf}, \code{quantileForecast},  \code{modelParameters},  
-   \code{brierScore}, \code{crps} and \code{mae}.
+   \code{brierScore}, \code{crps}, \code{CRPS}  and \code{MAE}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
@@ -97,7 +97,7 @@ A list with the following output components:
   \code{\link{modelParameters}}, 
   \code{\link{brierScore}},
   \code{\link{crps}},
-  \code{\link{mae}},
+  \code{\link{MAE}},
   \code{\link{controlBMAnormal}},
   \code{\link{controlBMAgamma0}},
   \code{\link{controlBMAgamma}}
@@ -145,7 +145,7 @@ with missing and exchangeable ensemble members
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   tempTestFit <- ensembleBMA( tempTestData, trainingDays = 30,
                               model = "normal")

@@ -100,20 +100,20 @@ with Missing and Exchangeable Ensemble Members,
   obs <- paste("MAXWSP10","obs", sep = ".")
   ens <- paste("MAXWSP10", ensMemNames, sep = ".")
 
-  windTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+  winsTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 dates = ensBMAtest[,"vdate"], 
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
-  windTrain <- trainingData( windTestData, trainingDays = 30,
+  winsTrain <- trainingData( winsTestData, trainingDays = 30,
                              date = "2008010100")
 
-  windTrainFit <- fitBMAgamma( windTrain)
+  winsTrainFit <- fitBMAgamma( winsTrain)
 
 ## equivalent to
-##    windTrainFit <- fitBMA( windTrain, model = "gamma")
+##    winsTrainFit <- fitBMA( winsTrain, model = "gamma")
 }
 \keyword{models}
 % docclass is function

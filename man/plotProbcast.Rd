@@ -81,7 +81,7 @@ Washington, 2009.
   srftData <- ensembleData( forecasts = srft[,labels],
                             dates = srft$date, observations = srft$obs,
                             latitude = srft$lat, longitude = srft$lon,
-                            forecastHour = 48, initializationTime = "00Z")
+                            forecastHour = 48, initializationTime = "00")
 
 \dontrun{ # R check
 
@@ -109,7 +109,7 @@ Washington, 2009.
  
   srftGridData <- ensembleData(forecasts = srftGrid[,memberLabels],
       latitude = srftGrid[,"latitude"], longitude = srftGrid[,"longitude"],
-                            forecastHour = 48, initializationTime = "00Z")
+                            forecastHour = 48, initializationTime = "00")
 
   gridForc <- quantileForecast( bmaFit, srftGridData, 
                     date = "2004021400", quantiles = c( .1, .5, .9))

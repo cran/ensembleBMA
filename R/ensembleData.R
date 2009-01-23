@@ -12,11 +12,20 @@ function(forecasts, dates = NULL, observations = NULL, ...,
  object <- eval(object, parent.frame())
 
  attr(object, "ensembleSize") <- if (is.null(dim(forecasts))) 1 else ncol(forecasts)
- if (missing(forecastHour))
-   stop("forecast hour is missing")
- attr(object, "forecastHour") <- forecastHour
- if (!missing(initializationTime))
-    attr(object, "initializationTime") <- initializationTime
+ if (missing(dates))
+   stop("dates is missing")
+ if (length(dates) == 1) {
+   nObs <- if (is.null(dim(forecasts))) length(forecasts) else nrow(forecasts)
+   dates <- as.factor(rep( as.character(dates), nObs))
+ }
+ if (missing(forecastHour)) {
+   warning("data cannot be used for modeling unless forecast hour is specified")
+  }
+ else attr(object, "forecastHour") <- forecastHour
+ if (missing(initializationTime)) {
+   warning("initilaization time not specified")
+ }
+ else  attr(object, "initializationTime") <- initializationTime
  attr(object, "exchangeable") <- exchangeable
  class(object) <- c("ensembleData", "data.frame")
  object

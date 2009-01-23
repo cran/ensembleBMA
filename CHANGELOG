@@ -1,5 +1,8 @@
 01/09 added subsetting (via date) for fitted BMA models
       changed ensembleDates to ensembleValidDates
+      added forecastHour and initializationTime attrributes to model fits  
+      changed crps to CRPS and added modeified crps; changed MAE to mae
+      added verifRankHist function
 
 12/08 modified ensembleData function for efficiency    
       added forecastHour requirement for ensembleData

@@ -1,5 +1,5 @@
-`cdf.ensembleBMAnormal` <-
-function(fit, ensembleData, values, dates = NULL, ...) 
+`MAE.default` <-
+function(fit, ensembleData, dates=NULL, ...) 
 {
  weps <- 1.e-4
 
@@ -12,6 +12,7 @@ function(fit, ensembleData, values, dates = NULL, ...)
 ## remove instances missing all forecasts
 
  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
+ M <- M | is.na(ensembleVerifObs(ensembleData))
  ensembleData <- ensembleData[!M,]
  
 ## match specified dates with dateTable in fit
@@ -61,52 +62,29 @@ function(fit, ensembleData, values, dates = NULL, ...)
    nObs <- length(Dates)
  }
 
- nForecasts <- ensembleSize(ensembleData)
+ obs <- ensembleVerifObs(ensembleData)
+ nForecasts <- ensembleSize(ensembleData) 
 
- CDF <- matrix( NA, nrow = nObs, ncol = length(values))
- dimnames(CDF) <- list(ensembleObsLabels(ensembleData), as.character(values)) 
+ Q <- as.vector(quantileForecast( fit, ensembleData, dates = dates))
 
  ensembleData <- ensembleForecasts(ensembleData)
 
- l <- 0 
- for (d in dates) {
+## maeCli <- mean(abs(obs - median(obs)))
 
-    l <- l + 1
-    k <- K[l]
+## maeEns <- mean(abs(obs - apply(ensembleData, 1, median)))
 
-    WEIGHTS <- fit$weights[,k]
-     
-    if (all(Wmiss <- is.na(WEIGHTS))) next
-     
-    SD <- if (!is.null(dim(fit$sd))) {
-            fit$sd[,k] 
-          }
-          else rep(fit$sd[k], nForecasts)
+ maeCli <- mean(abs(obs - mean(obs)))
 
-    I <- which(as.logical(match(Dates, d, nomatch = 0)))
+ maeEnsMean <- mean(abs(obs - apply(ensembleData, 1, mean, na.rm = TRUE)))
+ maeEnsMedian <- mean(abs(obs - apply(ensembleData, 1, median, na.rm = TRUE)))
+ mseEnsMean <- sum((obs - apply(ensembleData, 1, mean, na.rm = TRUE))^2)/length(obs)
+ mseEnsMedian <- sum((obs - apply(ensembleData, 1, median, na.rm = TRUE))^2)/length(obs)
 
-    for (i in I) {
-    
-       f <- ensembleData[i,]
-     
-       MEAN <- apply(rbind(1, f) * fit$biasCoefs[,,k], 2, sum)
+     maeBMAmedian <- mean(abs(obs - Q)) 
+     mseBMAmedian <- sum((obs - Q)^2)/length(obs)
 
-       M <- is.na(f) | Wmiss
+##c(climatology = maeCli, ensemble = maeEns, BMA = maeBMA)
 
-       W <- WEIGHTS
-
-       if (any(M)) {
-         W <- W + weps
-         W <- W[!M]/sum(W[!M])
-       }
-
-       CDF[i,] <- sapply( values, cdfBMAnormal,
-                          WEIGHTS = W, MEAN = MEAN[!M], SD = SD[!M]) 
-
-    }
-
- }
-
- CDF
+ c(ensemble = maeEnsMedian, BMA = maeBMAmedian)
 }
 

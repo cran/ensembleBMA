@@ -5,7 +5,9 @@ function(fit, ensembleData, thresholds, dates = NULL, ...)
  powfun <- function(x, power) x^power
 
  weps <- 1.e-4
- 
+
+ matchITandFH(fit,ensembleData)
+
  M <- matchEnsembleMembers(fit,ensembleData)
  nForecasts <- ensembleSize(ensembleData)
  if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]

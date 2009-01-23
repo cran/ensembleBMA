@@ -83,7 +83,7 @@ Washington, 2009.
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   tempTestFit1 <- ensembleBMAnormal(tempTestData, trainingDays = 30,
     control = controlBMAnormal(maxIter = 100, biasCorrection = "additive"))

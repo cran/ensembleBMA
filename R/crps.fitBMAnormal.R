@@ -131,7 +131,7 @@ function(fit, ensembleData, nSamples = NULL, seed=NULL, dates=NULL, ...)
  }
 
  crpsCli <- sapply(obs, function(x,Y) mean(abs(Y-x)), Y = obs)
- crpsCli <- mean(crpsCli - mean(crpsCli)/2)
+ crpsCli <- crpsCli - mean(crpsCli)/2
 
  crpsEns1 <- apply(abs(sweep(ensembleData,MARGIN=1,FUN ="-",STATS=obs)),
                    1, mean, na.rm = TRUE)
@@ -139,11 +139,11 @@ function(fit, ensembleData, nSamples = NULL, seed=NULL, dates=NULL, ...)
        apply(abs(sweep(Z, MARGIN = 1, FUN = "-", STATS = z)),1,sum,na.rm=TRUE),
                   Z = ensembleData), 1, sum, na.rm = TRUE)
 
- crpsEns <- mean(crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts)))
+ crpsEns <- crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts))
 
- crpsBMA <- crpsSim <- mean(crpsSim)
+ crpsBMA <- if (is.null(nSamples)) CRPS else crpsSim
 
-c(climatology = crpsCli, ensemble = crpsEns, BMA = crpsBMA)
-c(ensemble = crpsEns, BMA = crpsBMA)
+#cbind(climatology = crpsCli, ensemble = crpsEns, BMA = crpsBMA)
+ cbind(ensemble = crpsEns, BMA = crpsBMA)
 }
 

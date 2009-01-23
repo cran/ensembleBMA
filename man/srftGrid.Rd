@@ -59,7 +59,7 @@ Washington, 2009.
                             latitude = srft$lat,
                             longitude = srft$lon,
                             forecastHour = 48,
-                            initializationTime = "00Z")
+                            initializationTime = "00")
 
   srftFit <- ensembleBMAnormal( srftData, date = "2004012900",
                                 trainingDays = 25)
@@ -69,8 +69,8 @@ Washington, 2009.
                                 latitude = srftGrid$lat,
                                 longitude = srftGrid$lon,
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
-    crps( srtGridData, srftFit)
+   CRPS( srtGridData, srftFit)
 }}
 \keyword{datasets}

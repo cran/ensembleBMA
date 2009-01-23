@@ -76,14 +76,14 @@ Washington, 2009.
   obs <- paste("MAXWSP10","obs", sep = ".")
   ens <- paste("MAXWSP10", ensMemNames, sep = ".")
 
-  windTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+  winsTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 dates = ensBMAtest[,"vdate"], 
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
-   windTestFit1 <- ensembleBMAgamma(windTestData, trainingDays = 30,
+   winsTestFit1 <- ensembleBMAgamma(winsTestData, trainingDays = 30,
        control = controlBMAgamma(maxIter = 100, tol = 1.e-6))
 }
 \keyword{models}

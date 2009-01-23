@@ -15,8 +15,8 @@ ensembleBMAgamma( ensembleData, trainingDays, dates = NULL,
 }
 \arguments{
   \item{ensembleData}{
-      An \code{ensembleData} object including ensemble forecasts, 
-      verification observations and dates. 
+      An \code{ensembleData} object including ensemble forecasts 
+      with the corresponding verifying observations and their dates.
       Missing values (indicated by \code{NA}) are allowed.
   }
   \item{trainingDays}{
@@ -25,8 +25,8 @@ ensembleBMAgamma( ensembleData, trainingDays, dates = NULL,
   }
   \item{dates}{
      The dates for which forecasting models are desired. 
-     By default, this will include all
-     dates consistent with the training rule.
+     By default, this will be all dates in \code{ensembleBMA} for which
+     modeling is allowed given the training rule.
   }
   \item{control}{
      A list of control values for the fitting functions. The defaults are
@@ -75,7 +75,7 @@ ensembleBMAgamma( ensembleData, trainingDays, dates = NULL,
    to be forecast with  the training rule. \cr
    The following methods are available for \code{ensembleBMAgamma0} objects:
    \code{cdf}, \code{quantileForecast},   \code{modelParameters}, 
-   \code{brierScore}, \code{crps} and \code{mae}.
+   \code{brierScore}, \code{crps}, \code{CRPS} and \code{MAE}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
@@ -86,10 +86,10 @@ ensembleBMAgamma( ensembleData, trainingDays, dates = NULL,
   \code{\link{modelParameters}},
   \code{\link{brierScore}},
   \code{\link{crps}},
-  \code{\link{mae}}
+  \code{\link{MAE}}
 }
 \references{
- J. M. Sloughter, T.Gneiting and A. E. Raftery, 
+J. M. Sloughter, T.Gneiting and A. E. Raftery, 
 Probabilistic wind speed forecasting 
 using ensembles and Bayesian model averaging,
 Technical Report No. 544, Department of Statistics,
@@ -99,12 +99,7 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
-
-C. Fraley, A. E. Raftery, T. Gneiting,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles
-with Missing and Exchangeable Ensemble Members,
-(in preparation).
+Washington, revised 2009.
 }
 
 \examples{
@@ -115,17 +110,17 @@ with Missing and Exchangeable Ensemble Members,
   obs <- paste("MAXWSP10","obs", sep = ".")
   ens <- paste("MAXWSP10", ensMemNames, sep = ".")
 
-  windTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+  winsTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 dates = ensBMAtest[,"vdate"], 
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
-  windTestFit <- ensembleBMAgamma(windTestData, trainingDays = 30)
+  winsTestFit <- ensembleBMAgamma(winsTestData, trainingDays = 30)
 
 ## equivalent to
-##     windTestFit <- ensembleBMA(windTestData, trainingDays = 30,
+##     winsTestFit <- ensembleBMA(winsTestData, trainingDays = 30,
 ##                                model = "gamma")
 }
 \keyword{models}

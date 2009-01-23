@@ -7,6 +7,8 @@ function(fit, ensembleData, quantiles=0.5, dates=NULL, ...)
  
  weps <- 1.e-4
 
+ matchITandFH(fit,ensembleData)
+
  M <- matchEnsembleMembers(fit,ensembleData)
  nForecasts <- ensembleSize(ensembleData)
  if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]

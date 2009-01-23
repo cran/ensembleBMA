@@ -15,8 +15,8 @@ ensembleBMAgamma0( ensembleData, trainingDays, dates = NULL,
 }
 \arguments{
   \item{ensembleData}{
-      An \code{ensembleData} object including ensemble forecasts, 
-      verification observations and dates. 
+      An \code{ensembleData} object including ensemble forecasts with the 
+      corresponding verifying observations and their dates. 
       Missing values (indicated by \code{NA}) are allowed.
   }
   \item{trainingDays}{
@@ -25,8 +25,8 @@ ensembleBMAgamma0( ensembleData, trainingDays, dates = NULL,
   }
   \item{dates}{
      The dates for which forecasting models are desired. 
-     By default, this will include all
-     dates consistent with the training rule.
+     By default, this will be all dates in \code{ensembleData} for which
+     modeling is allowed given the training rule.
   }
   \item{control}{
      A list of control values for the fitting functions. The defaults are
@@ -75,7 +75,7 @@ ensembleBMAgamma0( ensembleData, trainingDays, dates = NULL,
    to be forecast with  the training rule. \cr
    The following methods are available for \code{ensembleBMAgamma0} objects:
    \code{cdf}, \code{quantileForecast},   \code{modelParameters}, 
-   \code{brierScore}, \code{crps} and \code{mae}.
+   \code{brierScore}, \code{crps}, \code{CRPS} and \code{MAE}.
 }
 \seealso{
   \code{\link{ensembleData}}, 
@@ -86,7 +86,7 @@ ensembleBMAgamma0( ensembleData, trainingDays, dates = NULL,
   \code{\link{modelParameters}},
   \code{\link{brierScore}},
   \code{\link{crps}},
-  \code{\link{mae}}
+  \code{\link{MAE}}
 }
 \references{
 J. M. Sloughter, A. E. Raftery, T. Gneiting and C. Fraley, 
@@ -119,7 +119,7 @@ with Missing and Exchangeable Ensemble Members,
                                 observations = ensBMAtest[,obs], 
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)
 

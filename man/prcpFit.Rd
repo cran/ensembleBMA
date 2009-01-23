@@ -4,7 +4,7 @@
   BMA Model Fit to Precipitation Data
 }
 \description{
- The default \code{ensembleBMAgamma0} model fit to the 
+ The \code{ensembleBMAgamma0} model fit with a 30 day training period to the 
  precipitation data set from \cr
  \emph{http://www.stat.washington.edu/MURI}, 
  which gives daily daily 48 hour forecasts of 24 hour accumulated 
@@ -78,7 +78,7 @@ Washington, 2009.
                                latitude = prcpGrid[,"latitude"],
                                longitude = prcpGrid[,"longitude"],
                                forecsatHour = 48,
-                               initializationTime = "00Z")
+                               initializationTime = "00")
 
 # probability of precipitation
   1 - cdf( prcpFit, prcpGridData, value = 0)

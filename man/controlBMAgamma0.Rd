@@ -82,7 +82,7 @@ Washington, 2009.
                                 observations = ensBMAtest[,obs], 
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   prcpTestFit1 <- ensembleBMAgamma0( prcpTestData, trainingDays = 30,
        control = controlBMAgamma0(power = (1/4)))

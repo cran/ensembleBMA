@@ -100,7 +100,7 @@ with Missing and Exchangeable Ensemble Members,
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
 \dontrun{# R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)

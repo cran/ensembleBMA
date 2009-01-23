@@ -105,7 +105,7 @@ with Missing and Exchangeable Ensemble Members,
                                 observations = ensBMAtest[,obs], 
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   prcpTrain <- trainingData( prcpTestData, trainingDays = 30,
                              date = "2008010100")

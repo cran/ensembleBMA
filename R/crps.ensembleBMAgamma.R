@@ -2,12 +2,16 @@
 function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...) 
 {
 
+ if (!is.null(seed)) set.seed(seed)
+
  powfun <- function(x,power) x^power
  powinv <- function(x,power) x^(1/power)
 
  weps <- 1.e-4
 
  if (is.null(nSamples)) nSamples <- 10000
+
+ matchITandFH(fit,ensembleData)
 
  M <- matchEnsembleMembers(fit,ensembleData)
  nForecasts <- ensembleSize(ensembleData)
@@ -140,10 +144,12 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
     }
  }
 
- crpsSim <- mean(crpsSim, na.rm = TRUE)
+##crpsSim <- mean(crpsSim, na.rm = TRUE)
 
- crpsCli <- sapply(obs, function(x,Y) mean(abs(Y-x)), Y = obs)
- crpsCli <- mean(crpsCli - mean(crpsCli)/2)
+  crpsCli <- sapply(obs, function(x,Y) mean(abs(Y-x)), Y = obs)
+##crpsCli <- mean(crpsCli - mean(crpsCli)/2)
+  
+  crpsCli <- crpsCli - mean(crpsCli)/2
 
  crpsEns1 <- apply(abs(sweep(ensembleData,MARGIN=1,FUN ="-",STATS=obs))
                    ,1,mean,na.rm=TRUE)
@@ -159,9 +165,10 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
                    Z = as.vector(ensembleData)), na.rm = TRUE)
  }
 
- crpsEns <- mean(crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts)))
+##crpsEns <- mean(crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts)))
+  crpsEns <- crpsEns1 - crpsEns2/(2*(nForecasts*nForecasts))
 
-##c(climatology = crpsCli, ensemble = crpsEns, BMA = crpsSim)
-c(ensemble = crpsEns, BMA = crpsSim)
+#cbind(climatology = crpsCli, ensemble = crpsEns, BMA = crpsSim)
+ cbind(ensemble = crpsEns, BMA = crpsSim)
 }
 

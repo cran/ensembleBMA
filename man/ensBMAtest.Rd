@@ -3,7 +3,7 @@
 \alias{ensBMAtest}
 \alias{tempTestFit}
 \alias{prcpTestFit}
-\alias{windTestFit}
+\alias{winsTestFit}
 \title{Ensemble BMA Test Data Set}
 \description{
   This data set gives 48-hour forecasts for 2-m temperature,
@@ -70,12 +70,12 @@ the Pacific Northwest,
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
 
-  mae( tempFit, tempTestData)
-  crps( tempFit, tempTestData)
+  MAE( tempFit, tempTestData)
+  CRPS( tempFit, tempTestData)
 
 #----------------------------------------------------------------------------
 
@@ -87,28 +87,28 @@ the Pacific Northwest,
                                 observations = ensBMAtest[,obs], 
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
   prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)
 
-  mae( prcpTestFit, prcpTestData)
-  crps( prcpTestFit, prcpTestData)
+  MAE( prcpTestFit, prcpTestData)
+  CRPS( prcpTestFit, prcpTestData)
 
 #----------------------------------------------------------------------------
 
   obs <- paste("MAXWSP10","obs", sep = ".")
   ens <- paste("MAXWSP10", ensMemNames, sep = ".")
 
-  windTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+  winsTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 dates = ensBMAtest[,"vdate"], 
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
-   windTestFit <- ensembleBMAgamma(windTestData, trainingDays = 30)
+   winsTestFit <- ensembleBMAgamma(winsTestData, trainingDays = 30)
 
-   mae( windTestFit, windTestData)
-   crps( windTestFit, windTestData)
+   MAE( winsTestFit, winsTestData)
+   CRPS( winsTestFit, winsTestData)
 }}
 \keyword{datasets}

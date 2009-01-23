@@ -1,11 +1,6 @@
-\name{mae}
-\alias{mae}
-\alias{mae.ensembleBMAgamma}
-\alias{mae.ensembleBMAgamma0}
-\alias{mae.ensembleBMAnormal}
-\alias{mae.fitBMAgamma}
-\alias{mae.fitBMAgamma0}
-\alias{mae.fitBMAnormal}
+\name{MAE}
+\alias{MAE}
+\alias{MAE.default}
 \title{
    Mean Absolute Error
 }
@@ -13,7 +8,7 @@
    Computes the mean absolute error (MAE) for ensemble forecasting models. 
 }
 \usage{
-mae( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
+MAE( fit, ensembleData, dates=NULL, \dots)
 }
 \arguments{
   \item{fit}{
@@ -30,13 +25,6 @@ mae( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
      If \code{ensembleData} does not include dates, they will
      be inferred from \code{fit} and \code{dates}. 
    }
-  \item{nSamples}{
-     The number of simulation samples for MAE via simulation.
-     The default is analytic computation of the MAE.
-  }
-  \item{seed}{
-     Argument to \code{set.seed} for random number generation in simulation.
-  }
  \item{dates}{
      The dates for which the CRPS and MAE will be computed.
      These dates must be consistent with \code{fit} and \code{ensembleData}.
@@ -95,12 +83,12 @@ with Missing and Exchangeable Ensemble Members,
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 \dontrun{ # R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
 }
 
-  mae( tempTestFit, tempTestData)
+  MAE( tempTestFit, tempTestData)
 }
 \keyword{models}
 % docclass is function

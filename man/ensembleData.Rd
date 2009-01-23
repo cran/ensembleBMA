@@ -28,6 +28,8 @@
 \alias{matchEnsembleMembers.fitBMAgamma}
 \alias{matchEnsembleMembers.fitBMAgamma0}
 \alias{matchEnsembleMembers.fitBMAnormal}
+\alias{matchITandFH}
+\alias{matchITandFH.default}
 \title{
   Create an ensembleData object
 }
@@ -46,9 +48,9 @@ ensembleData( forecasts, dates = NULL, observations = NULL, ...,
      of an ensemble and rows corresponding to forecasts for the same date.
   }
   \item{dates}{
-    A numeric or character vector or factor specifying the dates
-    corresponding to the forecasts. If numeric, it is interpreted
-    as a Julian date if it has an \code{origin} attribute specifying
+    A numeric or character vector or factor specifying the valid dates
+    for the forecasts. If numeric, it is interpreted as a Julian date
+    if it has an \code{origin} attribute specifying
     the month, day, and year, e.g. \code{c(month = 1, day = 1, year = 2000)}.
     Otherwise the character form of each date must be a string with format
     format YYYYMMDDHH or YYYYMMDD, where YYYY is the year,
@@ -81,9 +83,12 @@ ensembleData( forecasts, dates = NULL, observations = NULL, ...,
 }
 \value{
   An \code{ensembleData} object, incorporating forecasts and
-  (optionally) observations with the associated dates.
+  (optionally) observations with the associated valid dates.
 }
 \details{
+    All instances in an \code{ensembleData} object are assumed to have
+    the same forecast hour and initialization time, which should be
+    specified as part of the object. \cr  
     Methods for \code{ensembleData} objects include \code{ensembleSize},
     \code{ensembleForecasts}, \code{ensembleValidDates}, and
     \code{ensembleVerifObs}. \cr
@@ -120,7 +125,7 @@ Washington, 2009.
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
 \dontrun{ # R check
 
@@ -136,7 +141,7 @@ Washington, 2009.
                                 observations = ensBMAtest[,obs], 
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 \dontrun{ # R check
 
   prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)
@@ -146,16 +151,16 @@ Washington, 2009.
   obs <- paste("MAXWSP10","obs", sep = ".")
   ens <- paste("MAXWSP10", ensMemNames, sep = ".")
 
-  windTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+  winsTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 dates = ensBMAtest[,"vdate"], 
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
                                 forecastHour = 48,
-                                initializationTime = "00Z")
+                                initializationTime = "00")
 
 \dontrun{ # R check
 
- windTestFit <- ensembleBMAgamma(windTestData, trainingDays = 30)
+ winsTestFit <- ensembleBMAgamma(winsTestData, trainingDays = 30)
 
 }
 
