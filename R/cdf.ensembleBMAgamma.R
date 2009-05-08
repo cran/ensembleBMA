@@ -102,7 +102,7 @@ function(fit, ensembleData, values, dates = NULL, ...)
        }
 
        CDF[i,] <- sapply( sapply( values, powfun, power = fit$power), 
-                cdfBMAgamma0, WEIGHTS = W, MEAN = MEAN[!M], VAR = VAR[!M])
+                cdfBMAgamma, WEIGHTS = W, MEAN = MEAN[!M], VAR = VAR[!M])
     }
 
  }

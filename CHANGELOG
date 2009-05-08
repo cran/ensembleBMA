@@ -1,4 +1,6 @@
-03/08 changed nonunique forecast error exit to warning
+05/09 changed call to ccdfBMAgamma0 to cdfBMAgamma in cdf.ensembleBMAgamma
+
+03/09 changed nonunique forecast error exit to warning
 
 01/09 added subsetting (via date) for fitted BMA models
       changed ensembleDates to ensembleValidDates

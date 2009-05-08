@@ -39,7 +39,7 @@ function(ensembleData, trainingDays, dates = NULL,
  Dates <- as.character(ensDates)
  DATES <- sort(unique(Dates))
 
- if (trainingDays+lag > length(DATES)) 
+ if (trainingDays > length(DATES)) 
    stop("insufficient training data")
 
  julianDATES <- ymdhTOjul(DATES)

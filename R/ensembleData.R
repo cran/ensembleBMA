@@ -12,9 +12,10 @@ function(forecasts, dates = NULL, observations = NULL, ...,
  object <- eval(object, parent.frame())
 
  attr(object, "ensembleSize") <- if (is.null(dim(forecasts))) 1 else ncol(forecasts)
- if (missing(dates))
-   stop("dates is missing")
- if (length(dates) == 1) {
+ if (missing(dates)) {
+   warning("no dates specified")
+ }
+ else if (length(dates) == 1) {
    nObs <- if (is.null(dim(forecasts))) length(forecasts) else nrow(forecasts)
    dates <- as.factor(rep( as.character(dates), nObs))
  }
