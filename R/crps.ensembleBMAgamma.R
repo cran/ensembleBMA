@@ -113,7 +113,8 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
                             replace = TRUE, prob = W)
        }
        else {
-         SAMPLES <- rep( (1:nForecasts)[!M], nSamples) 
+         SAMPLES <- sample( 1:nForecasts, size = nSamples, 
+                            replace = TRUE, prob = WEIGHTS)
        }
 
        tab <- numeric(sum(!M))

@@ -1,4 +1,5 @@
-05/09 changed call to ccdfBMAgamma0 to cdfBMAgamma in cdf.ensembleBMAgamma
+05/09 fixed crps calculation for gamma0 and gamma models
+      changed call to cdfBMAgamma0 to cdfBMAgamma in cdf.ensembleBMAgamma
 
 03/09 changed nonunique forecast error exit to warning
 

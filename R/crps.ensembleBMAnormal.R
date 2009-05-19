@@ -160,7 +160,8 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
                              replace=TRUE,prob=W[!M]) 
          }
          else {
-           SAMPLES <- rep( (1:nForecasts)[!M], nSamples)
+           SAMPLES <- sample(1:nForecasts,size=nSamples,
+                             replace=TRUE,prob=WEIGHTS) 
          }
 
          tab <- table(SAMPLES)
