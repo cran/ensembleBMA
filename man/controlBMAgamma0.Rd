@@ -9,7 +9,7 @@
    precipitation.
 }
 \usage{
-controlBMAgamma0(maxIter, tol, nEsteps, power = (1/3), start)
+controlBMAgamma0(maxIter, tol, power = (1/3), start)
 }
 \arguments{
   \item{maxIter}{
@@ -24,14 +24,6 @@ controlBMAgamma0(maxIter, tol, nEsteps, power = (1/3), start)
      objective values in the M-step falls below \code{tol}.
      The default is \code{sqrt(.Machine$double.eps)}, 
      which is approximately \code{1.e-8} on IEEE compliant machines.
-  }
-  \item{nEsteps}{
-    The number of E-steps per M-step, after five iterations of standard
-    EM. The default is 1, but using more E-steps per M-step causes
-    the convergence criterion to be satisfied in fewer iterations.
-    This is a heuristic to speed things up since the results for
-    multiple E-steps often are not much different from the results
-    with one E-step per M-step.
   }
   \item{power}{
     A scalar value giving the power by which the data will be

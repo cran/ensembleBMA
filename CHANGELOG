@@ -1,3 +1,6 @@
+06/09 modified estimation in gamma0 and gamma to do true EM 
+      updated bias correction strategy to handle 0 forc in gamma and gamma0 
+
 05/09 fixed crps calculation for gamma0 and gamma models
       changed call to cdfBMAgamma0 to cdfBMAgamma in cdf.ensembleBMAgamma
 

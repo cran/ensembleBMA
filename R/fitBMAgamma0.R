@@ -17,7 +17,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
   maxIter <- control$maxIter
   tol <- eps <- control$tol
-  nEsteps <- control$nEsteps
 
 # remove instances missing all forecasts or obs
 
@@ -44,141 +43,33 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   ensembleData <- ensembleForecasts(ensembleData)
 
   Xvar <- ensembleData[!Y0, ]
-
-##LM0 <- function(coefs, Xy, XX, R)(crossprod(R %*% coefs) - 2*sum(coefs*Xy))/2
-
-##LM1 <- function(coefs, Xy, XX, R) XX %*% coefs - Xy
-
-##LM2 <- function(coefs, Xy, XX, R) XX
-
-  LM0 <- function(coefs, X, y, XX) {
-    r <- y - X %*% coefs
-    sum(r*r)/2
-  }
-
-  LM1 <- function(coefs, X, y, XX) {
-    r <- y - X %*% coefs
-    -crossprod(X,r)
-  }
-
-  LM2 <- function(coefs, X, y, XX) {
-    XX
-  }
-
-  LMopt0 <-      function(z) {
-## constrained opt for bias coefs with NA handling
-# x is the cube root of the forecasts; y is the cube root of the obs
-                           X <- model.matrix(z$formula, data = z$model)
-                           coefs    <- z$coefficients 
-                           coefs[1] <- max(coefs[1],0)
-                           coefs[2] <- max(coefs[2],0)
-                           opt <- nlminb(coefs, ob=LM0, gr=LM1, he=LM2,
-                                         lower = c(0,0), upper =c(Inf,Inf),
-                                     X = X, y = z$model$y,  XX = crossprod(X))
-                           if (opt$convergence) print(opt$message)
-                           coefs <- z$coefficients <- opt$par
-                           z$fitted.values <- X %*% coefs
-                           z
-                          }
-
-  LR0 <- function(coefs, X, y)
-  {
-    linearPredictor <- X %*% coefs
-    z <- sapply(linearPredictor, function(x) {
-                     if (x >= 0) {
-                        if (-x >= log(.Machine$double.eps)) {
-                          log(exp(-x)+1) + x 
-                        }
-                        else x
-                      }
-                     else {
-                       if (x >= log(.Machine$double.eps)) {
-                         log(1+exp(x))
-                       }
-                      else 0
-                    }
-             })
-    sum(z - y*(linearPredictor))
-  }
-
-  LR1 <- function(coefs, X, y)
-  {
-    z <-  sapply(X %*% coefs,
-                    function(x) {
-                      if (x >= 0) {
-                        if (-x >= log(.Machine$double.eps)) {
-                          1/(1+exp(-x))
-                        }
-                        else 1
-                      }
-                     else {
-                       if (x >= log(.Machine$double.xmin)) {
-                         x <- exp(x)
-                         x/(1+x)
-                       }
-                      else 0
-                   }
-             })
-    -crossprod(X,y-z)
-  }
-
-  LR2 <- function(coefs, X, y)
-  {
-    d <- sapply(X %*% coefs,
-                    function(x) {
-                      if (x >= 0) {
-                        if (-x >= log(.Machine$double.xmin)) {
-                          x <- exp(-x)
-                          x/(1+x)^2
-                        }
-                        else 0
-                      }
-                     else {
-                       if (x >= log(.Machine$double.xmin)) {
-                         x <- exp(x)
-                         x/(1+x)^2
-                       }
-                      else 0
-                     }
-             })
-    crossprod(sweep(X, MARGIN=1, FUN="*", STATS=sqrt(d)))
-  }
-
-  LRopt0 <-    function(z){
-                       coefs <- z$coefficients
-                       coefs[2] <- min(coefs[2],0)
-                       coefs[3] <- max(coefs[3],0)
-                       X <- model.matrix(z$formula, data = z$model)
-                       opt <- nlminb(coefs, ob=LR0, gr=LR1, he=LR2, 
-                                     lower = c(-Inf,-Inf,0), 
-                                     upper =c(Inf,0,Inf),
-                                     X = X, y = z$model$y)
-                       if (opt$convergence)  print(opt$message)
-                       coefs <- z$coefficients <- opt$par
-                       z$fitted.values <- sapply(X %*% coefs, inverseLogit)
-                       z
-                      }
   
   ensembleData <- apply(ensembleData, 2, 
                        function(x) sapply(x, powfun, power = control$power))
 
   miss <- as.vector(as.matrix(is.na(ensembleData)))
 
+    logisticFunc <- function(x, y) {
+      x <- as.matrix(x)
+      n <- ncol(x)
+      x <- as.vector(x)
+      y <- rep(y,n)
+      nax <- is.na(x)
+      x <- x[!nax]      
+      y <- y[!nax]      
+      fit <- glm(y ~ x + (x==0), family = binomial(logit))
+      coefs <- fit$coefficients
+      if (!(coefs[2] <= 0 && coefs[3] >= 0)) {
+        fit$coefficients[2] <- min(fit$coefficients[2],0)
+        fit$coefficients[3] <- max(fit$coefficients[3],0)
+        pred <- model.matrix(fit$formula,data=fit$model)
+        fit$fitted.values <- sapply(pred %*% fit$coefficients, inverseLogit)
+      }
+     fit
+    }
+
   if (nullX) {
-    prob0fit <- apply(ensembleData, 2, function(x, y0) {
-    glm(y0~x+(x==0),family=binomial(logit), na.action = na.omit)}, y0 = Y0)
-
-    prob0fit <- lapply( prob0fit, function(x, components) x[components],
-       components = c("coefficients","fitted.values","model","formula"))
-
-    temp <- lapply(prob0fit, function(x) x$fitted.values)
-
-    prob0check <- unlist(lapply(prob0fit, function(z) {
-                                coefs <- z$coefficients
-                                coefs[2] <= 0 && coefs[3] >= 0}))
-
-    if (any(!prob0check)) 
-      prob0fit[!prob0check] <- lapply(prob0fit[!prob0check], LRopt0)
+    prob0fit <- apply(ensembleData, 2, logisticFunc, y = Y0)
 
     prob0coefs <- lapply(prob0fit, function(x) x$coefficients)
     prob0coefs <- as.matrix(data.frame(prob0coefs))
@@ -189,14 +80,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   }
   else {
 
-    logisticFunc <- function(x, y) {
-      x <- as.matrix(x)
-      n <- ncol(x)
-      x <- as.vector(x)
-      y <- rep(y,n)
-      glm(y ~ x + (x==0), family = binomial(logit), na.action = na.omit)
-    }
-
     prob0coefs <- matrix(NA, 3, nForecasts)
     dimnames(prob0coefs) <- NULL
 
@@ -205,10 +88,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     for (labX in uniqueX) {
        I <- namX == labX
        fit <- logisticFunc(ensembleData[, I, drop = FALSE], Y0)
-       coefs <- fit$coefficients
-       if (any(!(fit$coefficients[2] <= 0 && fit$coefficients[3] >= 0))) {
-         fit <- LRopt0(fit)
-       }
        prob0coefs[,I] <- fit$coefficients
        miss <- is.na(ensembleData[, I, drop = FALSE])
        miss <- as.vector(as.matrix(miss))
@@ -231,26 +110,34 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
 # means determined as a bias-corrrrection step
 
+    lmFunc <- function(x, y) {
+      beta0 <- min(y)
+      x <- as.matrix(x)
+      n <- ncol(x)
+      x <- as.vector(x)
+      nax <- is.na(x)
+      x <- x[!nax]
+      y <- rep(y,n)[!nax]
+      if (all(!x)) {
+        fit <- list(coefficients = c(mean(y), 0),
+                    fitted.values = rep(mean(y), length(y)))
+      }
+      else {
+        fit <- lm(y ~ x)
+        coefs <- fit$coefficients
+        if (coefs[1] <= 0) {
+          coefs[1] <- beta0
+          coefs[2] <- sum((y-beta0)*x)/sum(x*x)
+          fit$coefficients <- coefs
+          fit$fitted.values <- cbind(1,x) %*% coefs
+       }
+     }
+     fit
+    }
+
   if (nullX) {
-    meanFit <- apply(ensembleData, 2, function(x, y) {
-              components <- c("coefficients","fitted.values","model")
-                     c(lm( y~x, na.action=na.omit)[components],
-                       list(formula = as.formula(y~x)))}, y = obs)
 
-    meanFit <- lapply(meanFit, function(z) {
-                                coefs <- z$coefficients
-                                if (is.na(coefs[1])) stop("NA intercept")
-          # second coefficient can be NA if all forecasts are 0
-                                if (is.na(coefs[2])) z$coefficients[2] <- 0
-                                z
-                               })
-
-    meanCheck1 <- unlist(lapply(meanFit, function(z) {
-                                coefs <- z$coefficients
-                                coefs[1] >= 0 && coefs[2] >= 0 
-                               }))
-    if (any(!meanCheck1)) 
-      meanFit[!meanCheck1] <- lapply(meanFit[!meanCheck1], LMopt0)
+    meanFit <- apply(ensembleData, 2, lmFunc, y = obs)
 
      biasCoefs <- lapply(meanFit, function(x) x$coefficients)
      biasCoefs <- as.matrix(data.frame(biasCoefs))
@@ -260,14 +147,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     }
   else {
 
-    lmFunc <- function(x, y) {
-      x <- as.matrix(x)
-      n <- ncol(x)
-      x <- as.vector(x)
-      y <- rep(y,n)
-      lm(y ~ x, na.action = na.omit)
-    }
-
     biasCoefs <- matrix( NA, 2, nForecasts)
 
     MEAN <- matrix(NA, nPrecip, nForecasts)
@@ -276,8 +155,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     for (labX in uniqueX) {
        I <- namX == labX
        fit <- lmFunc(ensembleData[, I, drop = FALSE], obs)
-       if (!(fit$coefficients[1] >=0 && fit$coefficients[2] >= 0)) 
-         fit <- LMopt0(fit)
        biasCoefs[, I] <- fit$coefficients
        miss <- is.na(ensembleData[, I, drop = FALSE])
        miss <- as.vector(as.matrix(miss))
@@ -288,7 +165,35 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
   miss <- is.na(Xvar)
 
-  gammaLoglikEM <- function(w, m, p1, X, Y)
+  completeDataLLmiss <- function(z, w, m, p0, p1, X, obs, Y0)
+{
+  objective <- function(par)
+ {
+# the obs contain no 0 values
+    nObs <- length(obs)
+    nFor <- ncol(X)
+
+    miss <- is.na(X)
+
+    v <- par[1]^2+(par[2]^2)*X
+    r <- m/v
+
+    W <- matrix( w, nObs, length(w), byrow = TRUE)
+    W[miss] <- 0
+    W <- sweep( W, MARGIN = 1, FUN = "/", STATS = apply(W, 1, sum))
+
+    q <- array(NA, dim(z))
+
+    q[!Y0,][!miss] <- dgamma(matrix(obs, nPrecip, nForecasts)[!miss], 
+                             shape=(r*m)[!miss], rate=r[!miss], log=TRUE) 
+#   q[!Y0,] <- log(sweep( p1, MARGIN = 2, FUN="*", STATS=w))+q[!Y0,]
+#   q[Y0,] <- sweep( p0, MARGIN=2, FUN="*", STATS=w)
+    -sum(z[!Y0,][!miss]*(q[!Y0,][!miss]+log(p1[!miss]*W[!miss])))
+  }
+  objective
+}
+
+  gammaLoglikNotEM <- function(w, m, p1, X, Y)
 {
   objective <- function(par)
  {
@@ -306,7 +211,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   objective
 }
 
-  gammaLoglikEMmiss <- function(w, m, p1, X, Y)
+  gammaLoglikNotEMmiss <- function(w, m, p1, X, Y)
 {
   objective <- function(par)
  {
@@ -334,27 +239,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   objective
 }
 
-# gammaLoglikEMgrad <- function(par, w, m, p, X, Y)
- gammaLoglikEMgrad <- function(w, m, p1, X, Y)
-{
-  gradient <- function(par)
-{
-    v <- par[1]^2+(par[2]^2)*X
-
-    g <- array(0,dim(v))
-    alpha <- m^2/v
-    g <- dgamma(Y, shape=alpha, rate=alpha/m, log=TRUE)
-    gmax <- max(g)
-    g <- p1*exp(g - gmax) # safeguard for over/underflow
-    denom <- sum(gmax+log(apply(sweep(g,MARGIN=2,FUN= "*",STATS = w),1,sum)))
-    g <- g * sweep(-digamma(alpha) + log(alpha-m) -
-                   sweep(1/m, MARGIN=1, FUN="*", STATS = Y[!Y0]),
-                   MARGIN=1, FUN="+", STATS = log(Y)+1) * alpha/v
-    g  <- sweep(g, MARGIN=2, FUN= "*", STATS = w)
-    -c(sum(apply(g,1,sum)),sum(apply(g*X,1,sum)))/denom
-  }
-  gradient
-}
   varCoefs <- if(is.null(control$start$varCoefs)) c(1,1) else control$start$varCoefs
   varCoefs <- pmax(varCoefs,1.e-4)
 
@@ -382,7 +266,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
   objold <- 0
 
  # main EM algorithm
- 
+
  newLL <- 0
 
   while(TRUE)
@@ -403,8 +287,6 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
  RATE <- MEAN/VAR
  SHAPE <- RATE*MEAN
-
- for (i in 1:nEsteps) {
 
     z[!Y0,][!miss] <- dgamma(matrix(obs, nPrecip, nForecasts)[!miss], 
                              shape=SHAPE[!miss], rate=RATE[!miss], log=TRUE) 
@@ -442,11 +324,7 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
     weps <- max(abs(wold - weights)/(1+abs(weights)))
 
-    if (nIter < 5) break
-} 
-
-      fn <- gammaLoglikEMmiss(weights, MEAN, PROB1, Xvar, obs)
-##     gr <- gammaLoglikEMgrad(weights, MEAN, PROB1, Xvar, obs)
+      fn <- completeDataLLmiss(z, weights, MEAN, PROB0, PROB1, Xvar, obs, Y0)
       optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
 
       if (optimResult$convergence) warning("optim does not converge")

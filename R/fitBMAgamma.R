@@ -17,7 +17,6 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 
   maxIter <- control$maxIter
   tol <- eps <- control$tol
-  nEsteps <- control$nEsteps
 
 # remove instances missing all forecasts or obs
 
@@ -50,20 +49,37 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 # means determined as a bias-corrrrection step
 # in this case, means are shared
 
-  components <- c("coefficients","fitted.values","model")
+  lmFunc <- function(x, y) {
+      beta0 <- min(y)
+      x <- as.matrix(x)
+      n <- ncol(x)
+      x <- as.vector(x)
+      nax <- is.na(x)
+      x <- x[!nax]
+      y <- rep(y,n)[!nax]
+      if (all(!x)) {
+        fit <- list(coefficients = c(mean(y),0),
+                    fitted.values = rep(mean(y), length(y)))
+      }
+      else {
+        fit <- lm(y ~ x)
+        coefs <- fit$coefficients
+        if (coefs[1] <= 0) {
+          coefs[1] <- beta0
+          coefs[2] <- sum((y-beta0)*x)/sum(x*x)
+          fit$coefficients <- coefs
+          fit$fitted.values <- cbind(1,x) %*% coefs
+        }
+     }
+     fit
+    }
 
-  meanVec <- rep(is.na(obs),nForecasts) | as.vector(is.na(ensembleData))
-  meanVec[as.logical(meanVec)] <- NA
-  meanFit1 <- lm(rep(obs,nForecasts) ~ as.vector(ensembleData), 
-           na.action = na.omit)[components]
+  meanFit <- lmFunc( ensembleData, obs)
 
-  biasCoefs <- meanFit1$coef
-  if (any(neg <- biasCoefs < 0)) {
-    cat("bias coefs < 0")
-    biasCoefs[neg] <- 0
-  }
+  biasCoefs <- meanFit$coefficients
 
-  meanVec[!is.na(meanVec)] <- meanFit1$fitted.values
+  meanVec <- as.vector(ensembleData)
+  meanVec[!is.na(meanVec)] <- meanFit$fitted.values
  
   MEAN <- matrix(meanVec, nObs, nForecasts)
 
@@ -72,20 +88,33 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
   Mzero <- miss[Y0,,drop=FALSE]
   Mnonz <- miss[!Y0,,drop=FALSE]
 
-  gammaLoglikEM <- function(w, m, p1, X, Y)
+  completeDataLLmiss <- function(z, w, m, X, obs)
 {
   objective <- function(par)
  {
-    v <- par[1]^2+(par[2]^2)*X
+    nObs <- length(obs)
+    nFor <- ncol(X)
 
-    g <- array(0,dim(v))
-    rate <- m/v
-    g <- dgamma(Y, shape=rate*m, rate=rate, log=TRUE)
-    gmax <- apply(g, 1, max)
-    g <- p1 * exp(g - gmax) # safeguard for over/underflow
-    g  <- sweep(g, MARGIN=2, FUN= "*", STATS = w)
-##  print(-sum(gmax+log(apply(g,1,sum))))
-    -sum(gmax+log(apply(g,1,sum)))
+    miss <- is.na(X)
+
+    Y0 <- obs == 0
+    Mzero <- miss[Y0,,drop=FALSE]
+    Mnonz <- miss[!Y0,,drop=FALSE]
+
+    W <- matrix( w, nObs, nFor, byrow = TRUE)
+    W[miss] <- 0
+    W <- sweep( W, MARGIN = 1, FUN = "/", STATS = apply(W, 1, sum))
+
+    v <- (par[1]^2+(par[2]^2)*X)^2
+    r <- m/v
+
+    q <- array(NA, dim(z))
+
+    q[Y0,][!Mzero] <- log(pgamma(1, shape=(r*m)[Y0,][!Mzero], 
+                                rate=r[Y0,][!Mzero]))
+    q[!Y0,][!Mnonz] <- dgamma(matrix(obs,nObs,nFor)[!Y0,][!Mnonz],
+                shape=(r*m)[!Y0,][!Mnonz], rate=r[!Y0,][!Mnonz], log=TRUE)
+    -sum(z[!miss]*(q[!miss]+log(W)[!miss]))
   }
   objective
 }
@@ -114,7 +143,8 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
  
     G[Y0,][!Mzero] <- pgamma(1, shape=(rate*m)[Y0,][!Mzero], 
                                 rate=rate[Y0,][!Mzero])
-    G[!Y0][!Mnonz] <- dgamma(matrix(Y,nObs,nFor)[!Y0,][!Mnonz],
+#   G[!Y0][!Mnonz] <- dgamma(matrix(Y,nObs,nFor)[!Y0,][!Mnonz],
+    G[!Y0,][!Mnonz] <- dgamma(matrix(Y,nObs,nFor)[!Y0,][!Mnonz],
                 shape=(rate*m)[!Y0,][!Mnonz], rate=rate[!Y0,][!Mnonz], log=TRUE)
     gmax <- rep(0,nrow(G))
     gmax[!Y0] <- apply( G[!Y0,], 1, max, na.rm = TRUE)
@@ -174,8 +204,6 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
  RATE <- MEAN/VAR
  SHAPE <- RATE*MEAN
 
- for (i in 1:nEsteps) {
-
     z[Y0,][!Mzero] <- pgamma(1, shape=SHAPE[Y0,][!Mzero], rate=RATE[Y0,][!Mzero])
 
     z[!Y0,][!Mnonz] <- dgamma(matrix(obs, nObs, nForecasts)[!Y0,][!Mnonz], 
@@ -216,12 +244,10 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 
     weps <- max(abs(wold - weights)/(1+abs(weights)))
 
-    if (nIter < 5) break
-} 
-
-      fn <- gammaLoglikEMmiss(weights, MEAN, ensembleData, obs)
+#     fn <- gammaLoglikEMmiss(weights, MEAN, ensembleData, obs)
+#     optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
+      fn <- completeDataLLmiss(z, weights, MEAN, ensembleData, obs)
       optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
-
       if (optimResult$convergence) warning("optim does not converge")
       varOld <- varCoefs
       varCoefs <- optimResult$par^2
