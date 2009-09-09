@@ -51,15 +51,16 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         }
         fit
     }
-    if (nullX) {
+    if (any(Y0)) {
+      if (nullX) {
         prob0fit <- apply(ensembleData, 2, logisticFunc, y = Y0)
         prob0coefs <- lapply(prob0fit, function(x) x$coefficients)
         prob0coefs <- as.matrix(data.frame(prob0coefs))
         dimnames(prob0coefs) <- NULL
         PROB0 <- matrix(NA, nObs, nForecasts)
         PROB0[!miss] <- unlist(lapply(prob0fit, function(x) x$fitted.values))
-    }
-    else {
+      }
+      else {
         prob0coefs <- matrix(NA, 3, nForecasts)
         dimnames(prob0coefs) <- NULL
         PROB0 <- matrix(NA, nObs, nForecasts)
@@ -72,9 +73,15 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
             miss <- as.vector(as.matrix(miss))
             PROB0[, I][!miss] <- fit$fitted.values
         }
-    }
+      }
     PROB1 <- (1 - PROB0)[!Y0, ]
     PROB0 <- PROB0[Y0, ]
+    }
+    else {
+      PROB1 <- matrix(1, nObs, nForecasts)
+      prob0coefs <- matrix(0, 3, nForecasts)
+      dimnames(prob0coefs) <- NULL
+    }
     obs <- sapply(obs, function(x) sapply(x, powfun, power = control$power))
     obs <- obs[!Y0]
     nPrecip <- length(obs)
@@ -215,7 +222,9 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         z[!Y0, ] <- sweep(z[!Y0, ], MARGIN = 1, FUN = "-", STATS = zmax)
         z[!Y0, ] <- sweep(PROB1, MARGIN = 2, FUN = "*", STATS = weights) * 
             exp(z[!Y0, ])
-        z[Y0, ] <- sweep(PROB0, MARGIN = 2, FUN = "*", STATS = weights)
+        if (any(Y0)) {
+          z[Y0, ] <- sweep(PROB0, MARGIN = 2, FUN = "*", STATS = weights)
+        }
         oldLL <- newLL
         newLL <- sum(zmax + log(apply(z[!Y0, ], 1, sum, na.rm = TRUE)))
         newLL <- newLL + sum(log(apply(z[Y0, ], 1, sum, na.rm = TRUE)))
@@ -229,6 +238,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         weps <- max(abs(wold - weights)/(1 + abs(weights)))
         fn <- completeDataLLmiss(z, weights, MEAN, PROB0, PROB1, 
             Xvar, obs, Y0)
+        print(sqrt(varCoefs))
         optimResult = optim(sqrt(varCoefs), fn = fn, method = "BFGS")
         if (optimResult$convergence) 
             warning("optim does not converge")
@@ -243,8 +253,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
                 break
         }
         nIter <- nIter + 1
-        if (nIter >= maxIter) 
-            break
+        if (nIter >= maxIter)             break
     }
     if (nIter >= maxIter && error > eps) 
         warning("iteration limit reached")

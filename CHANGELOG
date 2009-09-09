@@ -1,5 +1,4 @@
-09/09 fixed bias correction in gamma0 model to handle cases where
-      there are no 0 forecasts
+09/09 fixed gamma0 model to handle cases where there are no 0 forecasts
 
 06/09 modified estimation in gamma0 and gamma to do true EM 
       updated bias correction strategy to handle 0 forc in gamma and gamma0 
