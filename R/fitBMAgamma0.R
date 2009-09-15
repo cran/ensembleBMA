@@ -42,6 +42,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         fit <- glm(y ~ x + (x == 0), family = binomial(logit))
         coefs <- fit$coefficients
         coefs[is.na(coefs)] <- 0
+        fit$coefficients <- coefs        
         if (!(coefs[2] <= 0 && coefs[3] >= 0)) {
             fit$coefficients[2] <- min(fit$coefficients[2], 0)
             fit$coefficients[3] <- max(fit$coefficients[3], 0)
@@ -238,7 +239,6 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         weps <- max(abs(wold - weights)/(1 + abs(weights)))
         fn <- completeDataLLmiss(z, weights, MEAN, PROB0, PROB1, 
             Xvar, obs, Y0)
-        print(sqrt(varCoefs))
         optimResult = optim(sqrt(varCoefs), fn = fn, method = "BFGS")
         if (optimResult$convergence) 
             warning("optim does not converge")
