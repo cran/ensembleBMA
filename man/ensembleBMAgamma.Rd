@@ -117,7 +117,8 @@ Washington, revised 2009.
                                 forecastHour = 48,
                                 initializationTime = "00")
 
-  winsTestFit <- ensembleBMAgamma(winsTestData, trainingDays = 30)
+  winsTestFit <- ensembleBMAgamma(winsTestData, trainingDays = 30, 
+                                  control = controlBMAgamma(startupSpeed = 1))
 
 ## equivalent to
 ##     winsTestFit <- ensembleBMA(winsTestData, trainingDays = 30,

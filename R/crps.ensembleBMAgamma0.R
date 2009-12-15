@@ -1,4 +1,4 @@
-`crps.ensembleBMAgamma0` <-
+crps.ensembleBMAgamma0 <-
 function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...) 
 {
 
@@ -67,11 +67,20 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
    nObs <- length(Dates)
  }
 
+ Q <- as.vector(quantileForecast( fit, ensembleData, dates = dates))
+ naQ <- is.na(Q)
+
+ ensembleData <- ensembleData[!naQ,]
+ Dates  <- Dates[!naQ]
+
  obs <- ensembleVerifObs(ensembleData)
  nForecasts <- ensembleSize(ensembleData) 
 
+ nObs <- length(obs)
  crpsSim <- rep(NA, nObs)
  names(crpsSim) <- ensembleObsLabels(ensembleData)
+
+ members <- ensembleMemberLabels(ensembleData)
 
  ensembleData <- ensembleForecasts(ensembleData)
 
@@ -103,66 +112,44 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
 
        PROB0 <- sapply(apply(rbind( 1, fTrans, f==0)*fit$prob0coefs[,,k],
                               2,sum), inverseLogit)
-       RATE  <- RATE[!M]
-       SHAPE <- SHAPE[!M]
-       PROB0 <- PROB0[!M]
+
+       W <- WEIGHTS
+       if (any(M)) {
+         W <- W + weps
+         W <- W[!M] / sum(W[!M])
+       }
 
        if (sum(!M) > 1) {
-         W <- WEIGHTS + weps
-         W <- W[!M] / sum(W[!M])
-         SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples, 
-                           replace = TRUE, prob = W)
+         SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples,
+                             replace = TRUE, prob = W) 
        }
        else {
-         SAMPLES <- sample( 1:nForecasts, size = nSamples, 
-                           replace = TRUE, prob = WEIGHTS)
+         SAMPLES <- rep( (1:nForecasts)[!M], nSamples)
        }
 
-       tab <- numeric(sum(!M))
-       names(tab) <- (1:nForecasts)[!M]
-       tabSamples <- table(SAMPLES)
-       tab[names(tabSamples)] <- tabSamples
+       tab <- rep(0, nForecasts)
+       names(tab) <- members
+       for (j in seq(along = tab)) tab[j] <- sum(SAMPLES == j)
+       
+       SAMPLES[] <- NA
 
-       Z <- tab == 0
-
-       tab <- tab[!Z]
-
-       RATE  <- RATE[!Z]
-       SHAPE <- SHAPE[!Z]
-       PROB0 <- PROB0[!Z]
-
-       tab0 <- table(unlist(apply( cbind( seq(along = tab), tab), 1,
-              function(nj,PROB0) {
-         sample(c(nj[1],0), size = nj[2], replace = TRUE,
-                prob = c(1-PROB0[nj[1]],PROB0[nj[1]]))}, 
-                PROB0 = PROB0)))
-
-       I <- as.numeric(names(tab0[-1]))
-       tab[] <- 0
-       tab[I] <- tab0[-1]
-
-       Z <- tab == 0
-
-       tab <- tab[!Z]
-
-       if (length(tab)) {
-
-          RATE  <- RATE[!Z]
-          SHAPE <- SHAPE[!Z]
-
-          S <- apply( cbind( seq(along = tab), tab), 1,
-              function(nj,SHAPE,RATE) 
-                  rgamma(nj[2], shape=SHAPE[nj[1]], rate=RATE[nj[1]]),
-                                      SHAPE = SHAPE, RATE = RATE)
-           
-# model is fit to the cube root of the forecast
-
-         S <- sapply(as.vector(unlist(S)), powinv, power = fit$power)
-
-         SAMPLES <- c(rep(0, tab0[1]), S)
+       jj <- 0
+       for (j in seq(along = tab)) {
+          nsamp <- tab[j]
+          if (nsamp == 0) next
+          z <- sample(c(0,1), size = nsamp, replace = TRUE, 
+                        prob = c(PROB0[j],1-PROB0[j]))
+          znonz <- z != 0
+          nnonz <- sum(znonz)
+          if (nnonz > 0) z[znonz] <- rgamma(nnonz,shape=SHAPE[j],rate=RATE[j])
+          SAMPLES[jj + 1:nsamp] <- z
+          jj <- jj + nsamp
        }
-       else SAMPLES <- rep(0,tab0[1])
-  
+
+       nz <- SAMPLES != 0
+       if (any(nz)) SAMPLES[nz] <- sapply(SAMPLES[nz], powinv, power=fit$power)
+
+# crps2 approximates a term that is quadratic in the number of members  
        crps1  <- mean(abs(SAMPLES - obs[i])) 
        crps2 <-  mean(abs(diff(sample(SAMPLES))))
        crpsSim[i]  <- crps1 - crps2/2
@@ -172,7 +159,7 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
  crpsCli <- sapply(obs, function(x,Y) mean(abs(Y-x)), Y = obs)
  crpsCli <- crpsCli - mean(crpsCli)/2
 
- crpsEns1 <- apply(abs(sweep(ensembleData,MARGIN=1,FUN ="-",STATS=obs))
+ crpsEns1 <- apply(abs(sweep(ensembleData, MARGIN=1,FUN ="-",STATS=obs))
                    ,1,mean,na.rm=TRUE)
 
  if (nrow(ensembleData) > 1) {

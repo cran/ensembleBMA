@@ -22,14 +22,10 @@ pit( fit, ensembleData, dates = NULL, \dots)
   }
   \item{ensembleData}{
      An \code{ensembleData} object that includes ensemble forecasts,
-     verification observations and dates. 
+     verification observations and possibly dates. 
      Missing values (indicated by \code{NA}) are allowed. \\
      This need not be the data used for the model \code{fit}, 
-     although it must include the same ensemble members. \\
-     If \code{ensembleData} includes dates,
-     they must be consistent with \code{fit} and \code{dates}. 
-     If \code{ensembleData} does not include dates, they will
-     be inferred from \code{fit} and \code{dates}. 
+     although it must include the same ensemble members. 
   }
  \item{dates}{
      The dates for which the CDF will be computed.

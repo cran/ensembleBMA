@@ -9,6 +9,7 @@ function (x, i, j)
     exchangeable <- attr(x, "exchangeable")
     forecastHour <- attr(x, "forecastHour")
     initializationTime <- attr(x, "initializationTime")
+    startupSpeed <- attr(x, "startupSpeed")
     if (!missing(j) && !is.null(j)) {
       if (is.logical(j)) {
         if (length(j) != nForecasts)
@@ -57,6 +58,7 @@ function (x, i, j)
     x <- eval(matchCall, parent.frame())
     attr(x, "initializationTime") <- initializationTime
     attr(x, "forecastHour") <- forecastHour
+    attr(x, "startupSpeed") <- startupSpeed
     attr(x, "exchangeable") <- exchangeable 
     attr(x, "ensembleSize") <- nForcs
     x

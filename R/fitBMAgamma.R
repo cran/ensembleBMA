@@ -1,6 +1,23 @@
-`fitBMAgamma` <-
+fitBMAgamma <-
 function(ensembleData, control = controlBMAgamma(), exchangeable = NULL) 
 {
+
+  if (is.null(startup <- startupSpeed(ensembleData))) {
+    if (is.null(control$startupSpeed))
+      stop("default anemometer startup speed not specified")
+    startup <- control$startupSpeed
+  }
+
+  if (length(startup) != nrow(ensembleData)) {
+    startup <- rep(startup, length = nrow(ensembleData))
+  }
+  else if (length(startup) != 1) stop("startup speed improperly specified")
+ 
+  if (any(is.na(startup))) {
+    if (is.null(control$startupSpeed))
+      stop("default anemometer startup speed not specified")
+    startup[is.na(startup)] <- control$startupSpeed
+  }
 
   powfun <- function(x,power) x^power
 
@@ -23,6 +40,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
   M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
   M <- M | is.na(ensembleVerifObs(ensembleData))
   ensembleData <- ensembleData[!M,]
+  startup <- startup[M]
  
   if (is.null(obs <- ensembleVerifObs(ensembleData)))
    stop("verification observations required")
@@ -88,7 +106,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
   Mzero <- miss[Y0,,drop=FALSE]
   Mnonz <- miss[!Y0,,drop=FALSE]
 
-  completeDataLLmiss <- function(z, w, m, X, obs)
+  completeDataLLmiss <- function(z, w, m, X, obs, startup)
 {
   objective <- function(par)
  {
@@ -110,52 +128,24 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 
     q <- array(NA, dim(z))
 
-    q[Y0,][!Mzero] <- log(pgamma(1, shape=(r*m)[Y0,][!Mzero], 
-                                rate=r[Y0,][!Mzero]))
-    q[!Y0,][!Mnonz] <- dgamma(matrix(obs,nObs,nFor)[!Y0,][!Mnonz],
-                shape=(r*m)[!Y0,][!Mnonz], rate=r[!Y0,][!Mnonz], log=TRUE)
-    -sum(z[!miss]*(q[!miss]+log(W)[!miss]))
+    q[Y0,][!Mzero] <- log(pgamma(startup[Y0], shape=(r*m)[Y0,,drop=FALSE][!Mzero], 
+                                rate=r[Y0,,drop=FALSE][!Mzero]))
+
+    q[!Y0,][!Mnonz] <- dgamma(matrix(obs,nObs,nFor)[!Y0,,drop=FALSE][!Mnonz],
+                shape=(r*m)[!Y0,][!Mnonz], rate=r[!Y0,,drop=FALSE][!Mnonz], 
+                log=TRUE)
+
+    Wzero <- W == 0
+
+    include <- !miss & !Wzero
+
+    -sum(z[include]*(q[include]+log(W[include])))
   }
+
   objective
 }
 
-  gammaLoglikEMmiss <- function(w, m, X, Y)
-{
-  objective <- function(par)
- {
-    nObs <- length(Y)
-    nFor <- ncol(X)
-
-    G <- X
-
-    miss <- is.na(X)
-    Y0 <- Y == 0
-
-    Mzero <- miss[Y0,,drop=FALSE]
-    Mnonz <- miss[!Y0,,drop=FALSE]
-
-    W <- matrix( w, nObs, nFor, byrow = TRUE)
-    W[miss] <- 0
-    W <- sweep( W, MARGIN = 1, FUN = "/", STATS = apply(W, 1, sum))
-
-    v <- (par[1]^2+(par[2]^2)*X)^2
-    rate <- m/v
- 
-    G[Y0,][!Mzero] <- pgamma(1, shape=(rate*m)[Y0,][!Mzero], 
-                                rate=rate[Y0,][!Mzero])
-#   G[!Y0][!Mnonz] <- dgamma(matrix(Y,nObs,nFor)[!Y0,][!Mnonz],
-    G[!Y0,][!Mnonz] <- dgamma(matrix(Y,nObs,nFor)[!Y0,][!Mnonz],
-                shape=(rate*m)[!Y0,][!Mnonz], rate=rate[!Y0,][!Mnonz], log=TRUE)
-    gmax <- rep(0,nrow(G))
-    gmax[!Y0] <- apply( G[!Y0,], 1, max, na.rm = TRUE)
-    G[!Y0,] <- exp(G[!Y0,] - gmax[!Y0]) # safeguard for over/underflow
-    G  <- G * W
-    -sum(gmax+log(apply(G, 1, sum, na.rm = TRUE)), na.rm = TRUE)
-  }
-  objective
-}
-
-  varCoefs <- if(is.null(control$start$varCoefs)) c(1,1) else control$start$varCoefs
+  varCoefs <- if(is.null(control$init$varCoefs)) c(1,1) else control$init$varCoefs
   varCoefs <- pmax(varCoefs,1.e-4)
 
   names(varCoefs) <- names(weights) <- NULL
@@ -163,7 +153,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
   # set all latent variables equal initially, 
   # and "new weights" (used later to compare changes in weights) to zero
 
-  weights <- if (is.null(control$start$weights)) 1 else control$start$weights
+  weights <- if (is.null(control$init$weights)) 1 else control$init$weights
   if (length(weights) == 1) weights <- rep(weights,nForecasts) 
   weights <- weights/sum(weights)
   weights <- pmax(weights,1.e-4)
@@ -204,7 +194,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
  RATE <- MEAN/VAR
  SHAPE <- RATE*MEAN
 
-    z[Y0,][!Mzero] <- pgamma(1, shape=SHAPE[Y0,][!Mzero], rate=RATE[Y0,][!Mzero])
+    z[Y0,][!Mzero] <- pgamma(startup[Y0], shape=SHAPE[Y0,][!Mzero], rate=RATE[Y0,][!Mzero])
 
     z[!Y0,][!Mnonz] <- dgamma(matrix(obs, nObs, nForecasts)[!Y0,][!Mnonz], 
 
@@ -222,8 +212,8 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 ##     print(c(opt, optimResult$value))
 ##   }
 
-    newLL <-  sum( zmax + log( apply( z[!Y0,], 1, sum, na.rm = TRUE))) 
-    newLL <- newLL + sum( log( apply( z[Y0,], 1, sum, na.rm=TRUE)))
+    newLL <-  sum( zmax + log( apply( z[!Y0,,drop=FALSE], 1, sum, na.rm=TRUE)))
+    newLL <- newLL + sum( log( apply( z[Y0,,drop=FALSE], 1, sum, na.rm=TRUE)))
  
     # normalize the latent variables
     z <- z/apply(z, 1, sum, na.rm = TRUE)
@@ -246,7 +236,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 
 #     fn <- gammaLoglikEMmiss(weights, MEAN, ensembleData, obs)
 #     optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
-      fn <- completeDataLLmiss(z, weights, MEAN, ensembleData, obs)
+      fn <- completeDataLLmiss(z, weights, MEAN, ensembleData, obs, startup)
       optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
       if (optimResult$convergence) warning("optim does not converge")
       varOld <- varCoefs
@@ -276,9 +266,14 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
  names(biasCoefs) <- NULL
  names(weights) <- ensMemNames
 
+  startup <- unique(startup)
+
+  if (length(startup) > 1) startup <- NA
+
   structure(
   list(biasCoefs = biasCoefs, varCoefs = varCoefs,
        weights = weights, nIter = nIter, loglikelihood = newLL,
-       power = control$power), class = "fitBMAgamma")
+       power = control$power, startupSpeed = startup), 
+       class = "fitBMAgamma")
 }
 

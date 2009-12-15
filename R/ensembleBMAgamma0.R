@@ -1,4 +1,4 @@
-`ensembleBMAgamma0` <-
+ensembleBMAgamma0 <-
 function(ensembleData, trainingDays, dates = NULL, 
          control = controlBMAgamma0(), exchangeable = NULL)
 {
@@ -7,6 +7,8 @@ function(ensembleData, trainingDays, dates = NULL,
  call <- match.call()
 
  warmStart <- FALSE
+
+ if (missing(trainingDays)) stop("trainingDays must be specified")
 
  if (is.list(trainingDays)) trainingDays <- trainingDays[1]
 
@@ -134,10 +136,30 @@ function(ensembleData, trainingDays, dates = NULL,
 
     if (j != l) {
 
+      D <- as.logical(match(Dates, DATES[j:1], nomatch=0))
+      nonz <- sum(ensembleVerifObs(ensembleData[D,]) != 0)
+      if (nonz < control$rainobs) {
+        cat("insufficient nonzero training obs for date", dates[i], "...\n")
+        next
+      }
+      
       twin <- (j+1) - (1:trainingDays)
 
-      D <- as.logical(match(Dates, DATES[twin], nomatch=0))
-      if (!any(D)) stop("this should not happen")
+      while (TRUE) {
+           D <- as.logical(match(Dates, DATES[twin], nomatch=0))
+           if (!any(D)) stop("this should not happen")
+           d <- ensembleValidDates(ensembleData[D,])
+#     if (length(unique(d)) != trainingDays) stop("wrong # of training days")
+           nonz <- sum(ensembleVerifObs(ensembleData[D,]) != 0)
+           if (nonz >= control$rainobs) break
+           if (min(twin) == 1) break
+           twin <- max(twin):(min(twin)-1)
+      }
+
+      if (nonz < control$rainobs) {
+        cat("insufficient nonzero training obs for date", dates[i], "...\n")
+        next
+      }
 
       cat("modeling for date", dates[i], "...")
 

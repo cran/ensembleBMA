@@ -104,6 +104,7 @@ with Missing and Exchangeable Ensemble Members,
                                 dates = ensBMAtest[,"vdate"], 
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
+                                startupSpeed = 1,
                                 forecastHour = 48,
                                 initializationTime = "00")
 

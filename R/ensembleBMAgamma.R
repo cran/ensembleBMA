@@ -1,4 +1,4 @@
-`ensembleBMAgamma` <-
+ensembleBMAgamma <-
 function(ensembleData, trainingDays, dates = NULL, 
          control = controlBMAgamma(), exchangeable = NULL)
 {
@@ -136,7 +136,8 @@ function(ensembleData, trainingDays, dates = NULL,
 
       D <- as.logical(match(Dates, DATES[twin], nomatch=0))
       if (!any(D)) stop("this should not happen")
-
+      d <- ensembleValidDates(ensembleData[D,])
+      if (length(unique(d)) != trainingDays) stop("wrong # of training days")
       cat("modeling for date", dates[i], "...")
 
       kNA <- apply(ensembleForecasts(ensembleData[D,]), 2, 

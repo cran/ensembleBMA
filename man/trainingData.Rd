@@ -52,10 +52,10 @@ using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
 Washington, December 2008.
 
-C. Fraley, A. E. Raftery, T. Gneiting,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles
-with Missing and Exchangeable Ensemble Members,
-(in preparation).
+C. Fraley, A. E. Raftery and T. Gneiting,
+Calibrating Multi-Model Forecast Ensembles with Exchangeable and Missing
+Members using Bayesian Model Averaging, to appear in
+\emph{Monthly Weather Review, 2009}.
 }
 
 \examples{

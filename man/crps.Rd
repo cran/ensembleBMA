@@ -3,9 +3,11 @@
 \alias{crps.ensembleBMAgamma}
 \alias{crps.ensembleBMAgamma0}
 \alias{crps.ensembleBMAnormal}
+\alias{crps.ensembleBMAbvnormal}
 \alias{crps.fitBMAgamma}
 \alias{crps.fitBMAgamma0}
 \alias{crps.fitBMAnormal}
+\alias{crps.fitBMAbvnormal}
 \alias{CRPS}
 \alias{CRPS.default}
 \title{
@@ -13,7 +15,7 @@
 }
 \description{
    Computes the continuous ranked probability score (CRPS)
-   for ensemble forecasting models. 
+   for univariate ensemble forecasting models. 
 }
 \usage{
 crps( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
@@ -25,14 +27,10 @@ CRPS( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
   }
   \item{ensembleData}{
      An \code{ensembleData} object that includes ensemble forecasts,
-     verification observations and dates. 
+     verification observations and possibly dates. 
      Missing values (indicated by \code{NA}) are allowed. \\
      This need not be the data used for the model \code{fit}, 
-     although it must include the same ensemble members. \\
-     If \code{ensembleData} includes dates,
-     they must be consistent with \code{fit} and \code{dates}. 
-     If \code{ensembleData} does not include dates, they will
-     be inferred from \code{fit} and \code{dates}. 
+     although it must include the same ensemble members. 
   }
   \item{nSamples}{
      The number of simulation samples for CRPS via simulation.
@@ -44,7 +42,7 @@ CRPS( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
   \item{seed}{
      Argument to \code{set.seed} for random number generation in simulation.
   }
- \item{dates}{
+  \item{dates}{
      The dates for which the CRPS will be computed.
      These dates must be consistent with \code{fit} and \code{ensembleData}.
      The default is to use all of the dates in \code{fit}.
@@ -72,28 +70,24 @@ CRPS( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
    transformation of the data. \cr
    For normal models for temperature and pressure, analytic computation 
    of the CRPS is the default. CRPS will be computed via simulation for
-   normal models only if \code{nSamples} is set to a positive value.
+   normal models only if \code{nSamples} is set to a positive value. \cr
+   For the bivariate normal model for wind speed and direction, the
+   CRPS is computed for the marginal wind speed distribution.
 }
 \seealso{
-  \code{\link{ensembleBMA}} 
+  \code{\link{ensembleBMA}},
+  \code{\link{fitBMA}}
 }
 \references{
-E. P. Grimit, T. Gneiting, V. J. Berrocal and N. A. Johnson, 
-The continuous ranked probability score for circular variables 
-and its application to mesoscale forecast ensemble verification,
-\emph{Quarterly Journal of the Royal Meteorological Society 
-      132:2925-2642 (2006)}.
+T. Gneiting and A. E. Raftery,
+Strictly proper scoring rules, prediction and estimation,
+\emph{Journal of the American Statistical Association 102:359--378 (2007).}
 
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
 Washington, 2009.
-
-C. Fraley, A. E. Raftery, T. Gneiting,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles
-with Missing and Exchangeable Ensemble Members,
-(in preparation).
 }
 
 \examples{

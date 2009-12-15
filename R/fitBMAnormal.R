@@ -1,4 +1,4 @@
-`fitBMAnormal` <-
+fitBMAnormal <-
 function(ensembleData, control = controlBMAnormal(),
          exchangeable = NULL)
 {
@@ -33,9 +33,9 @@ function(ensembleData, control = controlBMAnormal(),
   ensMemNames <- ensembleMemberLabels(ensembleData)
   nForecasts <- length(ensMemNames)
 
-  if(is.null(sd <- control$start$sd)) sd <- sd(obs)
+  if(is.null(sd <- control$init$sd)) sd <- sd(obs)
 
-  weights <- if (is.null(control$start$weights) || any(is.na(control$start.weights))) 1 else control$start$weights
+  weights <- if (is.null(control$init$weights) || any(is.na(control$init$weights))) 1 else control$init$weights
   if (length(weights) == 1) weights <- rep(weights,nForecasts)
   weights <- weights/sum(weights)
   weights <- pmax(weights,1.e-4)

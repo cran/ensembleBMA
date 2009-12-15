@@ -9,7 +9,7 @@
    precipitation.
 }
 \usage{
-controlBMAgamma0(maxIter, tol, power = (1/3), start)
+controlBMAgamma0(maxIter, tol, power = (1/3), rainobs = 10, init)
 }
 \arguments{
   \item{maxIter}{
@@ -32,8 +32,19 @@ controlBMAgamma0(maxIter, tol, power = (1/3), start)
     power of the data.
     The untransformed forecast is used to fit the variance model.
    }
-  \item{start}{
-     An optional list of starting values for variance coefficients
+  \item{rainobs}{
+    An integer specifying a minimum number of observations with
+    nonzero precipitation in the training data. When necessary and
+    possible, the training period will be extended backward in
+    increments of days to meet the minimum requirement.
+    It is not possible to fit the BMA model for precipitation without
+    sufficient nonzero observations. The default minimum number is 10.
+    It many instances fewer nonzero observations may suffice, but it
+    could also be that more are needed to model precipitation in some
+    datasets.
+  }
+  \item{init}{
+     An optional list of initial values for variance coefficients
      and weights. The default is to start with the variance coefficients
      equal to 1, and with equal weights for each member of the ensemble.
   }

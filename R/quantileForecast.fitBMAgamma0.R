@@ -1,4 +1,4 @@
-`quantileForecast.fitBMAgamma0` <-
+quantileForecast.fitBMAgamma0 <-
 function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...) 
 { 
 
@@ -36,7 +36,7 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
 
        VAR <- fit$varCoefs[1] + fit$varCoefs[2]*f
 
-       fTrans <- sapply( f, power, fit$power)
+       fTrans <- sapply( f, powfun, fit$power)
 
        PROB0 <- sapply(apply(rbind( 1, fTrans, f==0) * fit$prob0coefs,
                              2,sum), inverseLogit)
@@ -52,6 +52,7 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
        Q[i,] <- sapply( quantiles, quantBMAgamma0, WEIGHTS=W,
                         MEAN=MEAN[!M], VAR=VAR[!M],PROB0=PROB0[!M])
    }
+
  }
 
   apply(Q, 2, powinv, power = fit$power)

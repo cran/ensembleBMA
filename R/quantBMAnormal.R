@@ -1,7 +1,7 @@
-`quantBMAnormal` <-
+quantBMAnormal <-
 function(alpha, WEIGHTS, MEAN, SD)
 {
-  lower <- 0
+  lower <- min(MEAN-6*SD)
   upper <- max(MEAN+6*SD)
 
   if (cdfBMAnormal(lower, WEIGHTS, MEAN, SD, 0) > alpha) return(NA)

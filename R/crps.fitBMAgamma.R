@@ -1,4 +1,4 @@
-`crps.fitBMAgamma` <-
+crps.fitBMAgamma <-
 function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...) 
 {
  powfun <- function(x,power) x^power
@@ -33,6 +33,8 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
  crpsSim <- rep(NA, nObs)
  names(crpsSim) <- ensembleObsLabels(ensembleData)
 
+ members <- ensembleMemberLabels(ensembleData)
+
  ensembleData <- ensembleForecasts(ensembleData)
 
  WEIGHTS <- fit$weights
@@ -54,25 +56,32 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
        RATE <- MEAN/VAR
        SHAPE <- MEAN*RATE
 
-       if (sum(!M) > 1 ) {  
-         W <- WEIGHTS + weps
-         W <- W[!M]/sum(W[!M])
-         SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples, 
-                            replace = TRUE, prob = W)
-       }
-       else {
-         SAMPLES <- rep( (1:nForecasts)[!M], nSamples)
+       W <- WEIGHTS
+       if (any(M)) {
+         W <- W + weps
+         W <- W[!M] / sum(W[!M])
        }
 
-       tab <- table(SAMPLES)
+       SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples,
+                           replace = TRUE, prob = W) 
 
-       S <- apply( cbind(as.numeric(names(tab)), tab), 1,
-              function(nj,SHAPE,RATE) 
-                  rgamma(nj[2], shape=SHAPE[nj[1]], rate=RATE[nj[1]]),
-                                        SHAPE = SHAPE[!M], RATE = RATE[!M])
+       tab <- rep(0, nForecasts)
+       names(tab) <- members
+       for (j in seq(along = tab)) tab[j] <- sum(SAMPLES == j)
+       
+       SAMPLES[] <- NA
 
-       SAMPLES <- sapply(as.vector(unlist(S)), powinv, power = fit$power)
+       jj <- 0
+       for (j in seq(along = tab)) {
+          nsamp <- tab[j]
+          if (nsamp == 0) next
+          SAMPLES[jj + 1:nsamp] <- rgamma(nsamp,shape=SHAPE[j],rate=RATE[j])
+          jj <- jj + nsamp
+        }
 
+# crps2 approximates a term that is quadratic in the number of members
+       nz <- SAMPLES != 0
+       if (any(nz)) SAMPLES[nz] <- sapply(SAMPLES[nz], powinv, power=fit$power)
   
        crps1  <- mean(abs(SAMPLES - obs[i])) 
        crps2 <-  mean(abs(diff(sample(SAMPLES))))

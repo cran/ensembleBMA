@@ -1,4 +1,4 @@
-`pit.fitBMAgamma` <-
+pit.fitBMAgamma <-
 function(fit, ensembleData, dates=NULL, ...) 
 {
  
@@ -22,6 +22,19 @@ function(fit, ensembleData, dates=NULL, ...)
  PIT <- numeric(nObs)
  names(PIT) <- ensembleObsLabels(ensembleData)
 
+ startup <- startupSpeed(ensembleData)
+ if (is.null(startup) & !is.na(fit$startup)) {
+   if (length(fit$startup) != 1) stop("problem with startup specification")
+   startup <- rep(fit$startup, nrow(ensembleData))
+ }
+ if (is.null(startup)) startup <- rep(controlBMAgamma()$startupSpeed,
+                                      nrow(ensembleData))
+
+ if (any(is.na(startup))) {
+   if (is.null(controlBMAgamma()$startupSpeed)) 
+     stop("default anemometer startup speed not specified")
+   startup[is.na(startup)] <- controlBMAgamma()$startupSpeed
+ }
  obs <- sapply( ensembleVerifObs(ensembleData), powfun, power = fit$power)
  nForecasts <- ensembleSize(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)
@@ -50,6 +63,8 @@ function(fit, ensembleData, dates=NULL, ...)
 
        PIT[i] <- cdfBMAgamma( obs[i], WEIGHTS = W, 
                           MEAN = MEAN[!M], VAR = VAR[!M]) 
+
+       if (startup[i] > 0 && obs[i] < startup[i]) PIT[i] <- runif(0, max = PIT[i])
     }
 
  }

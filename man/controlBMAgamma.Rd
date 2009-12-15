@@ -8,7 +8,7 @@
    of a mixture of gammas to ensemble forecasts for wind speed.
 }
 \usage{
-controlBMAgamma(maxIter, tol, power = 1, start)
+controlBMAgamma(maxIter, tol, power = 1, startupSpeed = NULL, init)
 }
 \arguments{
   \item{maxIter}{
@@ -30,8 +30,15 @@ controlBMAgamma(maxIter, tol, power = 1, start)
     The default is not to transform the data.
     The untransformed forecast is used to fit the variance model.
    }
-  \item{start}{
-     An optional list of starting values for variance coefficients
+  \item{startupSpeed}{
+    A scalar value giving a global value for the anemometer startup speed,
+    or the threshold below which a value of 0 is recorded. As this can
+    vary from station to station and network to network, it may be
+    preferable to include \code{startupSpeed} as part of the \code{ensembleData}
+    object.
+   }
+  \item{init}{
+     An optional list of initial values for variance coefficients
      and weights. The default is to start with the variance coefficients
      equal to 1, and with equal weights for each member of the ensemble.
   }
@@ -76,7 +83,7 @@ Washington, 2009.
                                 initializationTime = "00")
 
    winsTestFit1 <- ensembleBMAgamma(winsTestData, trainingDays = 30,
-       control = controlBMAgamma(maxIter = 100, tol = 1.e-6))
+       control = controlBMAgamma(maxIter = 100, tol = 1.e-6, startupSpeed = 1))
 }
 \keyword{models}
 % docclass is function

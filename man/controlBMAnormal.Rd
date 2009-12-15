@@ -8,7 +8,7 @@
    of a mixture of normals to ensemble forecasts.
 }
 \usage{
-controlBMAnormal(maxIter, tol, equalVariance, biasCorrection, start) 
+controlBMAnormal(maxIter, tol, equalVariance, biasCorrection, init) 
 }
 \arguments{
   \item{maxIter}{
@@ -45,8 +45,8 @@ controlBMAnormal(maxIter, tol, equalVariance, biasCorrection, start)
    }
   }
   }
- \item{start}{
-     An optional list of starting values for standard deviations 
+ \item{init}{
+     An optional list of initial values for standard deviations 
      and weights. The default is to start with all standard deviations
      equal to 1, and with equal weights for each member of the ensemble.
   }

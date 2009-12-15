@@ -3,9 +3,11 @@
 \alias{quantileForecast.ensembleBMAgamma}
 \alias{quantileForecast.ensembleBMAgamma0}
 \alias{quantileForecast.ensembleBMAnormal}
+\alias{quantileForecast.ensembleBMAbvnormal}
 \alias{quantileForecast.fitBMAgamma}
 \alias{quantileForecast.fitBMAgamma0}
 \alias{quantileForecast.fitBMAnormal}
+\alias{quantileForecast.fitBMAbvnormal}
 \alias{quantBMAgamma}
 \alias{quantBMAgamma0}
 \alias{quantBMAnormal}
@@ -25,14 +27,10 @@ quantileForecast( fit, ensembleData, quantiles = 0.5, dates=NULL, \dots)
   }
   \item{ensembleData}{
      An \code{ensembleData} object that includes ensemble
-     forecasts, verification observations and dates.
+     forecasts, verification observations and possibly dates.
      Missing values (indicated by \code{NA}) are allowed. \\
      This need not be the data used for the model \code{fit}, 
-     although it must include the same ensemble members. \\
-     If \code{ensembleData} includes dates,
-     they must be consistent with \code{fit} and \code{dates}. 
-     If \code{ensembleData} does not include dates, they will
-     be inferred from \code{fit} and \code{dates}. 
+     although it must include the same ensemble members. 
   }
   \item{quantiles}{
      The vector of desired quantiles for the PDF of the BMA mixture model.
@@ -57,7 +55,9 @@ A vector of forecasts corresponding to the desired quantiles.
    Note the model may have been applied to a power transformation of the data,
    but that information is included in the input \code{fit}, and
    the output is transformed appropriately. \cr
-   This can be used to compute prediction intervals for the PDF. 
+   This can be used to compute prediction intervals for the PDF.  \cr
+   For the bivariate normal model for wind speed and direction, the
+   CRPS is computed for the marginal wind speed distribution.
 }
 \seealso{
   \code{\link{ensembleBMA}}, 

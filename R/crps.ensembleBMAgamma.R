@@ -1,4 +1,4 @@
-`crps.ensembleBMAgamma` <-
+crps.ensembleBMAgamma <-
 function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...) 
 {
 
@@ -69,12 +69,16 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
    nObs <- length(Dates)
  }
 
+ Q <- as.vector(quantileForecast( fit, ensembleData, dates = dates))
+ if (any(is.na(Q))) stop("NAs in forecast") # fix like ensembleBMAgamma0
+
  obs <- ensembleVerifObs(ensembleData)
  nForecasts <- ensembleSize(ensembleData) 
 
  crpsSim <- rep(NA, nObs)
  names(crpsSim) <- ensembleObsLabels(ensembleData)
 
+ members <- ensembleMemberLabels(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)
 
  l <- 0
@@ -103,42 +107,38 @@ function(fit, ensembleData, nSamples=10000, seed=NULL, dates=NULL, ...)
        RATE <- MEAN/VAR
        SHAPE <- MEAN*RATE
 
-       RATE  <- RATE[!M]
-       SHAPE <- SHAPE[!M]
+       W <- WEIGHTS
+       if (any(M)) {
+         W <- W + weps
+         W <- W[!M] / sum(W[!M])
+       }
 
        if (sum(!M) > 1) {
-         W <- WEIGHTS + weps
-         W <- W[!M] / sum(W[!M])
-         SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples, 
-                            replace = TRUE, prob = W)
+         SAMPLES <- sample( (1:nForecasts)[!M], size = nSamples,
+                             replace = TRUE, prob = W) 
        }
        else {
-         SAMPLES <- sample( 1:nForecasts, size = nSamples, 
-                            replace = TRUE, prob = WEIGHTS)
+         SAMPLES <- rep((1:nForecasts)[!M], nSamples)
        }
 
-       tab <- numeric(sum(!M))
-       names(tab) <- (1:nForecasts)[!M]
-       tabSamples <- table(SAMPLES)
-       tab[names(tabSamples)] <- tabSamples
+       tab <- rep(0, nForecasts)
+       names(tab) <- members
+       for (j in seq(along = tab)) tab[j] <- sum(SAMPLES == j)
+       
+       SAMPLES[] <- NA
 
-       Z <- tab == 0
-
-       tab <- tab[!Z]
-
-       if (length(tab)) {
-          RATE  <- RATE[!Z]
-          SHAPE <- SHAPE[!Z]
-
-          S <- apply( cbind( seq(along = tab), tab), 1,
-              function(nj,SHAPE,RATE) 
-                  rgamma(nj[2], shape=SHAPE[nj[1]], rate=RATE[nj[1]]),
-                                      SHAPE = SHAPE, RATE = RATE)
-
-         SAMPLES <- sapply(as.vector(unlist(S)), powinv, power = fit$power)
+       jj <- 0
+       for (j in seq(along = tab)) {
+          nsamp <- tab[j]
+          if (nsamp == 0) next
+          SAMPLES[jj + 1:nsamp] <- rgamma(nsamp,shape=SHAPE[j],rate=RATE[j])
+          jj <- jj + nsamp
         }
-       else stop("no samples")
-  
+
+       nz <- SAMPLES != 0
+       if (any(nz)) SAMPLES[nz] <- sapply(SAMPLES[nz], powinv, power=fit$power)
+
+# crps2 approximates a term that is quadratic in the number of members
        crps1  <- mean(abs(SAMPLES - obs[i])) 
        crps2 <-  mean(abs(diff(sample(SAMPLES))))
        crpsSim[i]  <- crps1 - crps2/2

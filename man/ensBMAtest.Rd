@@ -8,9 +8,9 @@
 \description{
   This data set gives 48-hour forecasts for 2-m temperature,
   precipitation accumulated over the last 24 hours, and maximum wind speed
-  over the US Pacific Northwest region in 2007/2008 initialized at 00 hours
-  UTC using a 12km grid. The forecasts are based on an 8 member version 
-  of the University of Washington mesoscale ensemble
+  at SeaTac (KSEA) and Portland (PDX) ariports in 2007/2008  initialized at 
+  00 hours UTC using a 12km grid. The forecasts are based on an 8 member 
+  version of the University of Washington mesoscale ensemble
   (Grimit and Mass 2002; Eckel and Mass 2005). \cr
 }
 \format{

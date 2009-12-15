@@ -1,10 +1,11 @@
-`ensembleData` <-
+ensembleData <-
 function(forecasts, dates = NULL, observations = NULL, ...,
-         forecastHour, initializationTime, exchangeable = NULL)
+         forecastHour, initializationTime,
+         startupSpeed = NULL, exchangeable = NULL)
 {
  object <- match.call()
  object[[1]] <- as.name("cbind")
- object$forecastHour <- object$initializationTime <- object$exchangeable <- NULL
+ object$forecastHour <- object$initializationTime <- object$startupSpeed <- object$exchangeable <- NULL
  object <- object[!unlist(lapply(object, is.null))]
  nam <- names(object)
  nam[2] <- nam[1]
@@ -28,6 +29,7 @@ function(forecasts, dates = NULL, observations = NULL, ...,
  }
  else  attr(object, "initializationTime") <- initializationTime
  attr(object, "exchangeable") <- exchangeable
+ attr(object, "startupSpeed") <- startupSpeed
  class(object) <- c("ensembleData", "data.frame")
  object
 }

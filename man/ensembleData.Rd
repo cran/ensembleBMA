@@ -10,6 +10,7 @@
 \alias{ensembleSize}
 \alias{ensembleValidDates}
 \alias{ensembleVerifObs}
+\alias{startupSpeed}
 \alias{ensembleMemberLabels.ensembleData}
 \alias{ensembleFhour.ensembleData}
 \alias{ensembleForecasts.ensembleData}
@@ -20,6 +21,7 @@
 \alias{ensembleNobs.ensembleData}
 \alias{ensembleValidDates.ensembleData}
 \alias{ensembleVerifObs.ensembleData}
+\alias{startupSpeed.ensembleData}
 \alias{[.ensembleData}
 \alias{matchEnsembleMembers}
 \alias{matchEnsembleMembers.ensembleBMAgamma}
@@ -29,6 +31,7 @@
 \alias{matchEnsembleMembers.fitBMAgamma0}
 \alias{matchEnsembleMembers.fitBMAnormal}
 \alias{matchITandFH}
+\alias{matchITandFH.default}
 \alias{matchITandFH.default}
 \title{
   Create an ensembleData object
@@ -40,11 +43,13 @@
 }
 \usage{
 ensembleData( forecasts, dates = NULL, observations = NULL, ...,
-              forecastHour, initializationTime, exchangeable = NULL)
+              forecastHour, initializationTime,
+              startupSpeed = NULL, exchangeable = NULL)
 }
 \arguments{
   \item{forecasts}{
-     A matrix with columns corresponding to forecasts from individual members 
+     A matrix or array (for vector qunatities) 
+     with columns corresponding to forecasts from individual members 
      of an ensemble and rows corresponding to forecasts for the same date.
   }
   \item{dates}{
@@ -57,19 +62,26 @@ ensembleData( forecasts, dates = NULL, observations = NULL, ...,
     MM the monthn, DD the day, and (optionally) HH the hour.
    }
   \item{observations}{
-    Optional vector of observed weather conditions corresponding 
+    Optional vector (or matrix for vector quantities) of observed weather 
+    conditions corresponding 
     to the forecasts. Must be supplied if the data is to be
     used for BMA modeling. 
   }
   \item{...}{
-    A named list of additional attributes such as latitude
-    and longitude.
+    A named list of additional attributes such as latitude,
+    longitude, and startupSpeed for wind speed.
   }
   \item{forecastHour}{
      A numeric vector giving the forecast hour.
   }
   \item{initializationTime}{
      A numeric or character vector giving the initialization time.
+  }
+  \item{startupSpeed}{
+    A numeric value specifying a value  below which the anemometer
+    readings for wind speed will be recorded as zero. This value
+    is used for all stations when the startup speed is not explicity
+    specified as part of the data.
   }
   \item{exchangeable}{
      A numeric or character vector or factor indicating groups of 
@@ -93,7 +105,9 @@ ensembleData( forecasts, dates = NULL, observations = NULL, ...,
     \code{ensembleForecasts}, \code{ensembleValidDates}, and
     \code{ensembleVerifObs}. \cr
     Subsetting is possible, but in the case of columns it applies only to
-    the ensemble forecasts.
+    the ensemble forecasts. \cr
+    For vector wind computations, the velocity should be in the first 
+    column and the direction in the second.
 }
 
 \seealso{
