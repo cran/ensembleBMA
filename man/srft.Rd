@@ -34,20 +34,19 @@ Initial results of a mesoscale short-range ensemble forecasting system over
 the Pacific Northwest, 
 \emph{Weather and Forecasting 17:192--205, 2002}.
 
-V. J. Berrocal, A. E. Raftery, T. Gneiting and R. C. Steed,
-Probabilistic Weather Forecasting for Winter Road Maintenance,
-Technical Report No. 511, Department of Statistics, University of
-Washington, August 2007.
-
 V. J. Berrocal, A. E. Raftery and T. Gneiting,
 Combining spatial and ensemble information in probabilistic weather forecasts,
 \emph{Monthly Weather Review 133:1386--1402, 2007}.
+
+V. J. Berrocal, A. E. Raftery, T. Gneiting and R. C. Steed,
+Probabilistic Weather Forecasting for Winter Road Maintenance,
+\emph{Journal of the American Statistical Association, 2010 (to appear)}.
 
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter, 
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting 
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 }
 
 \examples{
@@ -65,7 +64,7 @@ Washington, 2009.
                             forecastHour = 48,
                             initializationTime = "00")
 
-  srftFit <- ensembleBMAnormal( srftData, date = "2004012900",
+  srftFit <- ensembleBMAnormal( srftData, date = "2004013100",
                                 trainingDays = 25)
 }}
 \keyword{datasets}

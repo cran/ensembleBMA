@@ -68,11 +68,26 @@ T. Gneiting, F. Balabdaoui and A. Raftery,
 Probabilistic forecasts, calibration and sharpness.
 \emph{Journal of the Royal Statistical Society, Series B 69:243--268, 2007}.
 
+J. M. Sloughter, A. E. Raftery, T Gneiting and C. Fraley, 
+Probabilistic quantitative precipitation forecasting 
+using Bayesian model averaging,
+\emph{Monthly Weather Review 135:3209--3220, 2007}.
+
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensemble and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, revised 2009.
+Washington, 2007 (revised 2010).
+
+C. Fraley, A. E. Raftery, T. Gneiting,
+Calibrating Multi-Model Forecast Ensembles
+with Exchangeable and Missing Members using Bayesian Model Averaging,
+\emph{Monthly Weather Review 138:190--202, 2010}.
+
+J. M. Sloughter, T. Gneiting and A. E. Raftery, 
+Probabilistic wind speed forecasting 
+using ensembles and Bayesian model averaging,
+\emph{Journal of the American Statistical Association, 105:25--35, 2010}.
 }
 
 \examples{

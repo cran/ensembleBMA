@@ -7,7 +7,7 @@
 \description{
 This data set gives 48-hour forecasts of 24 hour accumulated precipitation
 on a grid of locations in the US Pacific Northwest 
-initialized on  January 11, 2003 OOZ and valid on January 13, 2003 OOZ. 
+initialized on  January 13, 2003 OOZ and valid on January 15, 2003 OOZ. 
 The ensemble forecasts come from a nine member version of the 
 University of Washington Mesoscale Ensemble 
 (Grimit and Mass 2002; Eckel and Mass 2005).
@@ -57,9 +57,9 @@ Washington, 2009.
 
   data(prcpFit)
 
-# median forecast for Jan 13, 2003 at the grid points
+# median forecast for Jan 15, 2003 at the grid points
 
-  quantileForecast( prcpFit, prcpGridData, date = "20030113")
+  quantileForecast( prcpFit, prcpGridData, date = "20030115")
   
 }}
 \keyword{data}

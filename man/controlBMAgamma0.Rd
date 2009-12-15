@@ -9,7 +9,10 @@
    precipitation.
 }
 \usage{
-controlBMAgamma0(maxIter, tol, power = (1/3), rainobs = 10, init)
+controlBMAgamma0(maxIter = Inf, tol = sqrt(.Machine$double.eps), 
+                 power = (1/3), rainobs = 10, 
+                 init = list(varCoefs = NULL, weights = NULL),
+                 prior = NULL)
 }
 \arguments{
   \item{maxIter}{
@@ -48,6 +51,10 @@ controlBMAgamma0(maxIter, tol, power = (1/3), rainobs = 10, init)
      and weights. The default is to start with the variance coefficients
      equal to 1, and with equal weights for each member of the ensemble.
   }
+  \item{prior}{
+     Prior specification for PoP computation. Not currently used; to
+     be added later.
+  }
 }
 
 \value{
@@ -69,7 +76,7 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Ensemble Forecasting
 using Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 }
 
 \examples{

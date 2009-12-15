@@ -35,13 +35,15 @@ function(ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
 
   Y0 <- obs == 0
   n0obs <- sum(Y0)
-  cat(" ", nObs - n0obs)
+# cat(" ", nObs - n0obs)
 
   if (sum(!Y0) < 2) stop("less than 2 nonzero obs")
 
 # untransformed weather data for variance model  
 
   ensembleData <- ensembleForecasts(ensembleData)
+
+  Xvar <- ensembleData[!Y0, ]
   
   ensembleData <- apply(ensembleData, 2, 
                        function(x) sapply(x, powfun, power = control$power))
@@ -119,17 +121,15 @@ if (any(Y0)) {
 
   }
 
-  PROB1 <- (1-PROB0)[!Y0,]
+  POP <- (1-PROB0)[!Y0,]
   PROB0 <- PROB0[Y0,]
 
  }
  else {
-      PROB1 <- matrix(1, nObs, nForecasts)
+      POP <- matrix(1, nObs, nForecasts)
       prob0coefs <- matrix(0, 3, nForecasts)
       dimnames(prob0coefs) <- NULL
  }
-
-  Xvar <- ensembleData[!Y0, ]
 
   obs <- sapply(obs, function(x) sapply( x, powfun, power = control$power))
   obs <- obs[!Y0]
@@ -282,7 +282,7 @@ if (any(Y0)) {
                              shape=SHAPE[!miss], rate=RATE[!miss], log=TRUE) 
     zmax = apply( z[!Y0,], 1, max, na.rm=TRUE) 
     z[!Y0,] <- sweep( z[!Y0,], MARGIN=1, FUN="-", STATS=zmax)  
-    z[!Y0,] <- sweep( PROB1, MARGIN = 2, FUN="*", STATS=weights)*exp(z[!Y0,])
+    z[!Y0,] <- sweep( POP, MARGIN = 2, FUN="*", STATS=weights)*exp(z[!Y0,])
     z[Y0,] <- sweep( PROB0, MARGIN=2, FUN="*", STATS=weights)
 
     oldLL <- newLL
@@ -314,7 +314,7 @@ if (any(Y0)) {
 
     weps <- max(abs(wold - weights)/(1+abs(weights)))
 
-      fn <- completeDataLLmiss(z, weights, MEAN, PROB0, PROB1, Xvar, obs, Y0)
+      fn <- completeDataLLmiss(z, weights, MEAN, PROB0, POP, Xvar, obs, Y0)
       optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
 
       if (optimResult$convergence) warning("optim does not converge")

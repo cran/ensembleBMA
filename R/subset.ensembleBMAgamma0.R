@@ -5,7 +5,7 @@ function(x,d) {
   m <- match( d, names(x$nIter), nomatch = 0)
   if (any(!m)) stop("dates not matched in model")
   x$training$table <- x$training$table[d]
-  x$prob0coefs <- x$prob0oefs[,,d,drop = FALSE]
+  x$prob0coefs <- x$prob0coefs[,,d,drop = FALSE]
   x$biasCoefs <- x$biasCoefs[,,d,drop = FALSE]
   x$varCoefs <- x$varCoefs[,d,drop = FALSE]
   x$weights <- x$weights[,d,drop = FALSE]

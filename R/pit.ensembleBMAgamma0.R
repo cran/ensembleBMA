@@ -109,7 +109,6 @@ function(fit, ensembleData, dates = NULL, ...)
        PIT[i] <- cdfBMAgamma0(obs[i],  WEIGHTS = W, PROB0 = PROB0[!M], 
                                      MEAN = MEAN[!M], VAR = VAR[!M]) 
 
-       if (obs[i] == 0) PIT[i] <- runif(0, max = PIT[i])
     }
 
  }

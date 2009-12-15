@@ -1,7 +1,7 @@
-`ensembleValidDates.ensembleData` <-
+ensembleValidDates.ensembleData <-
 function (x) 
 { 
  class(x) <- "data.frame"
- x$dates
+ as.character(x$dates)
 }
 

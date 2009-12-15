@@ -1,15 +1,19 @@
-pit.ensembleBMAgamma <-
-function(fit, ensembleData, dates = NULL, ...) 
+plot.ensembleBMAgamma <-
+function(x, ensembleData, dates=NULL, ask=TRUE, ...) 
 {
+
+ par(ask = ask)
 
  powfun <- function(x,power) x^power
  powinv <- function(x,power) x^(1/power)
 
  weps <- 1.e-4
 
- matchITandFH(fit,ensembleData)
+ matchITandFH(x,ensembleData)
 
- M <- matchEnsembleMembers(fit,ensembleData)
+ exchangeable <- x$exchangeable
+
+ M <- matchEnsembleMembers(x,ensembleData)
  nForecasts <- ensembleSize(ensembleData)
  if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
 
@@ -20,7 +24,7 @@ function(fit, ensembleData, dates = NULL, ...)
  
 ## match specified dates with dateTable in fit
 
- dateTable <- dimnames(fit$weights)[[2]]
+ dateTable <- dimnames(x$weights)[[2]]
 
  if (!is.null(dates)) {
 
@@ -66,28 +70,9 @@ function(fit, ensembleData, dates = NULL, ...)
  }
 
  nForecasts <- ensembleSize(ensembleData)
- 
- PIT <- numeric(nObs)
- names(PIT) <- ensembleObsLabels(ensembleData)
 
- startup <- startupSpeed(ensembleData)
- if (is.null(startup) & !is.null(fit$startup)) {
-   if (length(fit$startup) != 1) stop("problem with startup specification")
-   startup <- rep(fit$startup, nrow(ensembleData))
- }
+ obs <- ensembleVerifObs(ensembleData)
 
- if (is.null(startup)) startup <- controlBMAgamma()$startupSpeed
-
- if (length(startup == 1)) startup <- rep(startup, length = nObs)
-
- if (any(is.na(startup))) {
-   if (is.null(controlBMAgamma()$startupSpeed)) 
-     stop("default anemometer startup speed not specified")
-   startup[is.na(startup)] <- controlBMAgamma()$startupSpeed
- }
-
-
- obs <- sapply( ensembleVerifObs(ensembleData), powfun, power = fit$power)
  ensembleData <- ensembleForecasts(ensembleData)
  
  l <- 0
@@ -96,7 +81,7 @@ function(fit, ensembleData, dates = NULL, ...)
     l <- l + 1
     k <- K[l]
 
-    WEIGHTS <- fit$weights[,k]
+    WEIGHTS <- x$weights[,k]
      
     if (all(Wmiss <- is.na(WEIGHTS))) next
 
@@ -108,11 +93,11 @@ function(fit, ensembleData, dates = NULL, ...)
 
        M <- is.na(f) | Wmiss
      
-       VAR <- (fit$varCoefs[1,k] + fit$varCoefs[2,k]*f)^2
+       VAR <- (x$varCoefs[1,k] + x$varCoefs[2,k]*f)^2
         
-       fTrans <- sapply(f, powfun, power = fit$power)
+       fTrans <- sapply(f, powfun, power = x$power)
 
-       MEAN <- apply(rbind(1, fTrans) * fit$biasCoefs[,k], 2, sum)
+       MEAN <- apply(rbind(1, fTrans) * x$biasCoefs[,k], 2, sum)
 
        W <- WEIGHTS
        if (any(M)) {
@@ -120,14 +105,12 @@ function(fit, ensembleData, dates = NULL, ...)
          W <- W[!M]/sum(W[!M])
        }
 
-       PIT[i] <- cdfBMAgamma( obs[i], WEIGHTS = W, 
-                              MEAN = MEAN[!M], VAR = VAR[!M]) 
-
-       if (startup[i] > 0 && obs[i] <= startup[i]) PIT[i] <- runif(0, max = PIT[i])  
+       plotBMAgamma( WEIGHTS = W, MEAN = MEAN[!M], VAR = VAR[!M],
+                     obs = obs[i], exchangeable = exchangeable)
     }
 
  }
 
- PIT
+ invisible()
 }
 

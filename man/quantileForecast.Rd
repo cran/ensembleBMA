@@ -78,12 +78,17 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles
-with Missing and Exchangeable Ensemble Members,
-(in preparation).
+Calibrating Multi-Model Forecast Ensembles
+with Exchangeable and Missing Members using Bayesian Model Averaging,
+\emph{Monthly Weather Review 138:190--202, 2010}.
+
+J. M. Sloughter, T. Gneiting and A. E. Raftery, 
+Probabilistic wind speed forecasting 
+using ensembles and Bayesian model averaging,
+\emph{Journal of the American Statistical Association, 105:25--35, 2010}.
 }
 
 \examples{
@@ -122,7 +127,7 @@ with Missing and Exchangeable Ensemble Members,
                             forecastHour = 48,
                             initializationTime = "00")
 
-  srftFit <- ensembleBMAnormal(srftData, date = "2004012900",
+  srftFit <- ensembleBMAnormal(srftData, date = "2004013100",
                                trainingDays = 25)
 
   data(srftGrid)
@@ -134,7 +139,7 @@ with Missing and Exchangeable Ensemble Members,
                                initializationTime = "00")
 
   srftGridForc <- quantileForecast( srftFit, srftGridData, 
-                     date = "2004012900")
+                     date = "2004013100")
 }}
 \keyword{models}
 % docclass is function

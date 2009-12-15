@@ -4,14 +4,13 @@ function(forecasts, dates = NULL, observations = NULL, ...,
          startupSpeed = NULL, exchangeable = NULL)
 {
  object <- match.call()
- object[[1]] <- as.name("cbind")
+ object[[1]] <- as.name("cbind.data.frame")
  object$forecastHour <- object$initializationTime <- object$startupSpeed <- object$exchangeable <- NULL
  object <- object[!unlist(lapply(object, is.null))]
  nam <- names(object)
  nam[2] <- nam[1]
  names(object) <- nam
  object <- eval(object, parent.frame())
-
  attr(object, "ensembleSize") <- if (is.null(dim(forecasts))) 1 else ncol(forecasts)
  if (missing(dates)) {
    warning("no dates specified")
@@ -20,6 +19,7 @@ function(forecasts, dates = NULL, observations = NULL, ...,
    nObs <- if (is.null(dim(forecasts))) length(forecasts) else nrow(forecasts)
    dates <- as.factor(rep( as.character(dates), nObs))
  }
+ else dates <- as.factor(dates)
  if (missing(forecastHour)) {
    warning("data cannot be used for modeling unless forecast hour is specified")
   }

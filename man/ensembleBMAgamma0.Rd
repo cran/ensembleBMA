@@ -98,12 +98,12 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 
 C. Fraley, A. E. Raftery, T. Gneiting,
-Using Bayesian Model Averaging to Calibrate Forecast Ensembles
-with Missing and Exchangeable Ensemble Members,
-(in preparation).
+Calibrating Multi-Model Forecast Ensembles
+with Exchangeable and Missing Members using Bayesian Model Averaging,
+\emph{Monthly Weather Review 138:190--202, 2010}.
 }
 
 \examples{

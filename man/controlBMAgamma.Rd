@@ -54,17 +54,16 @@ controlBMAgamma(maxIter, tol, power = 1, startupSpeed = NULL, init)
 }
 
 \references{
-J. M. Sloughter, T.Gneiting and A. E. Raftery, 
+J. M. Sloughter, T. Gneiting and A. E. Raftery, 
 Probabilistic wind speed forecasting 
 using ensembles and Bayesian model averaging,
-Technical Report No. 544, Department of Statistics,
-University of Washington, October 2008.
+\emph{Journal of the American Statistical Association, 105:25--35, 2010}.
 
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Ensemble Forecasting
 using Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 }
 
 \examples{

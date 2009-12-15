@@ -81,13 +81,13 @@ CRPS( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
 \references{
 T. Gneiting and A. E. Raftery,
 Strictly proper scoring rules, prediction and estimation,
-\emph{Journal of the American Statistical Association 102:359--378 (2007).}
+\emph{Journal of the American Statistical Association 102:359--378, 2007}.
 
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 }
 
 \examples{

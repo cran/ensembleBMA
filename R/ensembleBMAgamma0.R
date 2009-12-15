@@ -4,6 +4,8 @@ function(ensembleData, trainingDays, dates = NULL,
 {
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
 
+ if (missing(trainingDays)) stop("trainingDays must be specified")
+
  call <- match.call()
 
  warmStart <- FALSE
@@ -93,7 +95,7 @@ function(ensembleData, trainingDays, dates = NULL,
     }
 
     if (any(dates < julTOymdh(min(Jdates),origin=origin,dropHour=(lD == 8)))) {
-     stop("some dates precede the first training period")
+     stop("dates precede the first training period")
    }
 
    if (any(dates > julTOymdh(max(Jdates),origin=origin,dropHour=(lD == 8)))) {

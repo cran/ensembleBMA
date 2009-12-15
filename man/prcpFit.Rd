@@ -62,7 +62,7 @@ C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensembles and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 }
 
 \examples{
@@ -84,7 +84,7 @@ Washington, 2009.
   1 - cdf( prcpFit, prcpGridData, value = 0)
 
 # probability of precipitation above 0.25 in
-  1 - cdf( prcpFit, prcpGridData, date = "20030113", value = 25)
+  1 - cdf( prcpFit, prcpGridData, date = "20030115", value = 25)
   
 }}
 \keyword{data}

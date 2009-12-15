@@ -61,13 +61,13 @@ controlBMAnormal(maxIter, tol, equalVariance, biasCorrection, init)
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
 Using Bayesian model averaging to calibrate forecast ensembles,
-\emph{Monthly Weather Review 133:1155-1174, 2005}.
+\emph{Monthly Weather Review 133:1155--1174, 2005}.
 
 C. Fraley, A. E. Raftery, T. Gneiting and J. M. Sloughter,
 \code{ensembleBMA}: An \code{R} Package for Probabilistic Forecasting
 using Ensemble and Bayesian Model Averaging,
 Technical Report No. 516R, Department of Statistics, University of
-Washington, 2009.
+Washington, 2007 (revised 2010).
 }
 
 \examples{

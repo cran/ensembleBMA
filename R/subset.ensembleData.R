@@ -55,7 +55,12 @@ function (x, i, j)
         stop("repeated entries not allowed")
     }
     matchCall$drop <- FALSE
-    x <- eval(matchCall, parent.frame())
+    listCall <- as.list(matchCall)
+    nam <- names(listCall)
+    listCall <- listCall[c(1,2,which(nam == "i"), which(nam == "j"), 
+                  length(listCall))]
+    names(listCall) <- NULL
+    x <- eval(as.call(listCall), parent.frame())
     attr(x, "initializationTime") <- initializationTime
     attr(x, "forecastHour") <- forecastHour
     attr(x, "startupSpeed") <- startupSpeed

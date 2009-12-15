@@ -1,4 +1,4 @@
-`cdf.ensembleBMAgamma0` <-
+cdf.ensembleBMAgamma0 <-
 function(fit, ensembleData, values, dates = NULL, ...) 
 {
  powfun <- function(x,power) x^power
@@ -106,7 +106,7 @@ function(fit, ensembleData, values, dates = NULL, ...)
 
        CDF[i,] <- sapply( sapply( values, powfun, power = fit$power), 
                           cdfBMAgamma0, WEIGHTS = W, 
-                          PROB0 = PROB0[!M], MEAN = MEAN[!M], VAR = VAR[!M]) 
+                          MEAN = MEAN[!M], VAR = VAR[!M], PROB0 = PROB0[!M]) 
     }
 
  }

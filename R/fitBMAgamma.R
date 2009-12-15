@@ -40,7 +40,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
   M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
   M <- M | is.na(ensembleVerifObs(ensembleData))
   ensembleData <- ensembleData[!M,]
-  startup <- startup[M]
+  startup <- startup[!M]
  
   if (is.null(obs <- ensembleVerifObs(ensembleData)))
    stop("verification observations required")
@@ -173,7 +173,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 
  # main EM algorithm
  
- newLL <- 0
+  newLL <- 0
 
   while(TRUE)
   {
