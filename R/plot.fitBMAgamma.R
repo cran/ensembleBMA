@@ -1,7 +1,10 @@
 plot.fitBMAgamma <-
 function(x, ensembleData, dates=NULL, ...) 
 {
-
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  exchangeable <- x$excchangeable
  
  powfun <- function(x,power) x^power
@@ -11,18 +14,22 @@ function(x, ensembleData, dates=NULL, ...)
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(x,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ ensembleData <- ensembleData[,matchEnsembleMembers(x,ensembleData)]
 
-# remove instances missing all forecasts
+ M <- !dataNA(ensembleData,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
+ fitDates <- modelDates(x)
 
- nObs <- nrow(ensembleData)
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
 
- obs <- ensembleVerifObs(ensembleData)
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) x <- x[fitDates[M$fit]]
+
+ obs <- dataVerifObs(ensembleData)
+ nObs <- length(obs)
+
+ if (nObs == 0) obs <- rep( NA, nrow(ensembleData))
 
  nForecasts <- ensembleSize(ensembleData)
 

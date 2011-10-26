@@ -1,6 +1,11 @@
 `quantBMAgamma0` <-
 function(alpha, WEIGHTS, MEAN, VAR, PROB0)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
+
  # if the probability of zero is greater than the desired alpha
  # then the quantile is zero
 

@@ -2,6 +2,11 @@ fitBMAnormal <-
 function(ensembleData, control = controlBMAnormal(),
          exchangeable = NULL)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
+  ZERO <- 1.e-100
 
   if (is.null(exchangeable)) exchangeable <- ensembleGroups(ensembleData)
 
@@ -19,18 +24,18 @@ function(ensembleData, control = controlBMAnormal(),
     dimnames(matEX) <- list(NULL, uniqueEX)
   }
 
+  nObs <- dataNobs(ensembleData)
+  if (!nObs) stop("no observations")
+
 # remove instances missing all forecasts or obs
 
-  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
-  M <- M | is.na(ensembleVerifObs(ensembleData))
-  ensembleData <- ensembleData[!M,]
- 
-  if (is.null(obs <- ensembleVerifObs(ensembleData)))
-   stop("verification observations required")
+  ensembleData <- ensembleData[!dataNA(ensembleData,dates=FALSE),]
 
-  nObs <- ensembleNobs(ensembleData)
+  nObs <- dataNobs(ensembleData)
+  if (!nObs) stop("no observations")
+  obs <- dataVerifObs(ensembleData)
 
-  ensMemNames <- ensembleMemberLabels(ensembleData)
+  ensMemNames <- ensembleMembers(ensembleData)
   nForecasts <- length(ensMemNames)
 
   if(is.null(sd <- control$init$sd)) sd <- sd(obs)
@@ -181,6 +186,7 @@ function(ensembleData, control = controlBMAnormal(),
           zsum1 <- apply(z, 1, sum, na.rm = TRUE)
 
           z <- sweep( z, MARGIN = 1, FUN = "/", STATS = zsum1)
+          z[z < ZERO] <- 0
 
           old <- loglik
           loglik <- sum(log(zsum1))
@@ -188,6 +194,8 @@ function(ensembleData, control = controlBMAnormal(),
           zsum2 <- apply(z, 2, sum, na.rm = TRUE)
  
           weights <- zsum2/sum(zsum2)
+
+          weights[weights < ZERO] <- 0
 
           if (nullX) {
             if (control$equalVariance) {
@@ -232,6 +240,6 @@ function(ensembleData, control = controlBMAnormal(),
   list(biasCoefs = biasCoefs, sd = sd, weights = weights, 
        exchangeable = exchangeable, nIter = nIter, 
        loglikelihood = loglik),
-  class = "fitBMAnormal")
+       class = c("fitBMAnormal", "fitBMA"))
 }
 

@@ -1,6 +1,10 @@
-`quantileForecast.fitBMAnormal` <-
+quantileForecast.fitBMAnormal <-
 function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
@@ -11,13 +15,12 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
 
 # remove instances missing all forecasts
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
+ ensembleData <- ensembleData[!dataNA(ensembleData,observations=FALSE,dates=FALSE),]
 
- nObs <- nrow(ensembleData)
+ nObs <- dataNobs(ensembleData)
 
  Q <- matrix(NA, nObs, length(quantiles))
- dimnames(Q) <- list(ensembleObsLabels(ensembleData),as.character(quantiles))
+ dimnames(Q) <- list(dataObsLabels(ensembleData),as.character(quantiles))
 
  nForecasts <- ensembleSize(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)

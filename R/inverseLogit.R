@@ -1,8 +1,8 @@
 `inverseLogit` <-
 function(x) {
-
-## inverse logit function exp(x) / (1 + exp(x))
-## safeguared against underflow and overflow
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
 
               if (is.na(x)) return(NA)
               if (x >= 0) {

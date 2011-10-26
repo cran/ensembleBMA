@@ -2,6 +2,10 @@
 function(ensembleData, trainingDays, dates = NULL, control = NULL, 
          model = NULL, exchangeable = NULL, minCRPS = NULL)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
  mc <- match.call()   
  mc$model <- NULL

@@ -1,7 +1,10 @@
 plotBMAgamma <-
 function (WEIGHTS, MEAN, VAR, obs = NULL, exchangeable = NULL)
 {
-
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
   k <- length(WEIGHTS)
 
   Q <- matrix( NA, 2, k + 1)
@@ -25,7 +28,7 @@ function (WEIGHTS, MEAN, VAR, obs = NULL, exchangeable = NULL)
 
   r <- range(Q)
 
-  if (!is.null(obs)) r <- range(c(r,obs))
+  if (!is.null(obs) && !is.na(obs)) r <- range(c(r,obs))
 
   if (is.null(exchangeable)) exchangeable <- 1:k
 
@@ -54,13 +57,13 @@ ylim <- range(c(0,FORC))
 xlim <- range(c(0,x))
 
 plot( c(0,x), c(0,FORC[,lex+1]), type = "l", col = "black", ylim = ylim,
-      xlab = "Wind Speed", ylab = "Probability", lwd = 3)
+      xlab = "Wind Speed", ylab = "Probability Density", lwd = 3)
 
 abline( v = lo, col = "black", lty = 2)
 abline( v = med, col = "black")
 abline( v = up, col = "black", lty = 2)
 
-if (!is.null(obs)) abline( v = obs, col = "orange", lwd = 3)
+if (!is.null(obs) && !is.na(obs)) abline( v = obs, col = "orange", lwd = 3)
 
 colors <- rainbow(lex)
 for (l in 1:lex) {

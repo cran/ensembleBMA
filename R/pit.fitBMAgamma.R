@@ -1,28 +1,35 @@
 pit.fitBMAgamma <-
 function(fit, ensembleData, dates=NULL, ...) 
 {
- 
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  powfun <- function(x,power) x^power
 
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
-# remove instances missing all forecasts
+ M <- !dataNA(ensembleData,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
+ fitDates <- modelDates(fit)
 
- nObs <- nrow(ensembleData)
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates = NULL)
+
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ obs <- dataVerifObs(ensembleData)
+ nObs <- length(obs)
 
  PIT <- numeric(nObs)
- names(PIT) <- ensembleObsLabels(ensembleData)
+ names(PIT) <- dataObsLabels(ensembleData)
 
- startup <- startupSpeed(ensembleData)
+ startup <- dataStartupSpeed(ensembleData)
  if (is.null(startup) & !is.na(fit$startup)) {
    if (length(fit$startup) != 1) stop("problem with startup specification")
    startup <- rep(fit$startup, nrow(ensembleData))
@@ -35,7 +42,8 @@ function(fit, ensembleData, dates=NULL, ...)
      stop("default anemometer startup speed not specified")
    startup[is.na(startup)] <- controlBMAgamma()$startupSpeed
  }
- obs <- sapply( ensembleVerifObs(ensembleData), powfun, power = fit$power)
+
+ obs <- sapply( dataVerifObs(ensembleData), powfun, power = fit$power)
  nForecasts <- ensembleSize(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)
 

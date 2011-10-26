@@ -11,8 +11,7 @@
 \usage{
 controlBMAgamma0(maxIter = Inf, tol = sqrt(.Machine$double.eps), 
                  power = (1/3), rainobs = 10, 
-                 init = list(varCoefs = NULL, weights = NULL),
-                 prior = NULL)
+                 init = list(varCoefs = NULL, weights = NULL))
 }
 \arguments{
   \item{maxIter}{
@@ -50,10 +49,6 @@ controlBMAgamma0(maxIter = Inf, tol = sqrt(.Machine$double.eps),
      An optional list of initial values for variance coefficients
      and weights. The default is to start with the variance coefficients
      equal to 1, and with equal weights for each member of the ensemble.
-  }
-  \item{prior}{
-     Prior specification for PoP computation. Not currently used; to
-     be added later.
   }
 }
 

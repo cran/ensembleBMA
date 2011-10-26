@@ -1,6 +1,20 @@
 \name{ensembleBMA}
 \alias{ensembleBMA}
+\alias{getDates}
 \alias{getExchangeable}
+\alias{matchDates}
+\alias{match2side}
+\alias{modelDates}
+\alias{modelDates.default}
+\alias{modelMembers}
+\alias{modelMembers.default}
+\alias{matchEnsembleMembers}
+\alias{matchEnsembleMembers.ensembleBMAgamma}
+\alias{matchEnsembleMembers.ensembleBMAgamma0}
+\alias{matchEnsembleMembers.ensembleBMAnormal}
+\alias{matchEnsembleMembers.fitBMAgamma}
+\alias{matchEnsembleMembers.fitBMAgamma0}
+\alias{matchEnsembleMembers.fitBMAnormal}
 \title{
     BMA mixture model fit
 }

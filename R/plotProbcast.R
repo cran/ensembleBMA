@@ -1,17 +1,17 @@
-`plotProbcast` <-
+plotProbcast <-
 function(forecast, longitude, latitude, nGrid = 65, 
          type = c("image", "contour", "persp"), ..., 
          interpolate = FALSE, span = 0.75, maps = NULL)
 {
 ## col=rev(rainbow(100,start=0,end=0.85))
 
- FIELDS <- exists("US", mode = "function") 
- FIELDS <- FIELDS && exists("world", mode = "function")
- FIELDS <- FIELDS && exists("image.plot", mode = "function")
+# FIELDS <- exists("US", mode = "function") 
+# FIELDS <- FIELDS && exists("world", mode = "function")
+# FIELDS <- FIELDS && exists("image.plot", mode = "function")
 
- MAPS <- exists("map", mode = "function") 
- MAPS <- MAPS & exists("area.map", mode = "function") 
- MAPS <- MAPS & exists("match.map", mode = "function") 
+# MAPS <- exists("map", mode = "function") 
+# MAPS <- MAPS & exists("area.map", mode = "function") 
+# MAPS <- MAPS & exists("match.map", mode = "function") 
 
  type <- type[1]
 
@@ -34,7 +34,9 @@ function(forecast, longitude, latitude, nGrid = 65,
     pred <- binGrid( forecast, longitude, latitude, nGrid)
   }
 
-   if (type == "image" && FIELDS) {
+   if (type == "image") {
+##     fields:::image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
+       if (!exists("image.plot")) library(fields)
        image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
                   xlab = "", ylab = "", horizontal = TRUE, ...)
   }
@@ -44,7 +46,7 @@ function(forecast, longitude, latitude, nGrid = 65,
   }
     
 
-if (is.null(maps)) maps <- type == "image" && FIELDS
+if (is.null(maps)) maps <- type == "image"| type == "contour"
 
 if (maps) {
 
@@ -71,18 +73,18 @@ lonRange <- range(lon)
 latRange <- range(lat)
 
 if(US.map==2){
-  if (exists("US", mode = "function")) {
+##  fields:::US( xlim = lonRange, ylim = latRange,  add=TRUE, col=1, lwd=2)
+    if (!exists("US")) library("fields")
     US( xlim = lonRange, ylim = latRange,  add=TRUE, col=1, lwd=2)
-  }
-  if (MAPS) {
-    map('world', 'Canada', interior = TRUE, 
-        xlim = lonRange, ylim = latRange, add=TRUE, col=1, lwd=2 )
-  }
+##  maps:::map('world', 'Canada', interior = TRUE, 
+    if (!exists("map")) library(maps)
+      map('world', 'Canada', interior = TRUE, 
+           xlim = lonRange, ylim = latRange, add=TRUE, col=1, lwd=2 )
 }
  else {
-  if (exists("world", mode = "function")) {
-     world( xlim = lonRange, ylim = latRange, add=TRUE, col=1, lwd=2)     
-  } 
+##   fields:::world( xlim=lonRange, ylim=latRange, add=TRUE, col=1, lwd=2)     
+     if (!exists("world")) library("fields")
+        world( xlim=lonRange, ylim=latRange, add=TRUE, col=1, lwd=2)     
 }
 }  
 

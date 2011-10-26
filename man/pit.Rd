@@ -14,7 +14,7 @@
    of a BMA ensemble forecasting model at observation locations.
 }
 \usage{
-pit( fit, ensembleData, dates = NULL, \dots)
+pit( fit, ensembleData, dates = NULL, randomizeATzero=FALSE, \dots)
 }
 \arguments{
    \item{fit}{
@@ -29,10 +29,16 @@ pit( fit, ensembleData, dates = NULL, \dots)
   }
  \item{dates}{
      The dates for which the CDF will be computed.
-     These dates must be consistent with \code{fit} and \code{ensembleData}.
+     These dates must be consistent with \code{fit} and 
+     \code{ensembleData}.
      The default is to use all of the dates in \code{fit}.
      The dates are ignored if \code{fit} originates from \code{fitBMA}, 
      which also ignores date information.
+  }
+ \item{randomizeATzero}{
+     For the \code{gamma0} model for precipitation, observations should be
+     randomized at 0 for assessing the calibration. Has no effect for the
+     other models.
   }
  \item{\dots}{
      Included for generic function compatibility.
@@ -44,7 +50,7 @@ pit( fit, ensembleData, dates = NULL, \dots)
   }
 \details{
   Most often used for computing PIT histograms to assess calibration of
-  forecasts, in which case the observations in \code{ensembleData} awould
+  forecasts, in which case the observations in \code{ensembleData} would
   be those used in modeling \code{fit}. \cr
   Instances in \code{ensembleData} without verifying observations 
    are ignored. \cr
@@ -54,10 +60,11 @@ pit( fit, ensembleData, dates = NULL, \dots)
    The PIT is a continuous analog of the verification rank.
 }
 \seealso{
+  \code{\link{pitHist}},
+  \code{\link{verifRankHist}},
   \code{\link{ensembleBMA}}, 
   \code{\link{fitBMA}}, 
-  \code{\link{quantileForecast}},
-  \code{\link{verifRank}},
+  \code{\link{quantileForecast}}
 }
 \references{
 A. E. Raftery, T. Gneiting, F. Balabdaoui and M. Polakowski,
@@ -112,10 +119,8 @@ using ensembles and Bayesian model averaging,
   tempTestForc <- quantileForecast( tempTestFit, tempTestData)
   range(tempTestForc)
 
-  tempTestPIT <- pit( tempTestFit, tempTestData, 
-                        values = seq(from=277, to=282.5, by = .1))
+  tempTestPIT <- pit( tempTestFit, tempTestData) 
 
-  hist(tempTestPIT, breaks = 7)
 }
 \keyword{models}
 % docclass is function

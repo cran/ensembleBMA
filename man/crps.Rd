@@ -18,8 +18,8 @@
    for univariate ensemble forecasting models. 
 }
 \usage{
-crps( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
-CRPS( fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, \dots)
+crps( fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL, \dots)
+CRPS( fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL, \dots)
 }
 \arguments{
   \item{fit}{

@@ -1,6 +1,10 @@
 crps.fitBMAnormal <-
-function(fit, ensembleData, nSamples = NULL, seed=NULL, dates=NULL, ...) 
+function(fit, ensembleData, dates=NULL, nSamples = NULL, seed=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  weps <- 1.e-4
 
  if(!is.null(dates)) warning("dates ignored")
@@ -13,30 +17,33 @@ function(fit, ensembleData, nSamples = NULL, seed=NULL, dates=NULL, ...)
                        mu * erf((sqrt(2)*mu)/(2*sig))
   }
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
-# remove instances missing all forecasts or obs
+ M <- !dataNA(ensembleData,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- M <- M | is.na(ensembleVerifObs(ensembleData))
- ensembleData <- ensembleData[!M,]
+ fitDates <- modelDates(fit)
 
- if (is.null(obs <- ensembleVerifObs(ensembleData)))
-   stop("verification observations required")
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
 
-#nObs <- length(obs) 
- nObs <- ensembleNobs(ensembleData)
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ dates <- modelDates(fit)
+
+ Dates <- ensembleValidDates(ensembleData)
+
+ obs <- dataVerifObs(ensembleData)
+ nObs <- length(obs)
 
  if (!is.null(seed)) set.seed(seed)
 
  nForecasts <- ensembleSize(ensembleData) 
 
  CRPS <- crpsSim <- sampleMedian <- rep(NA, nObs)
- names(crpsSim) <- names(sampleMedian) <- ensembleObsLabels(ensembleData)
+ names(crpsSim) <- names(sampleMedian) <- dataObsLabels(ensembleData)
 
- members <- ensembleMemberLabels(ensembleData)
+ members <- ensembleMembers(ensembleData)
 
  ensembleData <- ensembleForecasts(ensembleData)
 

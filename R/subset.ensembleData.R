@@ -1,6 +1,10 @@
 `[.ensembleData` <-
 function (x, i, j) 
 { 
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
     ncolx <- ncol(x)
     matchCall <- match.call()
     matchCall[[1]] <- as.name("[.data.frame")
@@ -26,7 +30,7 @@ function (x, i, j)
           stop("repeated indexes not allowed")
         nForcs <- length(j)
         I <- 1:nForecasts
-        names(I) <- ensembleMemberLabels(x)
+        names(I) <- ensembleMembers(x)
         j <- I[j]
         names(j) <- NULL
         exchangeable <- exchangeable[j]

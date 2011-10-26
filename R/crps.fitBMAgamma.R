@@ -1,6 +1,10 @@
 crps.fitBMAgamma <-
-function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...) 
+function(fit, ensembleData, dates=NULL, nSamples=NULL, seed=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  powfun <- function(x,power) x^power
  powinv <- function(x,power) x^(1/power)
 
@@ -10,30 +14,33 @@ function(fit, ensembleData, nSamples=NULL, seed=NULL, dates=NULL, ...)
 
  if (is.null(nSamples)) nSamples <- 10000
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
-# remove instances missing all forecasts or obs
+ M <- !dataNA(ensembleData,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- M <- M | is.na(ensembleVerifObs(ensembleData))
- ensembleData <- ensembleData[!M,]
+ fitDates <- modelDates(fit)
 
- if (is.null(obs <- ensembleVerifObs(ensembleData)))
-   stop("verification observations required")
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
 
-#nObs <- length(obs) 
- nObs <- ensembleNobs(ensembleData)
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ dates <- modelDates(fit)
+
+ Dates <- ensembleValidDates(ensembleData)
+
+ obs <- dataVerifObs(ensembleData)
+ nObs <- length(obs)
 
  if (!is.null(seed)) set.seed(seed)
 
  nForecasts <- ensembleSize(ensembleData) 
 
  crpsSim <- rep(NA, nObs)
- names(crpsSim) <- ensembleObsLabels(ensembleData)
+ names(crpsSim) <- dataObsLabels(ensembleData)
 
- members <- ensembleMemberLabels(ensembleData)
+ members <- ensembleMembers(ensembleData)
 
  ensembleData <- ensembleForecasts(ensembleData)
 

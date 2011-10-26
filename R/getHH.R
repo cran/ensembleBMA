@@ -1,6 +1,10 @@
 `getHH` <-
 function (YYYYMMDDHH)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  if (!exists("chron")) library("chron")
  YYYYMMDDHH <- sapply(YYYYMMDDHH, as.character)
  l <- sapply(YYYYMMDDHH, nchar)

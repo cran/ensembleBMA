@@ -1,38 +1,35 @@
 \name{ensembleData}
 \alias{ensembleData}
+\alias{dataNA}
+\alias{dataNobs}
+\alias{dataObsLabels}
+\alias{dataStartupSpeed}
+\alias{dataVerifObs}
 \alias{ensembleForecasts}
 \alias{ensembleFhour}
 \alias{ensembleGroups}
 \alias{ensembleItime}
-\alias{ensembleMemberLabels}
-\alias{ensembleNobs}
-\alias{ensembleObsLabels}
+\alias{ensembleMembers}
 \alias{ensembleSize}
 \alias{ensembleValidDates}
-\alias{ensembleVerifObs}
-\alias{startupSpeed}
-\alias{ensembleMemberLabels.ensembleData}
+\alias{dataObsLabels.ensembleData}
+\alias{dataNA.ensembleData}
+\alias{dataNobs.ensembleData}
+\alias{dataStartupSpeed.ensembleData}
+\alias{dataVerifObs.ensembleData}
+\alias{ensembleMembers.ensembleData}
 \alias{ensembleFhour.ensembleData}
 \alias{ensembleForecasts.ensembleData}
 \alias{ensembleGroups.ensembleData}
 \alias{ensembleItime.ensembleData}
-\alias{ensembleObsLabels.ensembleData}
 \alias{ensembleSize.ensembleData}
-\alias{ensembleNobs.ensembleData}
 \alias{ensembleValidDates.ensembleData}
-\alias{ensembleVerifObs.ensembleData}
-\alias{startupSpeed.ensembleData}
 \alias{[.ensembleData}
-\alias{matchEnsembleMembers}
-\alias{matchEnsembleMembers.ensembleBMAgamma}
-\alias{matchEnsembleMembers.ensembleBMAgamma0}
-\alias{matchEnsembleMembers.ensembleBMAnormal}
-\alias{matchEnsembleMembers.fitBMAgamma}
-\alias{matchEnsembleMembers.fitBMAgamma0}
-\alias{matchEnsembleMembers.fitBMAnormal}
+\alias{matchEnsembleMembers.default}
 \alias{matchITandFH}
 \alias{matchITandFH.default}
-\alias{matchITandFH.default}
+\alias{startupSpeed}
+\alias{startupSpeed.ensembleData}
 \title{
   Create an ensembleData object
 }
@@ -72,10 +69,11 @@ ensembleData( forecasts, dates = NULL, observations = NULL, ...,
     longitude, and startupSpeed for wind speed.
   }
   \item{forecastHour}{
-     A numeric vector giving the forecast hour.
+     A number giving the \emph{forecast hour}, the time interval 
+     between the initialization and forecast times, in units of hours.
   }
   \item{initializationTime}{
-     A numeric or character vector giving the initialization time.
+     A number or character string giving the initialization time.
   }
   \item{startupSpeed}{
     A numeric value specifying a value  below which the anemometer
@@ -98,12 +96,12 @@ ensembleData( forecasts, dates = NULL, observations = NULL, ...,
   (optionally) observations with the associated valid dates.
 }
 \details{
-    All instances in an \code{ensembleData} object are assumed to have
+    For use with  batch processing modeling functions (\code{ensembleBMA}
+    etc), instances \code{ensembleData} object are assumed
     the same forecast hour and initialization time, which should be
     specified as part of the object. \cr  
     Methods for \code{ensembleData} objects include \code{ensembleSize},
-    \code{ensembleForecasts}, \code{ensembleValidDates}, and
-    \code{ensembleVerifObs}. \cr
+    \code{ensembleForecasts}, \code{ensembleValidDates}. \cr
     Subsetting is possible, but in the case of columns it applies only to
     the ensemble forecasts. \cr
     For vector wind computations, the velocity should be in the first 

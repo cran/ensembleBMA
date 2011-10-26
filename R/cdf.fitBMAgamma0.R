@@ -1,6 +1,10 @@
-`cdf.fitBMAgamma0` <-
+cdf.fitBMAgamma0 <-
 function(fit, ensembleData, values, dates=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  
  powfun <- function(x,power) x^power
  powinv <- function(x,power) x^(1/power)
@@ -9,21 +13,26 @@ function(fit, ensembleData, values, dates=NULL, ...)
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
-# remove instances missing all forecasts
+ M <- !dataNA(ensembleData,observations=FALSE,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
+ fitDates <- modelDates(fit)
 
- nObs <- nrow(ensembleData)
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
+
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ nObs <- nrow( ensembleData)
+ if (!nObs) stop("no data")
 
  CDF <- matrix( NA, nrow = nObs, ncol = length(values))
- dimnames(CDF) <- list(ensembleObsLabels(ensembleData), as.character(values)) 
+ dimnames(CDF) <- list(dataObsLabels(ensembleData), as.character(values)) 
 
  nForecasts <- ensembleSize(ensembleData)
+
  ensembleData <- ensembleForecasts(ensembleData)
 
  WEIGHTS <- fit$weights

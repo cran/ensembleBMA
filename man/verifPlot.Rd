@@ -1,35 +1,41 @@
-\name{verifRank}
-\alias{verifRank}
+\name{verifPlot}
+\alias{verifPlot}
 \title{
-   Verification Rank
+   Plot observations along with median, 10th and 90th percentile forecasts.  
 }
 \description{
-  Computes the rank of verifying observations.
-  relative to the corresponding ensemble forecasts.
+   Computes the median, 10th and 90th percentile forecasts,
+   and plots the corresponding observations.
 }
 \usage{
-verifRank( forecasts, observations)
+  verifPlot( fit, ensembleData, dates = NULL)
 }
 \arguments{
-   \item{forecasts}{
-     A matrix of ensemble forecasts, in which the rows corresponds to
-     locations and times and the columns correspond to the individual
-     ensemble members.
+   \item{fit}{
+     A model fit to ensemble forecasting data.
   }
-  \item{observations}{
-    A vector of observations corresponding to the locations and times
-    of the forecasts.
+  \item{ensembleData}{
+     An \code{ensembleData} object that includes ensemble forecasts,
+     verification observations and possibly dates.
+     Missing values (indicated by \code{NA}) are allowed. \\
+     This need not be the data used for the model \code{fit},
+     although it must include the same ensemble members.
+  }
+   \item{dates}{
+     The dates for which the CDF will be computed.
+     These dates must be consistent with \code{fit} and
+     \code{ensembleData}.
+     The default is to use all of the dates in \code{fit}.
+     The dates are ignored if \code{fit} originates from \code{fitBMA},
+     which also ignores date information.
   }
 }
 \value{
-  A vector giving the rank of verifying observations relative
-  to the correspnding ensemble forecasts.
+  A matrix giving the median, 10th and 90th percentile forecasts for the 
+  ensemble data at the specified dates. 
+  If observations are available, they are plotted along with the forecasts
+  in order of increasing 90th percentile forecast. 
  }
-\details{
-  The verification rank is used to assess calibration of a forecast
-  ensemble. A more uniform verification rank histogram
-  indicates better calibartion.
-}
 \seealso{
   \code{\link{ensembleData}}, 
   \code{\link{pit}} 
@@ -66,14 +72,10 @@ using ensembles and Bayesian model averaging,
 }
 
 \examples{
+  data(prcpFit)
   data(prcpDJdata)
 
-  prcpDJdataVR <- verifRank( ensembleForecasts(prcpDJdata),
-                               ensembleVerifObs(prcpDJdata))
-
-  hist(prcpDJdataVR, breaks = ensembleSize(prcpDJdata), xlab = "",
-       main = "Verification Rank Histogram")
-
+  forc <- verifPlot( prcpFit, prcpDJdata, date = "20030113")
 }
 \keyword{models}
 % docclass is function

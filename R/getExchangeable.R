@@ -1,6 +1,10 @@
 `getExchangeable` <-
 function (argument, attribute, nForecasts) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  if (is.null(argument)) return(attribute)
  if (length(argument) != nForecasts) {
    stop("exchangeable specification not consistent with forecasts")

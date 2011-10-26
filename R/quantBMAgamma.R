@@ -1,6 +1,10 @@
 `quantBMAgamma` <-
 function(alpha, WEIGHTS, MEAN, VAR)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
 
 # Initialize: Find lower and upper bounds
  

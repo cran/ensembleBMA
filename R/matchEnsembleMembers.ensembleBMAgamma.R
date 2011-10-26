@@ -1,6 +1,10 @@
-`matchEnsembleMembers.ensembleBMAgamma` <-
+matchEnsembleMembers.ensembleBMAgamma <-
 function( fit, ensembleData) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  # match ensemble members in ensembleData and fit
 
  if (!is.null(dim(fit$weights))) {
@@ -10,7 +14,7 @@ function( fit, ensembleData)
    fitMems <- names(fit$weights)
  }
  
- ensMems <- ensembleMemberLabels(ensembleData)
+ ensMems <- ensembleMembers(ensembleData)
 
  if (!is.null(fitMems) && !is.null(ensMems) 
      && length(fitMems) > length(ensMems))

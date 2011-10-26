@@ -1,3 +1,11 @@
+10/11 improved data compression
+      fixed problems with robustness of pop estimates for precip (Zhi Li)
+
+09/11 fixed problems with low precip (Alex Lenkowski)
+      added combine function for forecasing models
+      compressed the srft data
+      added verifRankHist, pitHist, and verifPlot functions
+
 06/10 fixed problems with subsetting for ensembleData
 
 03/10 fixed variance model for gamma0 (precip)

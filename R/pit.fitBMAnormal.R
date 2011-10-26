@@ -1,25 +1,33 @@
-`pit.fitBMAnormal` <-
+pit.fitBMAnormal <-
 function(fit, ensembleData, dates=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
- 
-# remove instances missing all forecasts
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
- 
- nObs <- nrow(ensembleData)
+ M <- !dataNA(ensembleData,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
+
+ fitDates <- modelDates(fit)
+
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates = NULL)
+
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ obs <- dataVerifObs(ensembleData)
+ nObs <- length(obs)
 
  PIT <- numeric(nObs)
- names(PIT) <- ensembleObsLabels(ensembleData)
+ names(PIT) <- dataObsLabels(ensembleData)
 
- obs <- ensembleVerifObs(ensembleData)
+ obs <- dataVerifObs(ensembleData)
  nForecasts <- ensembleSize(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)
 

@@ -1,7 +1,10 @@
 plot.ensembleBMAgamma <-
 function(x, ensembleData, dates=NULL, ask=TRUE, ...) 
 {
-
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  par(ask = ask)
 
  powfun <- function(x,power) x^power
@@ -13,65 +16,28 @@ function(x, ensembleData, dates=NULL, ask=TRUE, ...)
 
  exchangeable <- x$exchangeable
 
- M <- matchEnsembleMembers(x,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ ensembleData <- ensembleData[,matchEnsembleMembers(x,ensembleData)]
 
-## remove instances missing all forecasts
+ M <- !dataNA(ensembleData)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
- 
-## match specified dates with dateTable in fit
+ fitDates <- modelDates(x)
 
- dateTable <- dimnames(x$weights)[[2]]
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates)
 
- if (!is.null(dates)) {
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) x <- x[fitDates[M$fit]]
 
-   dates <- sort(unique(as.character(dates)))
+ dates <- modelDates(x)
 
-   if (length(dates) > length(dateTable)) 
-     stop("parameters not available for some dates")
+ Dates <- ensembleValidDates(ensembleData)
 
-   K <- match( dates, dateTable, nomatch=0)
+ obs <- dataVerifObs(ensembleData)
+ nObs <- length(obs)
 
-   if (any(!K) || !length(K)) 
-     stop("parameters not available for some dates")
-
- }
- else {
-
-   dates <- dateTable
-   K <- 1:length(dateTable)
-
-  }
-
- ensDates <- ensembleValidDates(ensembleData)
-
-## match dates in data with dateTable
- if (is.null(ensDates) || all(is.na(ensDates))) {
-   if (length(dates) > 1) stop("date ambiguity")
-   nObs <- nrow(ensembleData)
-   Dates <- rep( dates, nObs)
- }
- else {
-## remove instances missing dates
-   if (any(M <- is.na(ensDates))) {
-     ensembleData <- ensembleData[!M,]
-     ensDates <- ensembleValidDates(ensembleData)
-   }
-   Dates <- as.character(ensDates)
-   L <- as.logical(match( Dates, dates, nomatch=0))
-   if (all(!L) || !length(L)) 
-     stop("model fit dates incompatible with ensemble data")
-   Dates <- Dates[L]
-   ensembleData <- ensembleData[L,]
-   nObs <- length(Dates)
- }
+ if (nObs == 0) obs <- rep(NA,nrow(ensembleData))
 
  nForecasts <- ensembleSize(ensembleData)
-
- obs <- ensembleVerifObs(ensembleData)
 
  ensembleData <- ensembleForecasts(ensembleData)
  
@@ -79,25 +45,24 @@ function(x, ensembleData, dates=NULL, ask=TRUE, ...)
  for (d in dates) {
 
     l <- l + 1
-    k <- K[l]
 
-    WEIGHTS <- x$weights[,k]
+    WEIGHTS <- x$weights[,d]
      
     if (all(Wmiss <- is.na(WEIGHTS))) next
 
     I <- which(as.logical(match(Dates, d, nomatch = 0)))
 
     for (i in I) {
-    
+
        f <- ensembleData[i,]
 
        M <- is.na(f) | Wmiss
      
-       VAR <- (x$varCoefs[1,k] + x$varCoefs[2,k]*f)^2
+       VAR <- (x$varCoefs[1,d] + x$varCoefs[2,d]*f)^2
         
        fTrans <- sapply(f, powfun, power = x$power)
 
-       MEAN <- apply(rbind(1, fTrans) * x$biasCoefs[,k], 2, sum)
+       MEAN <- apply(rbind(1, fTrans) * x$biasCoefs[,d], 2, sum)
 
        W <- WEIGHTS
        if (any(M)) {

@@ -1,6 +1,10 @@
-`crpsNormal` <-
+crpsNormal <-
 function(sd, weights, biasCoefs, ensembleData)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
   #a couple of helper functions
   erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
 
@@ -30,7 +34,8 @@ function(sd, weights, biasCoefs, ensembleData)
                   STATS = biasCoefs[2,])
     MEAN <- sweep(MEAN, MARGIN = 2, FUN = "+", STATS = biasCoefs[1,])
 
-    nObs <- ensembleNobs(ensembleData)
+    obs <- dataVerifObs(ensembleData)
+    nObs <- length(obs)
 
     crpsTP <- numeric(nObs)
 
@@ -59,7 +64,7 @@ function(sd, weights, biasCoefs, ensembleData)
 
              tvar <- VAR[i]              # total variance
              tsd <- sqrt(tvar)            # total standard deviation
-             tmean <- MEAN[l,i] - ensembleData$obs[l]
+             tmean <- MEAN[l,i] - obs[l]
              crps2 <- crps2 + W[i]*absExp(tmean,tsd)
         }
 

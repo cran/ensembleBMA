@@ -1,6 +1,10 @@
 `matchITandFH.default` <-
 function( fit, ensembleData) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  naNULL <- function(x) {
             if (is.na(x)) x <- -2^20
             if (is.null(x)) x <- -2^25

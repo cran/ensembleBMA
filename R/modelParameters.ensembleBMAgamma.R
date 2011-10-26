@@ -1,6 +1,10 @@
 `modelParameters.ensembleBMAgamma` <-
 function(fit, dates = NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
 
  dateTable <- dimnames(fit$weights)[[2]]
 

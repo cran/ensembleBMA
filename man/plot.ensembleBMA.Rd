@@ -60,7 +60,7 @@
    the median forecast, and the dotted back lines represent the .1 and .9
    quartiles. The vertical orange line is the verifying observation (if
    any).\cr
-   Exchangeable members are respresented in the plots by the weighted
+   Exchangeable members are represented in the plots by the weighted
    group sum rather than by the indivdual weighted PDFs of each member.
 }
 

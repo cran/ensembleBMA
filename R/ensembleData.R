@@ -3,6 +3,10 @@ function(forecasts, dates = NULL, observations = NULL, ...,
          forecastHour, initializationTime,
          startupSpeed = NULL, exchangeable = NULL)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  object <- match.call()
  object[[1]] <- as.name("cbind.data.frame")
  object$forecastHour <- object$initializationTime <- object$startupSpeed <- object$exchangeable <- NULL

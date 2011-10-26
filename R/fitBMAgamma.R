@@ -1,23 +1,11 @@
 fitBMAgamma <-
 function(ensembleData, control = controlBMAgamma(), exchangeable = NULL) 
 {
-
-  if (is.null(startup <- startupSpeed(ensembleData))) {
-    if (is.null(control$startupSpeed))
-      stop("default anemometer startup speed not specified")
-    startup <- control$startupSpeed
-  }
-
-  if (length(startup) != nrow(ensembleData)) {
-    startup <- rep(startup, length = nrow(ensembleData))
-  }
-  else if (length(startup) != 1) stop("startup speed improperly specified")
- 
-  if (any(is.na(startup))) {
-    if (is.null(control$startupSpeed))
-      stop("default anemometer startup speed not specified")
-    startup[is.na(startup)] <- control$startupSpeed
-  }
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
+  ZERO <- 1.e-100
 
   powfun <- function(x,power) x^power
 
@@ -36,19 +24,31 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
   tol <- eps <- control$tol
 
 # remove instances missing all forecasts or obs
+  
+  ensembleData <- ensembleData[!dataNA(ensembleData,dates=FALSE),]
 
-  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
-  M <- M | is.na(ensembleVerifObs(ensembleData))
-  ensembleData <- ensembleData[!M,]
-  startup <- startup[!M]
+  nObs <- dataNobs(ensembleData)
+  if (!nObs) stop("no observations")
+  obs <- dataVerifObs(ensembleData)
+
+  if (is.null(startup <- dataStartupSpeed(ensembleData))) {
+    if (is.null(control$startupSpeed))
+      stop("default anemometer startup speed not specified")
+    startup <- control$startupSpeed
+  }
+
+  if (length(startup) != nrow(ensembleData)) {
+    startup <- rep(startup, length = nrow(ensembleData))
+  }
+  else if (length(startup) != 1) stop("startup speed improperly specified")
  
-  if (is.null(obs <- ensembleVerifObs(ensembleData)))
-   stop("verification observations required")
+  if (any(is.na(startup))) {
+    if (is.null(control$startupSpeed))
+      stop("default anemometer startup speed not specified")
+    startup[is.na(startup)] <- control$startupSpeed
+  }
 
-# nObs <- length(obs)
-  nObs <- ensembleNobs(ensembleData)
-
-  ensMemNames <- ensembleMemberLabels(ensembleData)
+  ensMemNames <- ensembleMembers(ensembleData)
 
   nForecasts <- length(ensMemNames)
 
@@ -217,11 +217,13 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
  
     # normalize the latent variables
     z <- z/apply(z, 1, sum, na.rm = TRUE)
+    z[z < ZERO] <- 0
 
     # calculate new weights based on latent variables
     wold <- weights
     zsum2 <- apply(z, 2, sum, na.rm = TRUE)
     weights <- zsum2/sum(zsum2)
+    weights[weights < ZERO] <- 0
 
     if (!nullX) {
 
@@ -274,6 +276,6 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
   list(biasCoefs = biasCoefs, varCoefs = varCoefs,
        weights = weights, nIter = nIter, loglikelihood = newLL,
        power = control$power, startupSpeed = startup), 
-       class = "fitBMAgamma")
+       class = c("fitBMAgamma", "fitBMA"))
 }
 

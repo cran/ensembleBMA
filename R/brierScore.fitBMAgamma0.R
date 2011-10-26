@@ -1,6 +1,10 @@
-`brierScore.fitBMAgamma0` <-
+brierScore.fitBMAgamma0 <-
 function(fit, ensembleData, thresholds, dates=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
 
  powfun <- function(x,power) x^power
  powinv <- function(x,power) x^(1/power)
@@ -9,23 +13,23 @@ function(fit, ensembleData, thresholds, dates=NULL, ...)
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
-# remove instances missing all forecasts or obs
+ M <- !dataNA(ensembleData,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- M <- M | is.na(ensembleVerifObs(ensembleData))
- ensembleData <- ensembleData[!M,]
- 
- if (is.null(y <- ensembleVerifObs(ensembleData)))
-   stop("verification observations required")
+ fitDates <- modelDates(fit)
 
-#nObs <- length(y) 
- nObs <- ensembleNobs(ensembleData)
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
+
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ y <- dataVerifObs(ensembleData)
+ nObs <- length(y)
 
  ensembleData <- ensembleForecasts(ensembleData)
+
  x <- sapply(apply( ensembleData, 1, mean, na.rm = TRUE), 
                     powfun, power = fit$power)
  

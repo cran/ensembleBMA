@@ -1,7 +1,13 @@
 `julTOymdh` <-
 function (julianDates, origin = NULL, dropHour = NULL) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
 
+ if (!exists("month.day.year")) library("chron")
+ 
  if (!is.null(orig <- attr( julianDates, "origin"))) {
    if (!is.null(origin)) {
      bad <- origin["month"] != orig["month"]
@@ -22,7 +28,7 @@ function (julianDates, origin = NULL, dropHour = NULL)
  }
  else hour <- 0
 
- x <- month.day.year( as.vector(floor(julianDates)), origin = origin)
+ x <- month.day.year( as.vector(floor(julianDates)), origin. = origin)
 
  if (is.null(dropHour)) {
    l <- attr(julianDates, "nchar")

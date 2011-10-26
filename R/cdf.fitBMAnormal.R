@@ -1,23 +1,31 @@
-`cdf.fitBMAnormal` <-
+cdf.fitBMAnormal <-
 function(fit, ensembleData, values, dates=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
- 
-# remove instances missing all forecasts
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
- 
+ M <- !dataNA(ensembleData,observations=FALSE,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
+
+ fitDates <- modelDates(fit)
+
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
+
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
  nObs <- nrow(ensembleData)
+ if (!nObs) stop("no data")
 
  CDF <- matrix( NA, nrow = nObs, ncol = length(values))
- dimnames(CDF) <- list(ensembleObsLabels(ensembleData), as.character(values)) 
+ dimnames(CDF) <- list(dataObsLabels(ensembleData), as.character(values)) 
 
  nForecasts <- ensembleSize(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)

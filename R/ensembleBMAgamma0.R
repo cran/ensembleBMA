@@ -2,6 +2,10 @@ ensembleBMAgamma0 <-
 function(ensembleData, trainingDays, dates = NULL, 
          control = controlBMAgamma0(), exchangeable = NULL)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
 
  if (missing(trainingDays)) stop("trainingDays must be specified")
@@ -12,16 +16,7 @@ function(ensembleData, trainingDays, dates = NULL,
 
  if (missing(trainingDays)) stop("trainingDays must be specified")
 
- if (is.list(trainingDays)) trainingDays <- trainingDays[1]
-
- if (length(trainingDays) > 1 || trainingDays <= 0 
-       || (trainingDays - trunc(trainingDays)) != 0) 
-   stop("trainingDays improperly specified")
-
- forecastHour <- ensembleFhour(ensembleData)
- lag <- ceiling( forecastHour / 24 )
-
- ensMemNames <- ensembleMemberLabels(ensembleData)
+ ensMemNames <- ensembleMembers(ensembleData)
  nForecasts <- length(ensMemNames)
 
  exchangeable <- getExchangeable( exchangeable, ensembleGroups(ensembleData),
@@ -29,87 +24,36 @@ function(ensembleData, trainingDays, dates = NULL,
 
 # remove instances missing all forecasts, obs or dates
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- M <- M | is.na(ensembleVerifObs(ensembleData))
- M <- M | is.na(ensembleValidDates(ensembleData))
- ensembleData <- ensembleData[!M,]
+ M <- !dataNA(ensembleData)
+ if (!all(M)) ensembleData <- ensembleData[M,]
  
- nObs <- ensembleNobs(ensembleData)
- if (!nObs) stop("no observations")
+ nObs <- nrow(ensembleData)
+ if (!nObs) stop("no data")
 
- ensDates <- ensembleValidDates(ensembleData)
- if (is.null(ensDates)) stop("dates unavailable")
-
- Dates <- as.character(ensDates)
+ Dates <- as.character(ensembleValidDates(ensembleData))
  DATES <- sort(unique(Dates))
 
- if (trainingDays > length(DATES)) 
-   stop("insufficient training data")
-
  julianDATES <- ymdhTOjul(DATES)
- origin <- attr( julianDATES, "origin")
  incr <- min(1,min(diff(julianDATES))) ## incr may be fractional for hours
+
+ forecastHour <- ensembleFhour(ensembleData)
+ lag <- ceiling( forecastHour / 24 )
 
 ## dates that can be modeled by the training data (ignoring gaps)
 
- Jdates <- seq(from = julianDATES[trainingDays]+lag*incr,
-               to = max(julianDATES)+lag*incr, by = incr)
-
-## determine the modeling dates
-
- DATEShh <- getHH(DATES)
-
- if (length(DATEShh) != 1) 
-    warning("valid dates do not have a unique forecast hour")
-
- if (!(lD <- unique(sapply(DATES,nchar)))) 
-   stop("all dates in data should have same character length")
-
- if (nullDates <- is.null(dates)) {
-
-   dates <- julTOymdh(Jdates, origin = origin, dropHour = (lD == 8))
-
- }
- else {
-
-   dates <- sort(unique(as.character(dates)))
-
-   if (!all(dateCheck(dates))) 
-     stop("improperly specified date(s) in dates argument")
-
-    datesHH <- getHH(dates)
-
-    if (length(datesHH) != 1) 
-      warning("dates do not have a unique forecast hour")
-   
-    if (any(datesHH != DATEShh)) stop("specified dates incompatible with data")
-
-    if (!(ld <- unique(sapply(dates,nchar)))) 
-      stop("all specified dates should have same character length")
-
-    if (ld < lD) {
-      dates <- sapply( dates, function(s) paste(s, "00", sep =""))
-    }
-    else if (ld < lD) {
-      dates <- sapply( dates, function(s) substring(s, 1, 8))
-    }
-
-    if (any(dates < julTOymdh(min(Jdates),origin=origin,dropHour=(lD == 8)))) {
-     stop("dates precede the first training period")
-   }
-
-   if (any(dates > julTOymdh(max(Jdates),origin=origin,dropHour=(lD == 8)))) {
-     warning("there are dates beyond the last training period")
-   }
-
- }
- 
- juliandates <- ymdhTOjul( dates, origin = origin)
-
+ dates <- getDates( DATES, julianDATES, dates, trainingDays, lag, incr)
+ juliandates <- ymdhTOjul(dates)
  nDates <- length(dates)
 
- prob0coefs <- array( NA, c(3, nForecasts, nDates),
-                      dimnames = list(NULL, ensMemNames, dates))
+ if (is.null(control$prior)) {
+# accomodates saved mean as an additional parameter
+   prob0coefs <- array( NA, c(3, nForecasts, nDates),
+                        dimnames = list(NULL, ensMemNames, dates))
+ }
+ else {
+   prob0coefs <- array( NA, c(4, nForecasts, nDates),
+                        dimnames = list(NULL, ensMemNames, dates))
+ }
  biasCoefs <- array( NA, c(2, nForecasts, nDates),
                       dimnames = list(NULL, ensMemNames, dates))
  varCoefs <- array( NA, c(2, nDates), dimnames = list(NULL, dates))
@@ -122,6 +66,8 @@ function(ensembleData, trainingDays, dates = NULL,
  nIter <- loglikelihood <- rep(0, nDates)
  names(nIter) <- names(loglikelihood) <- dates
 
+ obs <- dataVerifObs(ensembleData)
+ 
  K <- 1:nForecasts
 
  L <- length(juliandates)
@@ -139,28 +85,34 @@ function(ensembleData, trainingDays, dates = NULL,
     if (j != l) {
 
       D <- as.logical(match(Dates, DATES[j:1], nomatch=0))
-      nonz <- sum(ensembleVerifObs(ensembleData[D,]) != 0)
-      if (nonz < control$rainobs) {
+      nonz <- sum(obs[D] != 0)
+      if (is.null(control$prior) && nonz < control$rainobs) {
         cat("insufficient nonzero training obs for date", dates[i], "...\n")
         next
       }
       
       twin <- (j+1) - (1:trainingDays)
 
-      while (TRUE) {
+      if (is.null(control$prior)) {
+
+# attempt to extend the training period
+
+         while (TRUE) {
            D <- as.logical(match(Dates, DATES[twin], nomatch=0))
            if (!any(D)) stop("this should not happen")
            d <- ensembleValidDates(ensembleData[D,])
 #     if (length(unique(d)) != trainingDays) stop("wrong # of training days")
-           nonz <- sum(ensembleVerifObs(ensembleData[D,]) != 0)
+           nonz <- sum(obs[D] != 0)
            if (nonz >= control$rainobs) break
            if (min(twin) == 1) break
            twin <- max(twin):(min(twin)-1)
-      }
+        }
 
-      if (nonz < control$rainobs) {
-        cat("insufficient nonzero training obs for date", dates[i], "...\n")
-        next
+        if (nonz < control$rainobs) {
+          cat("insufficient nonzero training obs for date", dates[i], "...\n")
+          next
+        }
+
       }
 
       cat("modeling for date", dates[i], "...")
@@ -174,6 +126,7 @@ function(ensembleData, trainingDays, dates = NULL,
                             exchangeable = x)
       }
       else {
+
         fit <- fitBMAgamma0(ensembleData[D,], control = control,
                             exchangeable = exchangeable)
       }
@@ -204,6 +157,6 @@ function(ensembleData, trainingDays, dates = NULL,
                 exchangeable = exchangeable, power = fit$power),
                 forecastHour = forecastHour, 
                 initializationTime = ensembleItime(ensembleData),
-                call = match.call(), class = "ensembleBMAgamma0")
+                call = match.call(), class = c("ensembleBMAgamma0","ensembleBMA"))
 }
 

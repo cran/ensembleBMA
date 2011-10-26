@@ -1,6 +1,10 @@
 quantileForecast.fitBMAgamma0 <-
 function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...) 
 { 
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
 
  powfun <- function(x,power) x^power
  powinv <- function(x,power) x^(1/power)
@@ -9,18 +13,22 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(fit,ensembleData)
- nForecasts <- ensembleSize(ensembleData)
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
-# remove instances missing all forecasts
+ M <- !dataNA(ensembleData,observations=FALSE,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
 
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- ensembleData <- ensembleData[!M,]
+ fitDates <- modelDates(fit)
+
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
+
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
 
  nObs <- nrow(ensembleData)
 
  Q <- matrix(NA, nObs, length(quantiles))
- dimnames(Q) <- list(ensembleObsLabels(ensembleData),as.character(quantiles))
+ dimnames(Q) <- list(dataObsLabels(ensembleData),as.character(quantiles))
 
  nForecasts <- ensembleSize(ensembleData)
  ensembleData <- ensembleForecasts(ensembleData)
@@ -38,10 +46,10 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
 
        fTrans <- sapply( f, powfun, fit$power)
 
+       MEAN <- apply(rbind(1, fTrans)*fit$biasCoefs, 2, sum)
+
        PROB0 <- sapply(apply(rbind( 1, fTrans, f==0) * fit$prob0coefs,
                              2,sum), inverseLogit)
-
-       MEAN <- apply(rbind(1, fTrans)*fit$biasCoefs, 2, sum)
 
        W <- WEIGHTS
        if (any(M)) {

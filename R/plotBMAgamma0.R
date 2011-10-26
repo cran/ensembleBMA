@@ -1,6 +1,10 @@
 plotBMAgamma0 <-
 function (WEIGHTS, MEAN, VAR, PROB0, obs = NULL, exchangeable = NULL)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
   k <- length(WEIGHTS)
 
   W <- WEIGHTS
@@ -32,7 +36,7 @@ function (WEIGHTS, MEAN, VAR, PROB0, obs = NULL, exchangeable = NULL)
 
   n <- 1000
 
-  if (!is.null(obs)) r <- range(c(r,obs))
+  if (!is.null(obs) && !is.na(obs)) r <- range(c(r,obs))
 
   if (is.null(exchangeable)) exchangeable <- 1:k
 
@@ -65,7 +69,8 @@ xlim <- range(c(0,x))
 #if (!is.null(obs) && (obs <= lo || obs >= up)) return(invisible())
 
 plot( c(0,x), c(0,FORC[,lex+1]), type = "l", col = "black", ylim = ylim,
-      xlab = "Precipitation", ylab = "Probability", lwd = 3)
+      xlab = "Precipitation", 
+ylab = "Prob No Precip and Scaled PDF for Precip", lwd = 3)
 
 segments( 0, 0, 0, sum(WEIGHTS*PROB0), col = "black", lwd = 3)
 
@@ -73,7 +78,7 @@ abline( v = lo, col = "black", lty = 2)
 abline( v = med, col = "black")
 abline( v = up, col = "black", lty = 2)
 
-if (!is.null(obs)) abline( v = obs, col = "orange", lwd = 3)
+if (!is.null(obs) && !is.na(obs)) abline( v = obs, col = "orange", lwd = 3)
 
 colors <- rainbow(lex)
 for (l in 1:lex) {

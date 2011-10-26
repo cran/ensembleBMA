@@ -1,25 +1,30 @@
-`brierScore.fitBMAnormal` <-
+brierScore.fitBMAnormal <-
 function(fit, ensembleData, thresholds, dates=NULL, ...) 
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  weps <- 1.e-4
 
  if (!is.null(dates)) warning("dates ignored")
 
- M <- matchEnsembleMembers(fit,ensembleData)
+ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
+
+ M <- !dataNA(ensembleData,dates=FALSE)
+ if (!all(M)) ensembleData <- ensembleData[M,]
+
+ fitDates <- modelDates(fit)
+
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
+
+ if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
+ if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ y <- dataVerifObs(ensembleData)
+ nObs <- length(y)
+
  nForecasts <- ensembleSize(ensembleData)
- if (!all(M == 1:nForecasts)) ensembleData <- ensembleData[,M]
-
-# remove instances missing all forecasts or obs
-
- M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- M <- M | is.na(ensembleVerifObs(ensembleData))
- ensembleData <- ensembleData[!M,]
- 
- if (is.null(y <- ensembleVerifObs(ensembleData)))
-   stop("verification observations required")
-
-#nObs <- length(y) 
- nObs <- ensembleNobs(ensembleData)
 
  ensembleData <- ensembleForecasts(ensembleData)
  x <- apply( ensembleData, 1, mean, na.rm = TRUE)

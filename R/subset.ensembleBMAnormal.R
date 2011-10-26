@@ -1,5 +1,9 @@
 `[.ensembleBMAnormal` <-
 function(x,d) {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
   d <- as.character(d) 
   if (any(!dateCheck(d))) stop("improperly specified dates")
   m <- match( d, names(x$nIter), nomatch = 0)
@@ -9,6 +13,7 @@ function(x,d) {
   x$sd <- x$sd[d]
   x$weights <- x$weights[,d,drop = FALSE]
   x$nIter <- x$nIter[d]
+  attr(x,"call") <- list(attr(x,"call"), match.call())
   x
 }
 

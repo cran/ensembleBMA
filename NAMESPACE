@@ -1,0 +1,88 @@
+import("chron")
+
+export(julTOymdh,ymdhTOjul,dateCheck)
+export(ensembleData,trainingData,plotProbcast)
+
+export(dataVerifObs,dataVerifObs.ensembleData)
+export(dataNA,dataNA.ensembleData)
+export(dataNobs,dataNobs.ensembleData)
+export(dataObsLabels,dataObsLabels.ensembleData)
+export(dataStartupSpeed,dataStartupSpeed.ensembleData)
+
+export(ensembleForecasts,ensembleForecasts.ensembleData)
+export(ensembleSize,ensembleSize.ensembleData)
+export(ensembleValidDates,ensembleValidDates.ensembleData)
+export(ensembleFhour,ensembleFhour.ensembleData)
+export(ensembleItime,ensembleItime.ensembleData)
+export(ensembleGroups,ensembleGroups.ensembleData)
+export(ensembleMembers,ensembleMembers.ensembleData)
+
+export(controlBMAgamma0,controlBMAgamma,controlBMAnormal)
+export(ensembleBMA,ensembleBMAgamma0,ensembleBMAgamma,ensembleBMAnormal)
+export(fitBMA,fitBMAgamma0,fitBMAgamma,fitBMAnormal)
+
+export( CRPS, CRPS.default)
+export( MAE, MAE.default)
+
+export(pitHist,verifRankHist,verifPlot)
+
+export(brierScore,
+       brierScore.ensembleBMAgamma0,
+       brierScore.ensembleBMAgamma,
+       brierScore.ensembleBMAnormal,
+       brierScore.fitBMAgamma0,
+       brierScore.fitBMAgamma,
+       brierScore.fitBMAnormal)
+export(cdf,
+       cdf.ensembleBMAgamma0,
+       cdf.ensembleBMAgamma,
+       cdf.ensembleBMAnormal,
+       cdf.fitBMAgamma0,
+       cdf.fitBMAgamma,
+       cdf.fitBMAnormal)
+export(crps,
+       crps.ensembleBMAgamma0,
+       crps.ensembleBMAgamma,
+       crps.ensembleBMAnormal,
+       crps.fitBMAgamma0,
+       crps.fitBMAgamma,
+       crps.fitBMAnormal)
+export(modelParameters,
+       modelParameters.ensembleBMAgamma0,
+       modelParameters.ensembleBMAgamma,
+       modelParameters.ensembleBMAnormal,
+       modelParameters.fitBMAgamma0,
+       modelParameters.fitBMAgamma,
+       modelParameters.fitBMAnormal)
+export(quantileForecast,
+       quantileForecast.ensembleBMAgamma0,
+       quantileForecast.ensembleBMAgamma,
+       quantileForecast.ensembleBMAnormal,
+       quantileForecast.fitBMAgamma0,
+       quantileForecast.fitBMAgamma,
+       quantileForecast.fitBMAnormal)
+export(pit,
+       pit.ensembleBMAgamma0,
+       pit.ensembleBMAgamma,
+       pit.ensembleBMAnormal,
+       pit.fitBMAgamma0,
+       pit.fitBMAgamma,
+       pit.fitBMAnormal)
+export(combine,
+       combine.ensembleBMAgamma0,
+       combine.ensembleBMAgamma,
+       combine.ensembleBMAnormal)
+
+S3method("plot", "ensembleBMAgamma")
+S3method("plot", "ensembleBMAgamma0")
+S3method("plot", "ensembleBMAnormal")
+S3method("plot", "fitBMAgamma")
+S3method("plot", "fitBMAgamma0")
+S3method("plot", "fitBMAnormal")
+
+S3method("[", "ensembleBMAgamma")
+S3method("[", "ensembleBMAgamma0")
+S3method("[", "ensembleBMAnormal")
+
+#importFrom("fields","image.plot","US","world")
+#importFrom("maps","map")

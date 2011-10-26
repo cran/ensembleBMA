@@ -1,6 +1,10 @@
-`trainingData` <-
+trainingData <-
 function(ensembleData, trainingDays, date = NULL)
 {
+#
+# copyright 2006-present, University of Washington. All rights reserved.
+# for terms of use, see the LICENSE file
+#
  if (!inherits(ensembleData,"ensembleData")) stop("not an ensembleData object")
 
  if (is.list(trainingDays)) trainingsDays <- trainingDays[[1]]
@@ -11,17 +15,20 @@ function(ensembleData, trainingDays, date = NULL)
  
  lag <- ceiling( ensembleFhour(ensembleData) / 24 )
 
- ensMemNames <- ensembleMemberLabels(ensembleData)
+ ensMemNames <- ensembleMembers(ensembleData)
  nForecasts <- length(ensMemNames)
+
+ nObs <- dataNobs(ensembleData)
+ if (!nObs) stop("no observations")
 
 # remove instances missing all forecasts, obs or dates
 
  M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- M <- M | is.na(ensembleVerifObs(ensembleData))
+ M <- M | is.na(dataVerifObs(ensembleData))
  M <- M | is.na(ensembleValidDates(ensembleData))
  ensembleData <- ensembleData[!M,]
  
- nObs <- ensembleNobs(ensembleData)
+ nObs <- dataNobs(ensembleData)
  if (!nObs) stop("no observations")
 
  ensDates <- ensembleValidDates(ensembleData)

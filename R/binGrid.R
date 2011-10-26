@@ -1,5 +1,9 @@
 `binGrid` <-
 function( val, coord1, coord2, nGrid = 65){
+#
+# copyright 2006-present, University of Washington. All rights reserved. 
+# for terms of use, see the LICENSE file
+#
    size <- nGrid
    grid <- matrix(NA, size,size)  
    paco <- cbind(coord1, coord2, val)
