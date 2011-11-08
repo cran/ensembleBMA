@@ -18,13 +18,6 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
  M <- !dataNA(ensembleData,observations=FALSE,dates=FALSE)
  if (!all(M)) ensembleData <- ensembleData[M,]
 
- fitDates <- modelDates(fit)
-
- M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
-
- if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
- if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
-
  nObs <- nrow(ensembleData)
 
  Q <- matrix(NA, nObs, length(quantiles))

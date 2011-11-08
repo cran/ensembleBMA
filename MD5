@@ -1,5 +1,5 @@
-438eeccc04e11f13f37326aaf0c05bf8 *CHANGELOG
-f86ffe0cd95f888b75f01beab0920abe *DESCRIPTION
+ff006fcde43933f37d010b4b9220546e *CHANGELOG
+fe81424dccf30d9ada0da52456d1322f *DESCRIPTION
 379310c03753fdea74dc5f3f4739b7b1 *NAMESPACE
 c3df50961e3b220436dfae73f7acbf14 *R/CRPS.default.R
 06f6e9f63956fc45c658fff12544ae94 *R/CRPScap.R
@@ -71,7 +71,7 @@ a71ded1dcb13b270f715ffd127236d92 *R/ensembleSize.R
 ea184cf19661e00ff736c00ea9138b0e *R/ensembleValidDates.ensembleData.R
 a7f209eb9d5422b507b007fb7117dca2 *R/fitBMA.R
 4320a767b4df3637b706c363765d3c1e *R/fitBMAgamma.R
-4a37dc6f5702cd8217627adcb2a132a1 *R/fitBMAgamma0.R
+3c356396c30788a9d324e182a533eeea *R/fitBMAgamma0.R
 3eb186869c5cf481e2700aa04804bcaf *R/fitBMAnormal.R
 47fcf374d8512ec629f20ee6ca42b41d *R/getDates.R
 a76197efb6888a4de6ffa9f98471b399 *R/getExchangeable.R
@@ -126,8 +126,8 @@ bd47ecfea8bc6cd3a7be7605ffea5915 *R/quantBMAgamma0.R
 8caa8b6fff1f124d18f10c4911026282 *R/quantileForecast.ensembleBMAgamma.R
 d7d6e181c02ed2c1bc00ff7de7ef086d *R/quantileForecast.ensembleBMAgamma0.R
 3335a7276271fdf92a3e2fb76c1c2359 *R/quantileForecast.ensembleBMAnormal.R
-b129bd13659e4ab2cea96a225eed155e *R/quantileForecast.fitBMAgamma.R
-ce1b6b4276c3c38af575b730fdb334a5 *R/quantileForecast.fitBMAgamma0.R
+511cf9244e3acfd684a4e41de818bc96 *R/quantileForecast.fitBMAgamma.R
+d5525bcacdb234029ef92d932aec97eb *R/quantileForecast.fitBMAgamma0.R
 2855d4317438f2a04348e83787ddcd70 *R/quantileForecast.fitBMAnormal.R
 7c3110857be89d67569b47a60c2ebcc7 *R/startupSpeed.R
 8e61fd1d62437fb1af4bb90e375a458d *R/startupSpeed.ensembleData.R

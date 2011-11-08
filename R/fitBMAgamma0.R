@@ -216,6 +216,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     z <- matrix(1/nForecasts, ncol = nForecasts, nrow = nObs)
     objold <- 0
     newLL <- 0
+    MEAN[MEAN <= 0] <- max(min(obs),1.e-4)
     while (TRUE) {
         VAR <- varCoefs[1] + varCoefs[2] * Xvar
         RATE <- MEAN/VAR
