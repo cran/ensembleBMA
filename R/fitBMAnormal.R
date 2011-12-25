@@ -218,7 +218,7 @@ function(ensembleData, control = controlBMAnormal(),
 ##
             }
             else {
-              sd[] <- sqrt(apply(z*RSQ,2,sum,na.rm=TRUE)/zsum2)
+              sd <- sqrt(apply(z*RSQ,2,sum,na.rm=TRUE)/zsum2)
               sd <- drop(crossprod(sd,matEX))[namEX]
             }
           }

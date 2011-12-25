@@ -1,3 +1,5 @@
+01/12 sd[] <- to sd <- for exchangeable, unequal variances [Henri Stephan]
+
 11/11 included a work around in fitBMAgamma0 and qunatile.fitBMSgamma0 that 
       helps in situations where the bias coef estimates fall near or below 0
       removed date check from quantileForecast.fitBMA functions
