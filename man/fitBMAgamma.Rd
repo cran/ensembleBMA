@@ -103,7 +103,13 @@ Washington, 2007 (revised 2010).
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R check
   winsTrain <- trainingData( winsTestData, trainingDays = 30,
+                             date = "2008010100")
+}
+
+# for quick run only; use more training days for forecasting
+  winsTrain <- trainingData( winsTestData, trainingDays = 10,
                              date = "2008010100")
 
   winsTrainFit <- fitBMAgamma( winsTrain)

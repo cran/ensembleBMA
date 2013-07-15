@@ -43,6 +43,6 @@ function( val, coord1, coord2, nGrid = 65){
       }
     }
   }
-return(grid)
+ grid
 }
 

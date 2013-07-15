@@ -89,7 +89,13 @@ Washington, 2007 (revised 2010).
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R check
   prcpTestFit1 <- ensembleBMAgamma0( prcpTestData, trainingDays = 30,
+       control = controlBMAgamma0(power = (1/4)))
+}
+
+# for quick run only; use more training days for forecasting
+  prcpTestFit1 <- ensembleBMAgamma0( prcpTestData[1:14,], trainingDays = 6,
        control = controlBMAgamma0(power = (1/4)))
 }
 \keyword{models}

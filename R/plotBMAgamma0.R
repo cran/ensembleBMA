@@ -1,5 +1,5 @@
 plotBMAgamma0 <-
-function (WEIGHTS, MEAN, VAR, PROB0, obs = NULL, exchangeable = NULL)
+function (WEIGHTS, MEAN, VAR, PROB0, obs = NULL, exchangeable = NULL, power = 1)
 {
 #
 # copyright 2006-present, University of Washington. All rights reserved.
@@ -68,8 +68,24 @@ xlim <- range(c(0,x))
 
 #if (!is.null(obs) && (obs <= lo || obs >= up)) return(invisible())
 
+  xlab <- "Precipitation"
+  if (power != 1) {
+      if (power == 1/3) {
+            xlab <- "Cube Root of Precipitation"
+          }
+        else if (power == 1/2) {
+              xlab <- "Square Root of Precipitation"
+            }
+        else if (power == 1/4) {
+              xlab <- "Fourth Root of Precipitation"
+            }
+        else {
+              xlab <- paste( xlab, " to the ", round(power,3), " power")
+            }
+    }
+  
 plot( c(0,x), c(0,FORC[,lex+1]), type = "l", col = "black", ylim = ylim,
-      xlab = "Precipitation", 
+      xlab = xlab, 
 ylab = "Prob No Precip and Scaled PDF for Precip", lwd = 3)
 
 segments( 0, 0, 0, sum(WEIGHTS*PROB0), col = "black", lwd = 3)

@@ -81,9 +81,18 @@ Washington, 2007 (revised 2010).
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R check
    winsTestFit1 <- ensembleBMAgamma(winsTestData, trainingDays = 30,
-       control = controlBMAgamma(maxIter = 100, tol = 1.e-6, startupSpeed = 1))
+       control = controlBMAgamma(maxIter = 100, tol = 1.e-6,
+   startupSpeed =1))
+}
+
+# for quick run only; use more training days for forecasting
+   winsTestFit1 <- ensembleBMAgamma(winsTestData[1:14,], trainingDays = 5,
+      control = controlBMAgamma(maxIter = 100, tol = 1.e-6, startupSpeed = 1))
 }
 \keyword{models}
+
+
 % docclass is function
 

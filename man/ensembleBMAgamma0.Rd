@@ -121,11 +121,16 @@ with Exchangeable and Missing Members using Bayesian Model Averaging,
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R check
   prcpTestFit <- ensembleBMAgamma0( prcpTestData, trainingDays = 30)
 
 ## equivalent to
 ##    prcpTestFit <- ensembleBMA( prcpTestData, trainingDays = 30,
 ##                                model = "gamma0")
+}
+
+# for quick run only; use more training days for forecasting
+  prcpTestFit <- ensembleBMAgamma0( prcpTestData[3:16,], trainingDays = 6)
 }
 \keyword{models}
 % docclass is function

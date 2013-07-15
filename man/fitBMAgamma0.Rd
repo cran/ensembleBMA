@@ -107,7 +107,13 @@ with Exchangeable and Missing Members using Bayesian Model Averaging,
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R check
   prcpTrain <- trainingData( prcpTestData, trainingDays = 30,
+                             date = "2008010100")
+}
+
+# quick run only; use more training days for forecasting
+  prcpTrain <- trainingData( prcpTestData, trainingDays = 10,
                              date = "2008010100")
 
   prcpTrainFit <- fitBMAgamma0( prcpTrain)

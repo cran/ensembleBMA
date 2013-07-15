@@ -75,7 +75,7 @@ function(x, ensembleData, dates = NULL, ask = TRUE, ...)
 
       plotBMAgamma0(WEIGHTS = W, MEAN = MEAN[!M], VAR = VAR[!M], 
                       PROB0 = PROB0[!M], obs = obs[i],
-                      exchangeable = exchangeable)
+                      exchangeable = exchangeable, power = x$power)
 
     }
 

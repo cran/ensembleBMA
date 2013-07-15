@@ -62,10 +62,19 @@ Washington, 2007 (revised 2010).
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R check
   tempTestFit12 <- ensembleBMAnormal( tempTestData, trainingDays = 30,
                    dates = c("2008010100","2008010200"))
 
   tempTestFit34 <- ensembleBMAnormal( tempTestData, trainingDays = 30,
+                   dates = c("2008010300","2008010400"))
+}
+
+# for quick run only; use more training days for forecasting
+  tempTestFit12 <- ensembleBMAnormal( tempTestData, trainingDays = 8,
+                   dates = c("2008010100","2008010200"))
+
+  tempTestFit34 <- ensembleBMAnormal( tempTestData, trainingDays = 8.,
                    dates = c("2008010300","2008010400"))
 
   tempTestFit <- combine( tempTestFit12, tempTestFit34)

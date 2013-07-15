@@ -1,3 +1,9 @@
+07/13 shortened help file example timings
+
+02/13 changed plot methods for precip (gamma0) and wind speed (gamma) to
+           add transformation to horizontal axis label [Chang Eck]
+      changed matchEnsembleMembers methods to properly return result
+
 01/12 sd[] <- to sd <- for exchangeable, unequal variances [Henri Stephan]
 
 11/11 included a work around in fitBMAgamma0 and qunatile.fitBMSgamma0 that 

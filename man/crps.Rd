@@ -108,6 +108,10 @@ Washington, 2007 (revised 2010).
 \dontrun{# R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
 }
+
+# for quick run only; use more training days for forecasting
+  tempTestFit <- ensembleBMAnormal( tempTestData[1:20,], trainingDays = 8)
+
   crpsValues <- crps( tempTestFit, tempTestData)
   colMeans(crpsValues)
 

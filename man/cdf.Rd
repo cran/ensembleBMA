@@ -103,9 +103,13 @@ using ensembles and Bayesian model averaging,
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+
 \dontrun{# R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
 }
+
+# for quick run only; use more training days for forecasting
+  tempTestFit <- ensembleBMAnormal( tempTestData[1:20,], trainingDays = 8)
 
   tempTestForc <- quantileForecast( tempTestFit, tempTestData)
   range(tempTestForc)

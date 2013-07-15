@@ -160,11 +160,17 @@ using ensembles and Bayesian model averaging,
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R checl
   tempTestFit <- ensembleBMA( tempTestData, trainingDays = 30,
                               model = "normal")
 
 ## equivalent to
 ##    tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
+}
+
+# for quick run only; use more training days for forecasting
+  tempTestFit <- ensembleBMA( tempTestData[1:20,], trainingDays = 8,
+                              model = "normal")
 }
 \keyword{models}
 % docclass is function

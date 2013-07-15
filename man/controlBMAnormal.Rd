@@ -85,8 +85,15 @@ Washington, 2007 (revised 2010).
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ # R check
   tempTestFit1 <- ensembleBMAnormal(tempTestData, trainingDays = 30,
     control = controlBMAnormal(maxIter = 100, biasCorrection = "additive"))
+}
+
+# for quick run only; use more training days for forecasting
+  tempTestFit1 <- ensembleBMAnormal(tempTestData[1:20,], trainingDays = 5,
+    control = controlBMAnormal(maxIter = 100, biasCorrection = "additive"))
+
 }
 \keyword{models}
 % docclass is function

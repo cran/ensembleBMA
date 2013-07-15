@@ -116,11 +116,17 @@ with Exchangeable and Missing Members using Bayesian Model Averaging,
                                 forecastHour = 48,
                                 initializationTime = "00")
 
+\dontrun{ #  R check
   tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
 
 ## equivalent to
 ##   tempTestFit <- ensembleBMA( tempTestData, trainingDays = 30,
 ##                                model = "normal")
+}
+
+# for quick run only; use more training days for forecasting
+ tempTestFit <- ensembleBMAnormal( tempTestData[1:20,], trainingDays = 8)
+
 }
 \keyword{models}
 % docclass is function

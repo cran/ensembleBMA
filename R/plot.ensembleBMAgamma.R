@@ -71,7 +71,7 @@ function(x, ensembleData, dates=NULL, ask=TRUE, ...)
        }
 
        plotBMAgamma( WEIGHTS = W, MEAN = MEAN[!M], VAR = VAR[!M],
-                     obs = obs[i], exchangeable = exchangeable)
+                     obs = obs[i], exchangeable = exchangeable, power = x$power)
     }
 
  }

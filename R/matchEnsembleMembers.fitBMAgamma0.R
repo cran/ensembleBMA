@@ -33,5 +33,7 @@ function( fit, ensembleData)
 
  M <- match(fitMems, ensMems, nomatch = 0)
  if (any(!M)) stop("ensembleData is missing a member used in fit")
+
+ M
 }
 

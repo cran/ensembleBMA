@@ -1,5 +1,5 @@
 plotBMAgamma <-
-function (WEIGHTS, MEAN, VAR, obs = NULL, exchangeable = NULL)
+function (WEIGHTS, MEAN, VAR, obs = NULL, exchangeable = NULL, power = 1)
 {
 #
 # copyright 2006-present, University of Washington. All rights reserved.
@@ -56,8 +56,21 @@ up <- quantBMAgamma( .9,  WEIGHTS, MEAN, VAR)
 ylim <- range(c(0,FORC))
 xlim <- range(c(0,x))
 
+  xlab <- "Wind Speed"
+  if (power != 1) {
+      if (power == 1/3) {
+            xlab <- "Cube Root of Wind Speed"
+          }
+        else if (power == 1/2) {
+              xlab <- "Square Root of Wind Speed"
+            }
+        else {
+              xlab <- paste( xlab, " to the ", round(power,3), " power")
+            }
+    }
+  
 plot( c(0,x), c(0,FORC[,lex+1]), type = "l", col = "black", ylim = ylim,
-      xlab = "Wind Speed", ylab = "Probability Density", lwd = 3)
+      xlab = xlab, ylab = "Probability Density", lwd = 3)
 
 abline( v = lo, col = "black", lty = 2)
 abline( v = med, col = "black")
