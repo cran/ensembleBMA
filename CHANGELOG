@@ -1,3 +1,7 @@
+01/14 removed require(chron) [CRAN]
+
+10/13 fixed date handling in cdf functions [Sandor Baran]
+
 07/13 shortened help file example timings
 
 02/13 changed plot methods for precip (gamma0) and wind speed (gamma) to

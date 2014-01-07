@@ -5,8 +5,7 @@ function (julianDates, origin = NULL, dropHour = NULL)
 # copyright 2006-present, University of Washington. All rights reserved.
 # for terms of use, see the LICENSE file
 #
-
- if (!exists("month.day.year")) library("chron")
+# require("chron")
  
  if (!is.null(orig <- attr( julianDates, "origin"))) {
    if (!is.null(origin)) {

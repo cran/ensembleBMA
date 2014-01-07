@@ -16,12 +16,12 @@ function(fit, ensembleData, values, dates = NULL, ...)
 
  fitDates <- modelDates(fit)
 
- M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates)
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=dates)
 
  if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
  if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
 
- dates <- modelDates(fit)
+ if (is.null(dates)) dates <- modelDates(fit)
 
  Dates <- ensembleValidDates(ensembleData)
 

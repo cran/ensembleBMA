@@ -19,10 +19,12 @@ function(fit, ensembleData, values, dates = NULL, ...)
 
  fitDates <- modelDates(fit)
 
- M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
+ M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=dates)
 
  if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
  if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
+
+ if (is.null(dates)) dates <- modelDates(fit)
 
  nObs <- nrow(ensembleData)
  if (!nObs) stop("no data")

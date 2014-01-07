@@ -6,7 +6,7 @@ function (YYYYMMDDHH, origin = c(month = 1, day = 1, year = 2000))
   # for terms of use, see the LICENSE file
   #             
 
-  if (!exists("julian")) library("chron")
+# require("chron")
 
   YYYYMMDDHH <- sapply(YYYYMMDDHH, as.character)
   l <- unique(sapply(YYYYMMDDHH, nchar))

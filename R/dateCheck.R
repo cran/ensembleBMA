@@ -5,7 +5,7 @@ function (YYYYMMDDHH)
 # copyright 2006-present, University of Washington. All rights reserved.
 # for terms of use, see the LICENSE file
 #
- if (!exists("julian")) library("chron")
+# require("chron")
 
  origin <- c(month = 1, day = 1, year = 2000)
 
