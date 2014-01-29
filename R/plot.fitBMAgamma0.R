@@ -36,6 +36,8 @@ function(x, ensembleData, dates=NULL, ...)
 
  ensembleData <- ensembleForecasts(ensembleData)
 
+ obs <- powfun( obs, power = x$power)
+
  WEIGHTS <- x$weights
 
  if (!all(Wmiss <- is.na(WEIGHTS)))  {

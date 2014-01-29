@@ -1,5 +1,5 @@
-e4d961a53feeb1e73687df3c2eec36eb *CHANGELOG
-0a14f72742bbb85a2df00eb9c502241f *DESCRIPTION
+8171de35a36d09861f9cbaf06a0b8817 *CHANGELOG
+89ea3b5d5c7f6f0980421f8105d881ac *DESCRIPTION
 379310c03753fdea74dc5f3f4739b7b1 *NAMESPACE
 c3df50961e3b220436dfae73f7acbf14 *R/CRPS.default.R
 06f6e9f63956fc45c658fff12544ae94 *R/CRPScap.R
@@ -109,11 +109,11 @@ c193824e028c7d7b62792a069b2056f9 *R/pit.fitBMAgamma.R
 19b742e3d0bde10bb2c7af6ade018de4 *R/pit.fitBMAgamma0.R
 4d2a97e9984de7251517d744d52e5377 *R/pit.fitBMAnormal.R
 2000b3fa4f072fa05076f9c24f869bde *R/pitHist.R
-a634260a27f0526863fe6c6053d6c38e *R/plot.ensembleBMAgamma.R
-dfe63faa23ea269c4c3ecfeb84ff8c9d *R/plot.ensembleBMAgamma0.R
+94be5b36b5eecb5f89f12034e5196ccf *R/plot.ensembleBMAgamma.R
+6adaf690b7b667fb03a6bafa6e76824c *R/plot.ensembleBMAgamma0.R
 5c920cfa1e56c46e562a99ebff3cca23 *R/plot.ensembleBMAnormal.R
-f1183bed13b371b3a9fa95247ca1e2f1 *R/plot.fitBMAgamma.R
-94c14c55c88ffc92b43ddf1493ad19a3 *R/plot.fitBMAgamma0.R
+986d4953fab12228d7cfa960c7c6b029 *R/plot.fitBMAgamma.R
+555824ab360d3871e7b04e55c1dc21a4 *R/plot.fitBMAgamma0.R
 2a3216f464832cace84e14102099885d *R/plot.fitBMAnormal.R
 adc43f749b40ea1bd3e4971be8f302c8 *R/plotBMAgamma.R
 a67c59b3a3dcccb27e795a15b587cb77 *R/plotBMAgamma0.R

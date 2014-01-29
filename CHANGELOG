@@ -1,3 +1,5 @@
+01/29 corrected plot functions for gamma/gamma0 to transform obs  [Bo Madsen]
+
 01/14 removed require(chron) [CRAN]
 
 10/13 fixed date handling in cdf functions [Sandor Baran]
@@ -10,7 +12,7 @@
 
 01/12 sd[] <- to sd <- for exchangeable, unequal variances [Henri Stephan]
 
-11/11 included a work around in fitBMAgamma0 and qunatile.fitBMSgamma0 that 
+11/11 included a work around in fitBMAgamma0 and quantile.fitBMSgamma0 that 
       helps in situations where the bias coef estimates fall near or below 0
       removed date check from quantileForecast.fitBMA functions
 

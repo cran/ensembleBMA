@@ -40,6 +40,8 @@ function(x, ensembleData, dates=NULL, ask=TRUE, ...)
  nForecasts <- ensembleSize(ensembleData)
 
  ensembleData <- ensembleForecasts(ensembleData)
+
+ obs <- powfun( obs, power = x$power)
  
  l <- 0
  for (d in dates) {
