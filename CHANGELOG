@@ -1,3 +1,6 @@
+04/10 corrected call to dataNA in quantileForecast.fitBMAgamma and
+      corrected fitBMAgamma help file [Maxime Taillardat]
+
 01/29 corrected plot functions for gamma/gamma0 to transform obs  [Bo Madsen]
 
 01/14 removed require(chron) [CRAN]

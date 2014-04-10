@@ -15,7 +15,7 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
 
  ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
 
- M <- !dataNA(ensembleData,observations=NULL,dates=NULL)
+ M <- !dataNA(ensembleData,observations=FALSE,dates=FALSE)
  if (!all(M)) ensembleData <- ensembleData[M,]
  nObs <- nrow(ensembleData)
 

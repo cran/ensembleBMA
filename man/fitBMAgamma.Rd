@@ -2,12 +2,11 @@
 \alias{fitBMAgamma}
 \alias{inverseLogit}
 \title{
-    BMA precipitation model fit to a training set
+    BMA wind speed model fit to a training set
 }
 \description{
-   Fits a Bayesian Modeling Averaging mixture of gammas 
-   with a point mass at 0 to a given training set.
-   Intended for precipitation forecasts.
+   Fits a Bayesian Modeling Averaging mixture of gammas.
+   Intended for wind speed forecasts.
 }
 \usage{
 fitBMAgamma( ensembleData, control = controlBMAgamma(), exchangeable = NULL) 
@@ -33,10 +32,6 @@ fitBMAgamma( ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 }
 \value{
 A list with the following output components:
-  \item{prob0coefs}{
-    The fitted coefficients in the model for the point mass at 0 
-    (probability of zero precipitation) for each member of the ensemble.
-  }
   \item{biasCoefs}{
     The fitted coefficients in the model for the mean of nonzero observations
     for each member of the ensemble (used for bias correction).
