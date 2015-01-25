@@ -36,8 +36,8 @@ function(forecast, longitude, latitude, nGrid = 65,
 
    if (type == "image") {
 ##     fields:::image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
-       if (!exists("image.plot")) library(fields)
-       image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
+##     if (!exists("image.plot")) library(fields)
+       fields::image.plot(lon, lat, pred, xlim=lonRange, ylim=latRange,
                   xlab = "", ylab = "", horizontal = TRUE, ...)
   }
   else  {
@@ -74,17 +74,17 @@ latRange <- range(lat)
 
 if(US.map==2){
 ##  fields:::US( xlim = lonRange, ylim = latRange,  add=TRUE, col=1, lwd=2)
-    if (!exists("US")) library("fields")
-    US( xlim = lonRange, ylim = latRange,  add=TRUE, col=1, lwd=2)
+##  if (!exists("US")) library("fields")
+    fields::US( xlim = lonRange, ylim = latRange,  add=TRUE, col=1, lwd=2)
 ##  maps:::map('world', 'Canada', interior = TRUE, 
-    if (!exists("map")) library(maps)
-      map('world', 'Canada', interior = TRUE, 
+##   if (!exists("map")) library(maps)
+    maps::map('world', 'Canada', interior = TRUE, 
            xlim = lonRange, ylim = latRange, add=TRUE, col=1, lwd=2 )
 }
  else {
 ##   fields:::world( xlim=lonRange, ylim=latRange, add=TRUE, col=1, lwd=2)     
-     if (!exists("world")) library("fields")
-        world( xlim=lonRange, ylim=latRange, add=TRUE, col=1, lwd=2)     
+##   if (!exists("world")) library("fields")
+     fields::world( xlim=lonRange, ylim=latRange, add=TRUE, col=1, lwd=2)     
 }
 }  
 

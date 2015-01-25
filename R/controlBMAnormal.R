@@ -1,7 +1,7 @@
 controlBMAnormal <-
 function(maxIter = Inf, tol = sqrt(.Machine$double.eps), equalVariance = TRUE, 
          biasCorrection = c("regression", "additive", "none"),
-         init = list(sd = NULL, weights = NULL))  
+         init = list(sd = NULL, weights = NULL))
 {
 #
 # copyright 2006-present, University of Washington. All rights reserved.

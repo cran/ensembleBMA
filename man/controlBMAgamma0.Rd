@@ -11,7 +11,8 @@
 \usage{
 controlBMAgamma0(maxIter = Inf, tol = sqrt(.Machine$double.eps), 
                  power = (1/3), rainobs = 10, 
-                 init = list(varCoefs = NULL, weights = NULL))
+                 init = list(varCoefs = NULL, weights = NULL),
+             optim.control = list(ndeps = rep( sqrt(.Machine$double.eps), 2)))
 }
 \arguments{
   \item{maxIter}{
@@ -49,6 +50,13 @@ controlBMAgamma0(maxIter = Inf, tol = sqrt(.Machine$double.eps),
      An optional list of initial values for variance coefficients
      and weights. The default is to start with the variance coefficients
      equal to 1, and with equal weights for each member of the ensemble.
+  }
+  \item{optim.control}{
+     Control parameters	for the	optim function used in the M-step of EM.
+     The default here is list(ndeps = rep( sqrt(.Machine$double.eps), 2)),
+     which assigns a smaller finite-difference step size than the
+    \code{optim} default of 1.e-3. To use the default control parameters for
+    \code{optim}, set \code{optim.control=NULL}.
   }
 }
 

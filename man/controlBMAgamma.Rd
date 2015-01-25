@@ -8,7 +8,8 @@
    of a mixture of gammas to ensemble forecasts for wind speed.
 }
 \usage{
-controlBMAgamma(maxIter, tol, power = 1, startupSpeed = NULL, init)
+controlBMAgamma(maxIter, tol, power = 1, startupSpeed = NULL, init, 
+           optim.control = list(ndeps = rep( sqrt(.Machine$double.eps), 2)))
 }
 \arguments{
   \item{maxIter}{
@@ -34,13 +35,20 @@ controlBMAgamma(maxIter, tol, power = 1, startupSpeed = NULL, init)
     A scalar value giving a global value for the anemometer startup speed,
     or the threshold below which a value of 0 is recorded. As this can
     vary from station to station and network to network, it may be
-    preferable to include \code{startupSpeed} as part of the \code{ensembleData}
-    object.
+    preferable to include \code{startupSpeed} as part of the 
+   \code{ensembleData} object.
    }
   \item{init}{
      An optional list of initial values for variance coefficients
      and weights. The default is to start with the variance coefficients
      equal to 1, and with equal weights for each member of the ensemble.
+  }
+  \item{optim.control}{
+     Control parameters for the optim function used in the M-step of EM.
+     The default here is list(ndeps = rep( sqrt(.Machine$double.eps), 2)),
+     which assigns a smaller finite-difference step size than the
+    \code{optim} default of 1.e-3. To use the default control parameters for 
+    \code{optim}, set \code{optim.control=NULL}.
   }
 }
 

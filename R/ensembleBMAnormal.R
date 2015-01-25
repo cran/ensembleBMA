@@ -160,6 +160,7 @@ function(ensembleData, trainingDays, dates = NULL,
                 nIter = nIter, exchangeable = exchangeable),
                 forecastHour = forecastHour, 
                 initializationTime = ensembleItime(ensembleData),
-                call = match.call(), class = c("ensembleBMAnormal", "ensembleBMA"))
+                call = match.call(), 
+                class = c("ensembleBMAnormal", "ensembleBMA"))
 }
 

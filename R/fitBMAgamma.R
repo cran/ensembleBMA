@@ -135,9 +135,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
                 shape=(r*m)[!Y0,][!Mnonz], rate=r[!Y0,,drop=FALSE][!Mnonz], 
                 log=TRUE)
 
-    Wzero <- W == 0
-
-    include <- !miss & !Wzero
+    include <- !miss & !(W == 0) & !(r == 0)
 
     -sum(z[include]*(q[include]+log(W[include])))
   }
@@ -239,7 +237,13 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 #     fn <- gammaLoglikEMmiss(weights, MEAN, ensembleData, obs)
 #     optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
       fn <- completeDataLLmiss(z, weights, MEAN, ensembleData, obs, startup)
-      optimResult = optim(sqrt(varCoefs), fn=fn, method = "BFGS") 
+      optimResult = if (is.null(control$optim.control)) {
+                       optim(sqrt(varCoefs), fn=fn, method = "BFGS")
+                    }
+                    else {
+                       optim(sqrt(varCoefs), fn=fn, method = "BFGS",
+                             control = control$optim.control) 
+                    }
       if (optimResult$convergence) warning("optim does not converge")
       varOld <- varCoefs
       varCoefs <- optimResult$par^2

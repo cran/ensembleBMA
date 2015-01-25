@@ -10,7 +10,7 @@ function(ensembleData, forecasts = TRUE, observations = TRUE, dates = TRUE)
 
  M <- rep( TRUE, nrow(ensembleData))
  if (forecasts) M <- apply(ensembleForecasts(ensembleData), 1, function(z) all(is.na(z)))
- if (observations & !is.null(ensembleData$obs)) {
+ if (observations & !is.null(dataVerifObs(ensembleData))) {
    nObs <- dataNobs(ensembleData)
    if (nObs > 0) M <- M | is.na(dataVerifObs(ensembleData))
  }

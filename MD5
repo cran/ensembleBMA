@@ -1,6 +1,6 @@
-7ba0f280d6eb1310396715c520c00aff *CHANGELOG
-8709f22cc28097dd7e55c8eaecf3c5dc *DESCRIPTION
-379310c03753fdea74dc5f3f4739b7b1 *NAMESPACE
+334b0ae3cef3f8278f9afa112522cca1 *CHANGELOG
+3a136874b0b173cd3b0a2c4928f2961c *DESCRIPTION
+6524f566e973dfe096188815ef297b67 *NAMESPACE
 c3df50961e3b220436dfae73f7acbf14 *R/CRPS.default.R
 06f6e9f63956fc45c658fff12544ae94 *R/CRPScap.R
 6c0c383ad647523f2ebff8f979a152aa *R/MAE.R
@@ -28,9 +28,9 @@ ef7ad54c2fd1e587dfff313e28a2bb22 *R/cdfBMAnormal.R
 a1ae0c73026975054cd2c2e75e2ace4e *R/combine.ensembleBMAgamma0.R
 7e340bbb54ff906c5b540a47a25bc844 *R/combine.ensembleBMAnormal.R
 4a2b71f7e3c18a66cf828019c9d3f371 *R/combineCORE.R
-401875289f0f899cd6e92ffd4f57b9b3 *R/controlBMAgamma.R
-ba8868fc24afab021fcac12867b2449f *R/controlBMAgamma0.R
-65257442e2a3cdb8b21aa9d02c35f094 *R/controlBMAnormal.R
+d90902d276fd8d989dad155f499580d4 *R/controlBMAgamma.R
+89cc0f754513fd0ff04b39f6fb27dd5f *R/controlBMAgamma0.R
+8421214e00ed698f1465b63c03023be1 *R/controlBMAnormal.R
 60a5ee20cd3850c61bb46cb90051d803 *R/crps.R
 a7fe9dd1a4b9725ab672f57b9012b70b *R/crps.ensembleBMAgamma.R
 32348391c3ed9803b261cb494f6a37f9 *R/crps.ensembleBMAgamma0.R
@@ -40,7 +40,7 @@ a7fe9dd1a4b9725ab672f57b9012b70b *R/crps.ensembleBMAgamma.R
 06a1f74e547d8a7f495312d627052219 *R/crps.fitBMAnormal.R
 b79ab89d3fdad29a93e0ab9736cf98ca *R/crpsNormal.R
 e768edb8c44a13403943d479924906d4 *R/dataNA.R
-970e45444cf850aa0a97dc3065d187fa *R/dataNA.ensembleData.R
+079e9780a06eee6135eefd9af8797093 *R/dataNA.ensembleData.R
 62b14aa06f7cceeb0cc5a4d372575859 *R/dataNobs.R
 efc942a3f31e434b6b64bf29ddb359b3 *R/dataNobs.ensembleData.R
 e598c1427e3db2bcde85f24591895f12 *R/dataObsLabels.R
@@ -53,7 +53,7 @@ be3146c9115993c7ee63b0f614fc8e26 *R/dataVerifObs.ensembleData.R
 55a4a9eb2b0886515079dbb7cce1201d *R/ensembleBMA.R
 39c91c1ecebd2f0a57b7b3f062f5ff94 *R/ensembleBMAgamma.R
 70879a98641a3f90ed70b3cbe953603c *R/ensembleBMAgamma0.R
-2de11b1d951e7d2b87ca84cb2b834c0c *R/ensembleBMAnormal.R
+6513dfab7af3e0b9cdc3d4f26b92e19e *R/ensembleBMAnormal.R
 8a742c55bc902ecd293237c09bf56b88 *R/ensembleData.R
 32d36eb5a68ccbc67594eb40dc230303 *R/ensembleFhour.R
 f898be02205e345c6a55ad4e70a7824e *R/ensembleFhour.ensembleData.R
@@ -70,8 +70,8 @@ a71ded1dcb13b270f715ffd127236d92 *R/ensembleSize.R
 01d036df5a9bcf79ab4b2f176c2dc0c1 *R/ensembleValidDates.R
 ea184cf19661e00ff736c00ea9138b0e *R/ensembleValidDates.ensembleData.R
 a7f209eb9d5422b507b007fb7117dca2 *R/fitBMA.R
-4320a767b4df3637b706c363765d3c1e *R/fitBMAgamma.R
-3c356396c30788a9d324e182a533eeea *R/fitBMAgamma0.R
+9a818d3d7d8bee9d346876fc4519c26b *R/fitBMAgamma.R
+6d80d1296e16dae8b64d129f881bcd1b *R/fitBMAgamma0.R
 14701589242aff5a403d6ac0dd47cd4e *R/fitBMAnormal.R
 47fcf374d8512ec629f20ee6ca42b41d *R/getDates.R
 a76197efb6888a4de6ffa9f98471b399 *R/getExchangeable.R
@@ -118,7 +118,7 @@ c193824e028c7d7b62792a069b2056f9 *R/pit.fitBMAgamma.R
 adc43f749b40ea1bd3e4971be8f302c8 *R/plotBMAgamma.R
 a67c59b3a3dcccb27e795a15b587cb77 *R/plotBMAgamma0.R
 e5e62d967090479ace7a5144ff6e5b90 *R/plotBMAnormal.R
-fbff7a605ad95993e91c7d24e0513a7f *R/plotProbcast.R
+8caecf29372031d2d107e2ba1e8a8e9e *R/plotProbcast.R
 f9f83f411f3f8ff7849bb3bb2da01da0 *R/quantBMAgamma.R
 bd47ecfea8bc6cd3a7be7605ffea5915 *R/quantBMAgamma0.R
 79ccea200085fb4380399bb5c35aa457 *R/quantBMAnormal.R
@@ -150,8 +150,8 @@ f77dca345779db886944eae0be6b6a2c *man/MAE.Rd
 a9117329233ed3c2d0703d9293e85dad *man/brierScore.Rd
 8cbd0be30d98bff05919c409bff160bb *man/cdf.Rd
 8678af313d63840f201cdde9524e199e *man/combine.Rd
-9d5e0adbf765e68fab922c4209cb3ea7 *man/controlBMAgamma.Rd
-e54e4f00e88e78a0e4fa87583fef2bff *man/controlBMAgamma0.Rd
+58d42a9dcfb61eebdb17c3c6d0256b7f *man/controlBMAgamma.Rd
+5e6fee433be7e751979ec4b75d3f345c *man/controlBMAgamma0.Rd
 cf7c957f6bf5208ca0fd4dcd8eebc4f3 *man/controlBMAnormal.Rd
 e4198a38fca45e9af4d2f1ac444c110a *man/crps.Rd
 0214955ce5300c4f44c0eea14837825e *man/dateCheck.Rd

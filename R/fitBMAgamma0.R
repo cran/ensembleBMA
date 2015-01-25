@@ -246,7 +246,13 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         weps <- max(abs(wold - weights)/(1 + abs(weights)))
         fn <- completeDataLLmiss(z, weights, MEAN, PROB0, POP, 
             Xvar, obs, Y0)
-        optimResult = optim(sqrt(varCoefs), fn = fn, method = "BFGS")
+        optimResult = if (is.null(control$optim.control)) {
+                       optim(sqrt(varCoefs), fn=fn, method = "BFGS")
+                    }
+                    else {
+                       optim(sqrt(varCoefs), fn=fn, method = "BFGS",
+                             control = control$optim.control)
+               		         }
         if (optimResult$convergence) 
             warning("optim does not converge")
         varOld <- varCoefs

@@ -1,3 +1,8 @@
+01/25/15 fitBMAgamma robustification; added optim finite difference interval
+         to control parameters for gamma0 and gamma models [Maxime Taillardat]
+         changed ensembleData$obs to dataVerifObs(ensembleData) in dataNA
+         registered all S3 methods
+
 04/10 corrected call to dataNA in quantileForecast.fitBMAgamma and
       corrected fitBMAgamma help file [Maxime Taillardat]
 
