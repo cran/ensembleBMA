@@ -59,6 +59,7 @@ function(fit, ensembleData, quantiles=0.5, dates=NULL, ...)
        fTrans <- sapply( f, powfun, power = fit$power)
 
        MEAN <- apply(rbind(1, fTrans)*fit$biasCoefs[,d], 2, sum)
+       MEAN[MEAN < 0] <- 0
 
        W <- WEIGHTS
        if (any(M)) {
@@ -73,4 +74,3 @@ function(fit, ensembleData, quantiles=0.5, dates=NULL, ...)
 
   apply(Q, 2, powinv, power = fit$power)
 }
-

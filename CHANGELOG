@@ -1,12 +1,15 @@
-01/25/15 fitBMAgamma robustification; added optim finite difference interval
+03/15 zero lower bound enforced in bias correction for quantileForecast with
+      gamma and gamma0 models [Yang Xingchen]
+
+01/15 fitBMAgamma robustification; added optim finite difference interval
          to control parameters for gamma0 and gamma models [Maxime Taillardat]
          changed ensembleData$obs to dataVerifObs(ensembleData) in dataNA
          registered all S3 methods
 
-04/10 corrected call to dataNA in quantileForecast.fitBMAgamma and
+04/14 corrected call to dataNA in quantileForecast.fitBMAgamma and
       corrected fitBMAgamma help file [Maxime Taillardat]
 
-01/29 corrected plot functions for gamma/gamma0 to transform obs  [Bo Madsen]
+01/14 corrected plot functions for gamma/gamma0 to transform obs  [Bo Madsen]
 
 01/14 removed require(chron) [CRAN]
 
