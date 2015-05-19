@@ -2,6 +2,7 @@ fitBMAgamma0 <-
 function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL) 
 {
     ZERO <- 1e-100
+    
     powfun <- function(x, power) x^power
     powinv <- function(x, power) x^(1/power)
     if (is.null(exchangeable)) 
@@ -15,8 +16,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     }
     maxIter <- control$maxIter
     tol <- eps <- control$tol
-    ensembleData <- ensembleData[!dataNA(ensembleData, dates = FALSE), 
-        ]
+    ensembleData <- ensembleData[!dataNA(ensembleData, dates = FALSE), ]
     nObs <- dataNobs(ensembleData)
     if (!nObs) 
         stop("no observations")
@@ -27,8 +27,8 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     n0obs <- sum(Y0)
     if (sum(!Y0) < 2) 
         stop("less than 2 nonzero obs")
-    ensembleData <- ensembleForecasts(ensembleData)
-    Xvar <- ensembleData[!Y0, ]
+    ensembleData <- as.matrix(ensembleForecasts(ensembleData))
+    Xvar <- ensembleData[!Y0, ,drop=F]
     ensembleData <- apply(ensembleData, 2, function(x) sapply(x, 
         powfun, power = control$power))
     miss <- as.vector(as.matrix(is.na(ensembleData)))
@@ -85,7 +85,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     }
     if (any(Y0)) {
         if (nullX) {
-            prob0fit <- apply(ensembleData, 2, logisticFunc, 
+            prob0fit <- apply(as.matrix(ensembleData), 2, logisticFunc, 
                 y = Y0)
             prob0coefs <- lapply(prob0fit, function(x) x$coefficients)
             prob0coefs <- as.matrix(data.frame(prob0coefs))
@@ -149,7 +149,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         fit
     }
     if (nullX) {
-        meanFit <- apply(ensembleData, 2, lmFunc, y = obs)
+        meanFit <- apply(as.matrix(ensembleData), 2, lmFunc, y = obs)
         biasCoefs <- lapply(meanFit, function(x) x$coefficients)
         biasCoefs <- as.matrix(data.frame(biasCoefs))
         MEAN <- matrix(NA, nPrecip, nForecasts)
@@ -223,10 +223,10 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         SHAPE <- RATE * MEAN
         z[!Y0, ][!miss] <- dgamma(matrix(obs, nPrecip, nForecasts)[!miss], 
             shape = SHAPE[!miss], rate = RATE[!miss], log = TRUE)
-        zmax1 <- apply(z[!Y0, ], 1, max, na.rm = TRUE)
-        z[!Y0, ] <- sweep(z[!Y0, ], MARGIN = 1, FUN = "-", STATS = zmax1)
+        zmax1 <- apply(z[!Y0, ,drop=F], 1, max, na.rm = TRUE)
+        z[!Y0, ] <- sweep(z[!Y0, ,drop=F], MARGIN = 1, FUN = "-", STATS = zmax1)
         z[!Y0, ] <- sweep(POP, MARGIN = 2, FUN = "*", STATS = weights) * 
-            exp(z[!Y0, ])
+            exp(z[!Y0, ,drop=F])
         if (!is.null(PROB0)) 
             z[Y0, ] <- sweep(PROB0, MARGIN = 2, FUN = "*", STATS = weights)
         oldLL <- newLL
@@ -278,4 +278,3 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         varCoefs = varCoefs, weights = weights, nIter = nIter, 
         loglikelihood = newLL, power = control$power), class = "fitBMAgamma0")
 }
-

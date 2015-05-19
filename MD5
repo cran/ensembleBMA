@@ -1,5 +1,5 @@
-0019882b4d65bcd4ec6171fea8650e08 *CHANGELOG
-7bea5fec7e145fd9264a0e8283f49a42 *DESCRIPTION
+86d518083fbf230379255eeea640acd6 *CHANGELOG
+7a437d43a34dbb727f3732c4ba4a9579 *DESCRIPTION
 6524f566e973dfe096188815ef297b67 *NAMESPACE
 c3df50961e3b220436dfae73f7acbf14 *R/CRPS.default.R
 06f6e9f63956fc45c658fff12544ae94 *R/CRPScap.R
@@ -70,8 +70,8 @@ a71ded1dcb13b270f715ffd127236d92 *R/ensembleSize.R
 01d036df5a9bcf79ab4b2f176c2dc0c1 *R/ensembleValidDates.R
 ea184cf19661e00ff736c00ea9138b0e *R/ensembleValidDates.ensembleData.R
 a7f209eb9d5422b507b007fb7117dca2 *R/fitBMA.R
-9a818d3d7d8bee9d346876fc4519c26b *R/fitBMAgamma.R
-6d80d1296e16dae8b64d129f881bcd1b *R/fitBMAgamma0.R
+9c3e8fb3ee5f865ad48f7ac27271d830 *R/fitBMAgamma.R
+00fedcc0dba8bc86b448dbc40dd87fb2 *R/fitBMAgamma0.R
 14701589242aff5a403d6ac0dd47cd4e *R/fitBMAnormal.R
 47fcf374d8512ec629f20ee6ca42b41d *R/getDates.R
 a76197efb6888a4de6ffa9f98471b399 *R/getExchangeable.R

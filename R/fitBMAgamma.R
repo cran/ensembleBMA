@@ -6,7 +6,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 # for terms of use, see the LICENSE file
 #
   ZERO <- 1.e-100
-
+  
   powfun <- function(x,power) x^power
 
   if (is.null(exchangeable)) exchangeable <- ensembleGroups(ensembleData)
@@ -58,7 +58,7 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 
 # untransformed weather data for variance model  
 
-  ensembleData <- ensembleForecasts(ensembleData)
+  ensembleData <- as.matrix(ensembleForecasts(ensembleData))
   
   ensembleData <- as.matrix(apply(ensembleData, 2, 
                                   powfun, power = control$power))
@@ -198,8 +198,8 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
 
                   shape=SHAPE[!Y0,][!Mnonz], rate=RATE[!Y0,][!Mnonz], log=TRUE)
 
-    zmax = apply( z[!Y0,], 1, max, na.rm=TRUE) 
-    z[!Y0,] <- exp(sweep( z[!Y0,], MARGIN=1, FUN="-", STATS=zmax))
+    zmax = apply( z[!Y0,,drop=F], 1, max, na.rm=TRUE) 
+    z[!Y0,] <- exp(sweep( z[!Y0,,drop=F], MARGIN=1, FUN="-", STATS=zmax))
 
     z <- sweep( z, MARGIN = 2, FUN = "*", STATS = weights)
 
@@ -282,4 +282,3 @@ function(ensembleData, control = controlBMAgamma(), exchangeable = NULL)
        power = control$power, startupSpeed = startup), 
        class = c("fitBMAgamma", "fitBMA"))
 }
-

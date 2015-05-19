@@ -1,3 +1,5 @@
+05/15 fixed gamma and gamma0 models to handle single ensemble member
+
 03/15 zero lower bound enforced in bias correction for quantileForecast with
       gamma and gamma0 models [Yang Xingchen]
 
