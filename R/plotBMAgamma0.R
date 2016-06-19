@@ -50,7 +50,7 @@ function (WEIGHTS, MEAN, VAR, PROB0, obs = NULL, exchangeable = NULL, power = 1)
   for (l in 1:lex) {
      j <- which(exchangeable == l)[1]
      FORC[,l] <- dgamma( x, shape = RATE[j]*MEAN[j], rate = RATE[j])
-     FORC[,l] <- tex[l]*(WEIGHTS[j]*(1-PROB0[j])*FORC[,j])
+     FORC[,l] <- tex[l]*(WEIGHTS[j]*(1-PROB0[j])*FORC[,l])
   }
 
   for (i in 1:n) FORC[i,lex+1] <- sum(FORC[i,1:lex])

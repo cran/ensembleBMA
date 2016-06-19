@@ -1,5 +1,13 @@
 import("chron")
 
+importFrom("grDevices", "rainbow")
+importFrom("graphics", "abline", "axis", "hist", "lines", "par",
+           "plot", "points", "segments")
+importFrom("stats", "binomial", "dgamma", "dnorm", "glm", "lag", "lm",
+           "loess", "median", "na.omit", "optim", "optimize", "pgamma",
+           "pnorm", "power", "predict", "rgamma", "rnorm", "runif",
+           "sd", "uniroot")
+
 export(julTOymdh,ymdhTOjul,dateCheck)
 export(ensembleData,trainingData,plotProbcast)
 
