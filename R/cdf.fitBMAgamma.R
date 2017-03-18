@@ -18,13 +18,6 @@ ensembleData <- ensembleData[,matchEnsembleMembers(fit,ensembleData)]
  M <- !dataNA(ensembleData,observations=FALSE,dates=FALSE)
  if (!all(M)) ensembleData <- ensembleData[M,]
 
- fitDates <- modelDates(fit)
-
- M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
-
- if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
- if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
-
  nObs <- nrow( ensembleData)
  if (!nObs) stop("no data")
 

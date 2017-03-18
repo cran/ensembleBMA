@@ -20,13 +20,6 @@ function(x, ensembleData, dates=NULL, ...)
  M <- !dataNA(ensembleData,dates=FALSE)
  if (!all(M)) ensembleData <- ensembleData[M,]
 
- fitDates <- modelDates(x)
-
- M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates=NULL)
-
- if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
- if (!all(M$fit)) x <- x[fitDates[M$fit]]
-
  obs <- dataVerifObs(ensembleData)
  nObs <- length(obs)
 

@@ -14,13 +14,6 @@ function(fit, ensembleData, dates=NULL, ...)
  M <- !dataNA(ensembleData,dates=FALSE)
  if (!all(M)) ensembleData <- ensembleData[M,]
 
- fitDates <- modelDates(fit)
-
- M <- matchDates( fitDates, ensembleValidDates(ensembleData), dates = NULL)
-
- if (!all(M$ens)) ensembleData <- ensembleData[M$ens,]
- if (!all(M$fit)) fit <- fit[fitDates[M$fit]]
-
  obs <- dataVerifObs(ensembleData)
  nObs <- length(obs)
 

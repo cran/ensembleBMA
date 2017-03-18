@@ -1,3 +1,5 @@
+03/17 removed date handling from some fitBMA* functions. [Jakob Messner]
+	
 06/16 fixed plot function for gamma0 model [Mabrouk Abaza]
 
 05/15 fixed gamma and gamma0 models to handle single ensemble member
