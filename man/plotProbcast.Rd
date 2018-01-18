@@ -88,8 +88,8 @@ Washington, 2007 (revised 2010).
   bmaFit <- ensembleBMA( srftData, date = "2004012900", trainingDays = 25,
                          model = "normal")
 
-  bmaForc <- quantileForecast( bmaFit, srftData, date = "2004021400",  
-                                  quantiles = c(.1, .5. .9))
+  bmaForc <- quantileForecast( bmaFit, srftData, date = "2004012900",  
+                                  quantiles = c(.1, .5, .9))
 
   obs <- srftData$date == "2004012900"
   lat <- srftData$latitude[obs]

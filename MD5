@@ -1,5 +1,5 @@
-c18e5790bf83453e0861da03990d8033 *CHANGELOG
-f43fed55929e40d71ae5f89c22687248 *DESCRIPTION
+b6df52b59921a67f885fcdc625daa89c *CHANGELOG
+498b2da9cb183aee9021d0a1f3e9835d *DESCRIPTION
 68f70c18f52a26bd54369d701fed152a *NAMESPACE
 c3df50961e3b220436dfae73f7acbf14 *R/CRPS.default.R
 06f6e9f63956fc45c658fff12544ae94 *R/CRPScap.R
@@ -146,6 +146,7 @@ ce1310d8fc6bd9e8a9e925ced4afe045 *R/ymdhTOjul.R
 e9d461ae345e4c817f60b0ac33d6252e *data/prcpGrid.rda
 a6fd17c78a5ad8a2603d7b70a7128388 *data/srft.rda
 cba6812b5bdfb824c896158ad46996c3 *data/srftGrid.rda
+e04b1f5dede4a5a062fe64327f2f6a2f *inst/doc/techrep.pdf
 f77dca345779db886944eae0be6b6a2c *man/MAE.Rd
 a9117329233ed3c2d0703d9293e85dad *man/brierScore.Rd
 8cbd0be30d98bff05919c409bff160bb *man/cdf.Rd
@@ -170,7 +171,7 @@ fa8f2f7af9e4e000614b87b54f0da6b1 *man/modelParameters.Rd
 f2fb0bdfee1cbbf473905989d4094877 *man/pit.Rd
 b52b2a05abcf8494a4a1f68e3cb8c5d6 *man/pitHist.Rd
 10373c36322e5b376c4b9072ff088740 *man/plot.ensembleBMA.Rd
-3970e6020ef1c2e4d11498a04d07c109 *man/plotProbcast.Rd
+d637e7634b912fa00ea2ab68a060de46 *man/plotProbcast.Rd
 5af8c9946501ea24c75a1d3e2372218a *man/prcpDJdata.Rd
 ce1d0b1b8316bbda91c49e42cf262e0f *man/prcpFit.Rd
 77104a3613ca045e33f4afcdbb9fb735 *man/prcpGrid.Rd

@@ -1,3 +1,6 @@
+01/18 fixed typos in plotProbcast help file (Yuanting Zhang)
+      included tech report (inst/doc/techrep.pdf)
+	
 03/17 removed date handling from some fitBMA* functions. [Jakob Messner]
 	
 06/16 fixed plot function for gamma0 model [Mabrouk Abaza]
