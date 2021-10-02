@@ -36,7 +36,7 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
 
        VAR <- (fit$varCoefs[1] + fit$varCoefs[2]*f)^2
 
-       fTrans <- sapply( f, power, fit$power)
+       fTrans <- sapply( f, powfun, fit$power)
 
        MEAN <- apply(rbind(1, fTrans)*fit$biasCoefs, 2, sum)
 

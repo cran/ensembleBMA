@@ -1,6 +1,6 @@
 Package: ensembleBMA
-Version: 5.1.5
-Date: 2018-01-18
+Version: 5.1.6
+Date: 2021-10-01
 Title: Probabilistic Forecasting using Ensembles and Bayesian Model
         Averaging
 Author: Chris Fraley, Adrian E. Raftery, J. McLean Sloughter, Tilmann
@@ -9,9 +9,9 @@ Maintainer: Chris Fraley <fraley@u.washington.edu>
 Depends: R (>= 2.10), chron
 Suggests: fields, maps
 Description: Bayesian Model Averaging to create probabilistic forecasts
-        from ensemble forecasts and weather observations.
+        from ensemble forecasts and weather observations <https://stat.uw.edu/sites/default/files/files/reports/2007/tr516.pdf>.
 License: GPL (>= 2)
 Repository: CRAN
 NeedsCompilation: no
-Packaged: 2018-01-18 03:33:21 UTC; fraley
-Date/Publication: 2018-01-18 17:47:45 UTC
+Packaged: 2021-10-01 19:26:49 UTC; cfraley
+Date/Publication: 2021-10-02 13:40:16 UTC

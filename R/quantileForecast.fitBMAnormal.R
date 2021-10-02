@@ -29,10 +29,9 @@ function(fit, ensembleData, quantiles = 0.5, dates=NULL, ...)
 
  if (!all(Wmiss <- is.na(WEIGHTS))) {
 
-    SD <- if (!is.null(dim(fit$sd))) {
-             fit$sd
-          }
-          else rep(fit$sd, nForecasts)
+    SD <- as.vector(fit$sd)
+
+    if (length(SD != nForecasts)) stop("length(fit$sd) != nForecasts")
 
     for (i in 1:nObs) {
       
