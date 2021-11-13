@@ -6,7 +6,7 @@ function (ensembleData, control = controlBMAnormal(), exchangeable = NULL)
         exchangeable <- ensembleGroups(ensembleData)
     if (length(unique(exchangeable)) == length(exchangeable)) 
         exchangeable <- NULL
-    if (!(nullX <- is.null(exchangeable))) {
+    if (!(nullEX <- is.null(exchangeable))) {
         namEX <- as.character(exchangeable)
         uniqueEX <- unique(namEX)
         nEX <- length(uniqueEX)
@@ -44,7 +44,7 @@ function (ensembleData, control = controlBMAnormal(), exchangeable = NULL)
     MEAN <- RSQ <- matrix(NA, nObs, nForecasts)
     dimnames(MEAN) <- dimnames(RSQ) <- NULL
     switch(control$biasCorrection, regression = {
-        if (nullX) {
+        if (nullEX) {
             meanFit <- apply(ensembleForecasts(ensembleData), 
                 2, function(x, y) {
                   components <- c("coefficients", "fitted.values", 
@@ -90,7 +90,7 @@ function (ensembleData, control = controlBMAnormal(), exchangeable = NULL)
         bad <- biasCoefs[2, ] < 0
         if (any(bad)) print("biasCoefs < 0")
     }, additive = {
-        if (nullX) {
+        if (nullEX) {
             intcpt <- apply(obs - ensembleForecasts(ensembleData), 
                 2, mean, na.rm = TRUE)
             biasCoefs <- rbind(intcpt, 1)
@@ -142,7 +142,8 @@ function (ensembleData, control = controlBMAnormal(), exchangeable = NULL)
         z <- sweep(z, MARGIN = 2, FUN = "*", STATS = weights)
         dimnames(z) <- list(dimnames(z)[[1]], ensMemNames)
         zsum1 <- apply(z, 1, sum, na.rm = TRUE)
-	if (any(zsum1 == 0)) stop("parameter estimation fails")
+        if (any(zsum1 == 0)) 
+            stop("parameter estimation fails")
         z <- sweep(z, MARGIN = 1, FUN = "/", STATS = zsum1)
         z[z < ZERO] <- 0
         old <- loglik
@@ -150,7 +151,7 @@ function (ensembleData, control = controlBMAnormal(), exchangeable = NULL)
         zsum2 <- apply(z, 2, sum, na.rm = TRUE)
         weights <- zsum2/sum(zsum2)
         weights[weights < ZERO] <- 0
-        if (nullX) {
+        if (nullEX) {
             if (control$equalVariance) {
                 sd <- sqrt(sum(z * RSQ, na.rm = TRUE)/sum(z, 
                   na.rm = TRUE))
@@ -180,6 +181,7 @@ function (ensembleData, control = controlBMAnormal(), exchangeable = NULL)
     }
     names(weights) <- ensMemNames
     structure(list(biasCoefs = biasCoefs, sd = sd, weights = weights, 
-        exchangeable = exchangeable, nIter = nIter, loglikelihood = loglik), 
+        exchangeable = exchangeable,
+	nIter = nIter, loglikelihood = loglik, call = match.call()), 
         class = c("fitBMAnormal", "fitBMA"))
 }

@@ -83,7 +83,7 @@ with Exchangeable and Missing Members using Bayesian Model Averaging,
 
   ensNames <- c("gfs","cmcg","eta","gasp","jma","ngps","tcwb","ukmo")
 
-  obs <- paste("T2","obs", sep = ".")
+obs <- paste("T2","obs", sep = ".")
   ens <- paste("T2", ensNames, sep = ".")
 
   tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
@@ -97,10 +97,6 @@ with Exchangeable and Missing Members using Bayesian Model Averaging,
                              date  = "2008010100")
 
   tempTrainFit <- fitBMAnormal( tempTrain)
-
-## equivalent to
-##    tempTrainFit <- fitBMA( tempTrain, model = "normal")
-
 }
 \keyword{models}
 % docclass is function

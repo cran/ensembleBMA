@@ -157,10 +157,10 @@ function(ensembleData, trainingDays, dates = NULL,
 
  structure(list(training = list(days=trainingDays,lag= lag,table=trainTable),
                 biasCoefs = biasCoefs, sd = sd, weights = weights,
-                nIter = nIter, exchangeable = exchangeable),
+                nIter = nIter, exchangeable = exchangeable,
+		call = match.call()),
                 forecastHour = forecastHour, 
                 initializationTime = ensembleItime(ensembleData),
-                call = match.call(), 
                 class = c("ensembleBMAnormal", "ensembleBMA"))
 }
 

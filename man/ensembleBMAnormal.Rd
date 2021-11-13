@@ -108,7 +108,6 @@ with Exchangeable and Missing Members using Bayesian Model Averaging,
   obs <- paste("T2","obs", sep = ".")
   ens <- paste("T2", ensMemNames, sep = ".")
 
-
   tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 dates = ensBMAtest[,"vdate"],
                                 observations = ensBMAtest[,obs],

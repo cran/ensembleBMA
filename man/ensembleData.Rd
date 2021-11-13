@@ -45,7 +45,7 @@ ensembleData( forecasts, dates = NULL, observations = NULL, ...,
 }
 \arguments{
   \item{forecasts}{
-     A matrix or array (for vector qunatities) 
+     A matrix or array (for vector quantities) 
      with columns corresponding to forecasts from individual members 
      of an ensemble and rows corresponding to forecasts for the same date.
   }

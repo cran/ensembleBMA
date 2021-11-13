@@ -2,21 +2,21 @@ fitBMAgamma0 <-
 function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL) 
 {
     ZERO <- 1e-100
-    
     powfun <- function(x, power) x^power
     powinv <- function(x, power) x^(1/power)
     if (is.null(exchangeable)) 
         exchangeable <- ensembleGroups(ensembleData)
     if (length(unique(exchangeable)) == length(exchangeable)) 
         exchangeable <- NULL
-    if (!(nullX <- is.null(exchangeable))) {
+    if (!(nullEX <- is.null(exchangeable))) {
         namX <- as.character(exchangeable)
         uniqueX <- unique(namX)
         nX <- length(uniqueX)
     }
     maxIter <- control$maxIter
     tol <- eps <- control$tol
-    ensembleData <- ensembleData[!dataNA(ensembleData, dates = FALSE), ]
+    ensembleData <- ensembleData[!dataNA(ensembleData, dates = FALSE), 
+        ]
     nObs <- dataNobs(ensembleData)
     if (!nObs) 
         stop("no observations")
@@ -28,7 +28,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     if (sum(!Y0) < 2) 
         stop("less than 2 nonzero obs")
     ensembleData <- as.matrix(ensembleForecasts(ensembleData))
-    Xvar <- ensembleData[!Y0, ,drop=F]
+    Xvar <- ensembleData[!Y0, , drop = F]
     ensembleData <- apply(ensembleData, 2, function(x) sapply(x, 
         powfun, power = control$power))
     miss <- as.vector(as.matrix(is.na(ensembleData)))
@@ -55,8 +55,8 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         coefs[is.na(coefs)] <- 0
         if (!all(coefs[2:3] == 0) && coefs[2] > 0 && coefs[3] < 
             0) {
-           fit <- glm(y ~ 1, family = binomial(logit))
-           coefs <- c(fit$coefficients[1], 0, 0)
+            fit <- glm(y ~ 1, family = binomial(logit))
+            coefs <- c(fit$coefficients[1], 0, 0)
         }
         else if (coefs[2] > 0) {
             if (all(x != 0)) {
@@ -69,22 +69,22 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
                 if (coefs[3] < 0) {
                   fit <- glm(y ~ 1, family = binomial(logit))
                   coefs <- c(fit$coefficients[1], 0, 0)
-                 }
+                }
             }
         }
         else if (coefs[3] < 0) {
             fit <- glm(y ~ x, family = binomial(logit))
             coefs <- c(fit$coefficients, 0)
-            if (coefs[2] >= 0)  {
-              fit <- glm(y ~ 1, family = binomial(logit))
-              coefs <- c(fit$coefficients[1], 0, 0)
+            if (coefs[2] >= 0) {
+                fit <- glm(y ~ 1, family = binomial(logit))
+                coefs <- c(fit$coefficients[1], 0, 0)
             }
         }
         fit$coefficients <- coefs
         fit
     }
     if (any(Y0)) {
-        if (nullX) {
+        if (nullEX) {
             prob0fit <- apply(as.matrix(ensembleData), 2, logisticFunc, 
                 y = Y0)
             prob0coefs <- lapply(prob0fit, function(x) x$coefficients)
@@ -148,8 +148,9 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         }
         fit
     }
-    if (nullX) {
-        meanFit <- apply(as.matrix(ensembleData), 2, lmFunc, y = obs)
+    if (nullEX) {
+        meanFit <- apply(as.matrix(ensembleData), 2, lmFunc, 
+            y = obs)
         biasCoefs <- lapply(meanFit, function(x) x$coefficients)
         biasCoefs <- as.matrix(data.frame(biasCoefs))
         MEAN <- matrix(NA, nPrecip, nForecasts)
@@ -206,7 +207,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     weights <- weights/sum(weights)
     if (!is.null(names(weights))) 
         weights <- weights[ensMemNames]
-    if (!nullX) {
+    if (!nullEX) {
         for (labX in uniqueX) {
             I <- namX == labX
             weights[I] <- mean(weights[I])
@@ -216,17 +217,18 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     z <- matrix(1/nForecasts, ncol = nForecasts, nrow = nObs)
     objold <- 0
     newLL <- 0
-    MEAN[MEAN <= 0] <- max(min(obs),1.e-4)
+    MEAN[MEAN <= 0] <- max(min(obs), 1e-04)
     while (TRUE) {
         VAR <- varCoefs[1] + varCoefs[2] * Xvar
         RATE <- MEAN/VAR
         SHAPE <- RATE * MEAN
         z[!Y0, ][!miss] <- dgamma(matrix(obs, nPrecip, nForecasts)[!miss], 
             shape = SHAPE[!miss], rate = RATE[!miss], log = TRUE)
-        zmax1 <- apply(z[!Y0, ,drop=F], 1, max, na.rm = TRUE)
-        z[!Y0, ] <- sweep(z[!Y0, ,drop=F], MARGIN = 1, FUN = "-", STATS = zmax1)
+        zmax1 <- apply(z[!Y0, , drop = F], 1, max, na.rm = TRUE)
+        z[!Y0, ] <- sweep(z[!Y0, , drop = F], MARGIN = 1, FUN = "-", 
+            STATS = zmax1)
         z[!Y0, ] <- sweep(POP, MARGIN = 2, FUN = "*", STATS = weights) * 
-            exp(z[!Y0, ,drop=F])
+            exp(z[!Y0, , drop = F])
         if (!is.null(PROB0)) 
             z[Y0, ] <- sweep(PROB0, MARGIN = 2, FUN = "*", STATS = weights)
         oldLL <- newLL
@@ -240,19 +242,18 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
         zsum2 <- apply(z, 2, sum, na.rm = TRUE)
         weights <- zsum2/sum(zsum2)
         weights[weights < ZERO] <- 0
-        if (!nullX) {
+        if (!nullEX) {
             weights <- sapply(split(weights, namX), mean)[namX]
         }
         weps <- max(abs(wold - weights)/(1 + abs(weights)))
         fn <- completeDataLLmiss(z, weights, MEAN, PROB0, POP, 
             Xvar, obs, Y0)
         optimResult = if (is.null(control$optim.control)) {
-                       optim(sqrt(varCoefs), fn=fn, method = "BFGS")
-                    }
-                    else {
-                       optim(sqrt(varCoefs), fn=fn, method = "BFGS",
-                             control = control$optim.control)
-               		         }
+            optim(sqrt(varCoefs), fn = fn, method = "BFGS")
+        }
+        else {
+            optim(sqrt(varCoefs), fn = fn, method = "BFGS", control = control$optim.control)
+        }
         if (optimResult$convergence) 
             warning("optim does not converge")
         varOld <- varCoefs
@@ -275,6 +276,7 @@ function (ensembleData, control = controlBMAgamma0(), exchangeable = NULL)
     dimnames(prob0coefs) <- list(NULL, ensMemNames)
     names(weights) <- ensMemNames
     structure(list(prob0coefs = prob0coefs, biasCoefs = biasCoefs, 
-        varCoefs = varCoefs, weights = weights, nIter = nIter, 
-        loglikelihood = newLL, power = control$power), class = "fitBMAgamma0")
+    varCoefs = varCoefs, weights = weights, nIter = nIter, 
+        loglikelihood = newLL, power = control$power,
+	call = match.call()), class = "fitBMAgamma0")
 }

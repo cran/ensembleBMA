@@ -116,9 +116,10 @@ function(ensembleData, trainingDays, dates = NULL,
  structure(list(training = list(days=trainingDays,lag=lag,table=trainTable),
                 biasCoefs = biasCoefs, 
                 varCoefs = varCoefs, weights = weights, nIter = nIter,
-                exchangeable = exchangeable, power = fit$power),
+                exchangeable = exchangeable, power = fit$power,
+		call = match.call()),
                 forecastHour = forecastHour, 
                 initializationTime = ensembleItime(ensembleData),
-                call = match.call(), class = c("ensembleBMAgamma", "ensembleBMA"))
+                class = c("ensembleBMAgamma", "ensembleBMA"))
 }
 

@@ -108,7 +108,6 @@ using ensembles and Bayesian model averaging,
   obs <- paste("T2","obs", sep = ".")
   ens <- paste("T2", ensNames, sep = ".")
 
-
   tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 observations = ensBMAtest[,obs],
                                 station = ensBMAtest[,"station"],
@@ -124,6 +123,15 @@ using ensembles and Bayesian model averaging,
 ## equivalent to
 ##    tempTrainFit <- fitBMAnormal( tempTrain)
 
+  set.seed(0); exch <- sample(1:length(ens),replace=TRUE)
+  
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                exchangeable = exch,
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                dates = ensBMAtest[,"vdate"],
+                                forecastHour = 48,
+                                initializationTime = "00")
 }
 \keyword{models}
 % docclass is function

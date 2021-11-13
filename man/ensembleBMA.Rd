@@ -152,7 +152,6 @@ using ensembles and Bayesian model averaging,
   obs <- paste("T2","obs", sep = ".")
   ens <- paste("T2", ensMemNames, sep = ".")
 
-
   tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
                                 dates = ensBMAtest[,"vdate"],
                                 observations = ensBMAtest[,obs],
@@ -160,13 +159,27 @@ using ensembles and Bayesian model averaging,
                                 forecastHour = 48,
                                 initializationTime = "00")
 
-\dontrun{ # R checl
+\dontrun{ # R check
   tempTestFit <- ensembleBMA( tempTestData, trainingDays = 30,
                               model = "normal")
 
 ## equivalent to
 ##    tempTestFit <- ensembleBMAnormal( tempTestData, trainingDays = 30)
 }
+
+# for quick run only; use more training days for forecasting
+  tempTestFit <- ensembleBMA( tempTestData[1:20,], trainingDays = 8,
+                              model = "normal")
+
+  set.seed(0); exch <- sample(1:length(ens),replace=TRUE)
+
+  tempTestData <- ensembleData( forecasts = ensBMAtest[,ens],
+                                exchangeable = exch,
+                                dates = ensBMAtest[,"vdate"],
+                                observations = ensBMAtest[,obs],
+                                station = ensBMAtest[,"station"],
+                                forecastHour = 48,
+                                initializationTime = "00")
 
 # for quick run only; use more training days for forecasting
   tempTestFit <- ensembleBMA( tempTestData[1:20,], trainingDays = 8,
