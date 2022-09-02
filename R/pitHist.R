@@ -2,7 +2,7 @@ pitHist <-
 function( fit, ensembleData, dates=NULL)
 {
 
- if (class(fit) == "ensembleBMAgamma0" || class(fit) == "fitBMAgamma0") {
+ if (inherits(fit, "ensembleBMAgamma0") || inherits(fit,"fitBMAgamma0")) {
    randomizeATzero <- TRUE
  }
  else {

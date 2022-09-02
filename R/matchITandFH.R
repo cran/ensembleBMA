@@ -15,9 +15,9 @@ function( fit, ensembleData)
 # for terms of use, see the LICENSE file
 #
  naNULL <- function(x) {
-            if (is.na(x)) x <- -2^20
-            if (is.null(x)) x <- -2^25
-            if (is.infinite(x)) x <- -2^30
+            if (is.null(x)) return(-2^21)
+            if (is.na(x)) return(-2^22)
+            if (is.infinite(x)) return(-2^23)
             x
            }
 

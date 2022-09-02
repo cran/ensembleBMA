@@ -1,5 +1,5 @@
-4f457a03ecd011e465e5d1dfb8ce4b0e *CHANGELOG
-0f21a889d863640b93047554d8604319 *DESCRIPTION
+d00571105cfb9b13e6473e04b5dade08 *CHANGELOG
+121d490e5f3c3bf7ae24a464b24602c5 *DESCRIPTION
 68f70c18f52a26bd54369d701fed152a *NAMESPACE
 c3df50961e3b220436dfae73f7acbf14 *R/CRPS.default.R
 06f6e9f63956fc45c658fff12544ae94 *R/CRPScap.R
@@ -81,7 +81,7 @@ f86ba4399228dd5d2ccb8890c12650e3 *R/inverseLogit.R
 7fc75f4554e2c04b0dd57c16b3460e1d *R/match2side.R
 6115f02be91d6a923575e2c39cb496b1 *R/matchDates.R
 f8ff2b50170c05301a8b61b785cbacba *R/matchEnsembleMembers.R
-0e567e616a8bf5cde876f09db317bf17 *R/matchITandFH.R
+3dc62423f8db154839f1299371474ac1 *R/matchITandFH.R
 fba2a69fbbba632080639387f07946d5 *R/modelDates.R
 70d4742f478cbee761364879380eb505 *R/modelDates.default.R
 f4535c6a979a39d0147c80f684fddfcc *R/modelMembers.R
@@ -100,7 +100,7 @@ fd6c3fe1166dc9eaca44c5eb27fdacc5 *R/pit.ensembleBMAnormal.R
 7dde9185f156f8cbd61d423db5a775ea *R/pit.fitBMAgamma.R
 16d35074244fa7ea076eb75468525a07 *R/pit.fitBMAgamma0.R
 6f932d54c6ea9a9b61d4c870774cdfaf *R/pit.fitBMAnormal.R
-2000b3fa4f072fa05076f9c24f869bde *R/pitHist.R
+5bd7dbd1e55305c00fade25c33f1603f *R/pitHist.R
 94be5b36b5eecb5f89f12034e5196ccf *R/plot.ensembleBMAgamma.R
 6adaf690b7b667fb03a6bafa6e76824c *R/plot.ensembleBMAgamma0.R
 5c920cfa1e56c46e562a99ebff3cca23 *R/plot.ensembleBMAnormal.R
